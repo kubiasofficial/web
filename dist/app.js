@@ -38,6 +38,15 @@ const people = {
   family:[{label:'STARŠÍ BRATR',name:'Nathaniel James Raven',text:'Nathaniel plánuje a promýšlí. Daniel častěji jedná podle situace. Rozdílné povahy ale rodinné pouto nepřetrhly.',href:'#nathaniel'},{label:'MLADŠÍ SESTRA',name:'Scarlet Sky Raven',text:'Učil ji jezdit na koni a dodnes ji rád provokuje. Přes všechny hádky by se jí neváhal zastat.',href:'#scarlet'}]
  }
 
+ ,katie: {
+  name:'Katharine Jane Hunter',given:'KATHARINE JANE',surname:'HUNTER',nickname:'Katie',file:'katharine-jane-hunter.md',image:'katie.png',number:'004',birth:'02. II. 1871',origin:'TEXAS',stampTitle:'OSOBNÍ ARCHIV · KATIE HUNTER',age:'26 let',occupation:'Rančerka · farmářka · lovkyně',relatives:'Blackwater',relationLabel:'BYDLIŠTĚ',
+  kicker:'Některé rány nejsou vidět, ale pořád bolí.',description:'Pevná vůle. Důvěra zasloužená činy.<br>Vlastní cesta do Blackwateru.',cta:'POZNAT JEJÍ MINULOST',sidebar:'JEJÍ PŘÍBĚH',storyChapterCount:7,
+  alt:'Katharine Jane Hunter s tmavým copem, jizvou na tváři a praktickým koženým jezdeckým oblečením',
+  quote:'Některé rány nejsou vidět,<br>ale pořád bolí.',closing:'Někdy je nejtěžší cesta ta,<br><em>která vede domů.</em>',chapters:window.KATIE_CHAPTERS||[],
+  familyTitle:'Lidé po jejím boku',familyEyebrow:'DŮVĚRA SE POZNÁ PODLE ČINŮ.',familyDescription:'Nečeká velká gesta. Váží si lidí, kteří drží slovo, přiloží ruku k dílu a nezmizí při prvním problému.',
+  family:[{label:'SPOLEČNÉ CESTY A OBCHODY',name:'Sophie Cherry',text:'Při společných cestách obchodovaly s domorodými obyvateli. Naučily se i jejich jazyk, který občas používají mezi sebou.'},{label:'OPORA V NOVÉM KRAJI',name:'Rodina Crowe',text:'S rodinou Crowe přijela do Blackwateru. Je pro ni důležitou oporou, vlastní nezávislosti se však nevzdává.',status:'Opora v Blackwateru'}]
+ }
+
 };
 const selection=document.getElementById('selection');
 const profile=document.getElementById('profile');
@@ -48,26 +57,30 @@ function renderProfile(key){
  const person=people[key];
  profile.classList.toggle('scarlet-profile',key==='scarlet');
  profile.classList.toggle('daniel-profile',key==='daniel');
+ profile.classList.toggle('katie-profile',key==='katie');
  profile.querySelector('.profile-heading>.eyebrow').textContent='OSOBNÍ SPIS № '+person.number+' · NEW HORIZON, 1897';
  profile.querySelector('.profile-kicker').textContent=person.kicker;
- profile.querySelector('h1').innerHTML='<span>'+escapeHTML(person.given)+'</span>RAVEN';
+ profile.querySelector('h1').innerHTML='<span>'+escapeHTML(person.given)+'</span>'+escapeHTML(person.surname||'RAVEN');
  profile.querySelector('.signature').textContent=person.nickname;
  profile.querySelector('.hero-description').innerHTML=person.description;
  const storyLink=profile.querySelector('.profile-heading .story-button');
  storyLink.innerHTML=person.cta+' <span>↓</span>';
  storyLink.href=key==='nathaniel'?'#pribeh':'#'+key+'-pribeh';
  const image=profile.querySelector('.hero-character');image.src='assets/'+person.image;image.alt=person.alt;
- profile.querySelector('.stamp').innerHTML='SEDALIA · MISSOURI<strong>'+person.birth+'</strong>RODINNÝ ARCHIV RAVENOVÝCH';
- const facts=[['JMÉNO',person.name],['VĚK V LORE',person.age],['POVOLÁNÍ',person.occupation],['RODINA',person.relatives]];
+ profile.querySelector('.stamp').innerHTML=escapeHTML(person.origin||'SEDALIA · MISSOURI')+'<strong>'+escapeHTML(person.birth)+'</strong>'+escapeHTML(person.stampTitle||'RODINNÝ ARCHIV RAVENOVÝCH');
+ const facts=[['JMÉNO',person.name],['VĚK V LORE',person.age],['POVOLÁNÍ',person.occupation],[person.relationLabel||'RODINA',person.relatives]];
  profile.querySelector('.facts').innerHTML=facts.map(([title,value])=>'<div><span>'+escapeHTML(title)+'</span><strong>'+escapeHTML(value)+'</strong></div>').join('');
  profile.querySelector('.quote blockquote').innerHTML=person.quote;
  profile.querySelector('.quote .eyebrow').textContent=person.name.toUpperCase();
  profile.querySelector('.story-shell').id=key==='nathaniel'?'pribeh':key+'-pribeh';
  profile.querySelector('.chapter-sidebar>.eyebrow').textContent=person.sidebar;
- document.getElementById('story').innerHTML=person.chapters.map((chapter,index)=>`<section class="chapter" id="${chapterID(key,index)}"><h2><span class="chapter-number">${index<6?'KAPITOLA '+String(index+1).padStart(2,'0'):'OSOBNÍ SPIS'}</span>${escapeHTML(chapter.title)}</h2>${blocks(chapter.text)}</section>`).join('');
+ document.getElementById('story').innerHTML=person.chapters.map((chapter,index)=>`<section class="chapter" id="${chapterID(key,index)}"><h2><span class="chapter-number">${index<(person.storyChapterCount||6)?'KAPITOLA '+String(index+1).padStart(2,'0'):'OSOBNÍ SPIS'}</span>${escapeHTML(chapter.title)}</h2>${blocks(chapter.text)}</section>`).join('');
  document.getElementById('chapter-nav').innerHTML=person.chapters.map((chapter,index)=>`<a href="#${chapterID(key,index)}">${escapeHTML(chapter.title)}</a>`).join('');
  profile.querySelector('.download').href='assets/'+person.file;
- profile.querySelector('.family-members').innerHTML=person.family.map(member=>`<div><span>${escapeHTML(member.label)}</span><h3>${member.href?'<a href="'+member.href+'">'+escapeHTML(member.name)+' ↗</a>':escapeHTML(member.name)}</h3><p>${escapeHTML(member.text)}</p>${member.href?'<a class="family-link" href="'+member.href+'">Otevřít příběh ↗</a>':'<small>Příběh připravujeme</small>'}</div>`).join('');
+ profile.querySelector('.family h2').textContent=person.familyTitle||'Rodina Ravenových';
+ profile.querySelector('.family>div>.eyebrow').textContent=person.familyEyebrow||'KREV SPOJUJE. MINULOST ROZDĚLUJE.';
+ profile.querySelector('.family>div>p').textContent=person.familyDescription||'Po letech cestování dostávají možnost být znovu poblíž sebe. Každý si však přiváží vlastní cíle a tajemství.';
+ profile.querySelector('.family-members').innerHTML=person.family.map(member=>`<div><span>${escapeHTML(member.label)}</span><h3>${member.href?'<a href="'+member.href+'">'+escapeHTML(member.name)+' ↗</a>':escapeHTML(member.name)}</h3><p>${escapeHTML(member.text)}</p>${member.href?'<a class="family-link" href="'+member.href+'">Otevřít příběh ↗</a>':'<small>'+escapeHTML(member.status||'Příběh připravujeme')+'</small>'}</div>`).join('');
  profile.querySelector('.profile-footer>p').innerHTML=person.closing;
  activePerson=key;
  if('IntersectionObserver' in window){
@@ -94,7 +107,7 @@ function route(){
 }
 window.addEventListener('hashchange',route);route();
 document.querySelectorAll('button.character').forEach(button=>button.addEventListener('click',()=>{
- clearTimeout(noticeTimer);notice.textContent=button.dataset.name+' — příběh připravujeme. Zatím můžeš poznat Nathaniela, Scarlet a Daniela.';notice.hidden=false;
+ clearTimeout(noticeTimer);notice.textContent=button.dataset.name+' — příběh připravujeme. Zatím můžeš poznat Nathaniela, Scarlet, Daniela a Katie.';notice.hidden=false;
  noticeTimer=setTimeout(()=>{notice.hidden=true;},4200);
 }));
 window.addEventListener('keydown',event=>{if(event.key==='Escape'&&!profile.hidden)location.hash='';});
