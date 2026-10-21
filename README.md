@@ -1,7 +1,9 @@
 # New Horizon RP
 
-Oby?ejn? HTML, CSS a JavaScript bez frameworku a instalace.
+Čisté HTML/CSS/JavaScript. Otevřete `dist/index.html` přímo v prohlížeči, bez instalace a serveru.
 
-Otev?i `dist/index.html` p??mo v prohl??e?i. ?vod tvo?? pouze p?vodn? `uvodniobrazovka.png`. ?ikm? klikac? oblasti nad postavami se p?i najet? rozsv?t?. Nathaniel otev?e okno s obr?zkem a lore. Zav?en? tla??tkem, Escape nebo kliknut?m mimo okno. Ostatn? p??b?hy se p?ipravuj?.
+Úvod: nová grafika podle původního plakátu, pět interaktivních postav a ostrá HTML jména. Nathaniel má vlastní stránku s celým příběhem. Na mobilu lze mezi postavami posouvat. Ostatní příběhy se připravují.
 
-Web funguje i bez serveru p?es file://. Po zm?n? p?vodn?ho Markdownu spus? `python build-lore.py`.
+Původní soubory v `../obrazky` se nemění. Generovaná grafika a její prompt jsou uložené v projektu. Žádné umělé zvětšování bitmap. Google Fonts mají systémové náhrady při práci offline.
+
+Po úpravě `dist/assets/nathaniel-james-raven.md` spusťte `python build-lore.py`.
