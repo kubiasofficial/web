@@ -59,7 +59,7 @@ const people = {
 };
 const selection=document.getElementById('selection');
 const profile=document.getElementById('profile');
-let activePerson=null,observer;
+let activePerson=null;
 function chapterID(key,index){return (key==='nathaniel'?'':key+'-')+'kapitola-'+(index+1);}
 function renderProfile(key){
  const person=people[key];
@@ -92,12 +92,9 @@ function renderProfile(key){
  profile.querySelector('.family-members').innerHTML=person.family.map(member=>`<div><span>${escapeHTML(member.label)}</span><h3>${member.href?'<a href="'+member.href+'">'+escapeHTML(member.name)+' ↗</a>':escapeHTML(member.name)}</h3><p>${escapeHTML(member.text)}</p>${member.href?'<a class="family-link" href="'+member.href+'">Otevřít příběh ↗</a>':'<small>'+escapeHTML(member.status||'Příběh připravujeme')+'</small>'}</div>`).join('');
  profile.querySelector('.profile-footer>p').innerHTML=person.closing;
  activePerson=key;
- if('IntersectionObserver' in window){
-  observer?.disconnect();
-  observer=new IntersectionObserver(entries=>entries.forEach(entry=>{if(entry.isIntersecting)document.querySelectorAll('#chapter-nav a').forEach(a=>a.classList.toggle('active',a.hash==='#'+entry.target.id));}),{rootMargin:'-5% 0px -70% 0px'});
-  document.querySelectorAll('.chapter').forEach(chapter=>observer.observe(chapter));
- }
+ window.VisualReading?.render(key,person,{chapterID,escapeHTML});
 }
+
 function route(){
  const hash=location.hash;
  const prefixedKey=Object.keys(people).find(name=>hash==='#'+name||hash.startsWith('#'+name+'-'));
@@ -106,6 +103,7 @@ function route(){
  const previousPerson=activePerson;
  if(key&&activePerson!==key)renderProfile(key);
  selection.hidden=!!key;profile.hidden=!key;
+ window.VisualReading?.syncVisibility(key);
  document.title=key?people[key].name+' · New Horizon RP':'New Horizon RP · Pět osudů, jeden horizont';
  requestAnimationFrame(()=>{
   if((key&&hash==='#'+key)||!hash)window.scrollTo({top:0,left:0,behavior:'instant'});
