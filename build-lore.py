@@ -7,6 +7,7 @@ root = Path(__file__).resolve().parent
 for filename, output, variable in [
     ('nathaniel-james-raven.md', 'lore.js', 'RAVEN_CHAPTERS'),
     ('scarlet-sky-raven.md', 'scarlet-lore.js', 'SCARLET_CHAPTERS'),
+    ('daniel-thomas-raven.md', 'daniel-lore.js', 'DANIEL_CHAPTERS'),
 ]:
     text = (root / 'dist/assets' / filename).read_text(encoding='utf-8-sig')
     parts = re.split(r'^## (.+)$', text, flags=re.MULTILINE)
