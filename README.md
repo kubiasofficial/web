@@ -1,9 +1,9 @@
-# New Horizon RP
+# New Horizon RP — pět příběhů
 
-Čisté HTML/CSS/JavaScript. Otevřete `dist/index.html` přímo v prohlížeči, bez instalace a serveru.
+Čisté HTML/CSS/JavaScript. Otevřete `dist/index.html` v prohlížeči bez instalace a serveru. Funguje i přes file://. Google Fonts mají systémové náhrady pro offline režim.
 
-Úvod: nová grafika podle původního plakátu, pět interaktivních postav a ostrá HTML jména. Nathaniel má vlastní stránku s celým příběhem. Na mobilu lze mezi postavami posouvat. Ostatní příběhy se připravují.
+Dostupné jsou všechny postavy: Nathaniel James Raven, Scarlet Sky Raven, Daniel Thomas Raven, Katharine Jane Hunter a Sophie Cherry. Každá má samostatnou adresu pomocí #jméno, kapitoly, portrét a lore ke stažení. Na mobilu se portréty posouvají vodorovně. Escape vrací k výběru.
 
-Původní soubory v `../obrazky` se nemění. Generovaná grafika a její prompt jsou uložené v projektu. Žádné umělé zvětšování bitmap. Google Fonts mají systémové náhrady při práci offline.
+Zdrojové příběhy jsou v `dist/assets/*.md`. Po jejich úpravě spusťte `python build-lore.py`. Poznámky k přepisům a nesjednocené rodinné chronologii jsou v `content/`. Původní obrázky v `../obrazky` zůstávají beze změny. Prompty generovaných portrétů jsou v kořeni projektu.
 
-Po úpravě `dist/assets/nathaniel-james-raven.md` spusťte `python build-lore.py`.
+Sophie: uživatel výslovně potvrdil Sophie Cherry, 28 let, 1869, Missouri. Přesný den narození není domýšlen.

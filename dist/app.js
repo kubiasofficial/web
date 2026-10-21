@@ -44,20 +44,29 @@ const people = {
   alt:'Katharine Jane Hunter s tmavým copem, jizvou na tváři a praktickým koženým jezdeckým oblečením',
   quote:'Některé rány nejsou vidět,<br>ale pořád bolí.',closing:'Někdy je nejtěžší cesta ta,<br><em>která vede domů.</em>',chapters:window.KATIE_CHAPTERS||[],
   familyTitle:'Lidé po jejím boku',familyEyebrow:'DŮVĚRA SE POZNÁ PODLE ČINŮ.',familyDescription:'Nečeká velká gesta. Váží si lidí, kteří drží slovo, přiloží ruku k dílu a nezmizí při prvním problému.',
-  family:[{label:'SPOLEČNÉ CESTY A OBCHODY',name:'Sophie Cherry',text:'Při společných cestách obchodovaly s domorodými obyvateli. Naučily se i jejich jazyk, který občas používají mezi sebou.'},{label:'OPORA V NOVÉM KRAJI',name:'Rodina Crowe',text:'S rodinou Crowe přijela do Blackwateru. Je pro ni důležitou oporou, vlastní nezávislosti se však nevzdává.',status:'Opora v Blackwateru'}]
+  family:[{label:'SPOLEČNÉ CESTY A OBCHODY',name:'Sophie Cherry',text:'Při společných cestách obchodovaly s domorodými obyvateli. Naučily se i jejich jazyk, který občas používají mezi sebou.',href:'#sophie'},{label:'OPORA V NOVÉM KRAJI',name:'Rodina Crowe',text:'S rodinou Crowe přijela do Blackwateru. Je pro ni důležitou oporou, vlastní nezávislosti se však nevzdává.',status:'Opora v Blackwateru'}]
+ }
+
+ ,sophie: {
+  name:'Sophie Cherry',given:'SOPHIE',surname:'CHERRY',nickname:'Soph',file:'sophie-cherry.md',image:'sophie.png',number:'005',birth:'1869',origin:'MISSOURI',stampTitle:'OSOBNÍ ARCHIV · SOPHIE CHERRY',age:'28 let',occupation:'Lovkyně · stopařka · práce s koňmi',relatives:'Katharine Jane Hunter',relationLabel:'BLÍZKÁ OSOBA',
+  kicker:'Lepší je držet si odstup, než litovat důvěry.',description:'Ticho lesa. Věrnost koní.<br>Svoboda, kterou si nenechá vzít.',cta:'POZNAT JEJÍ MINULOST',sidebar:'JEJÍ PŘÍBĚH',storyChapterCount:8,
+  alt:'Sophie Cherry v černém klobouku s tmavými vlasy, modrošedýma očima, fialovým šátkem a loveckou výbavou',
+  quote:'Lidem nevěřím. Zvířata jsou upřímnější než jakýkoliv člověk.<br>V přírodě nacházím klid, který mi žádný člověk nedokáže dát.',closing:'Kůň člověka nezradí ze zlého úmyslu,<br><em>ale člověk to dokáže udělat i s úsměvem na tváři.</em>',chapters:window.SOPHIE_CHAPTERS||[],
+  familyTitle:'Ti, kterým důvěřuje',familyEyebrow:'DŮVĚRA NENÍ SAMOZŘEJMOST.',familyDescription:'Své soukromí si chrání a o minulosti mluví zřídka. Zvířatům důvěřuje více než lidem, ale vytrvalost a poctivé činy u ní mají váhu.',
+  family:[{label:'SPOLEČNÉ CESTY A OBCHODY',name:'Katharine Jane Hunter',text:'S Katie ji spojují společné cesty, obchodování s domorodými obyvateli i jazyk, který se během těchto cest naučily.',href:'#katie'},{label:'JEJÍ NEJVĚTŠÍ ZALÍBENÍ',name:'Koně plemene Shire',text:'Obdivuje jejich sílu, klidnou povahu a věrnost. Sní o malé stáji, kde by se jim mohla věnovat po zbytek života.',status:'Její sen · vlastní stáj a kousek země'}]
  }
 
 };
 const selection=document.getElementById('selection');
 const profile=document.getElementById('profile');
-const notice=document.getElementById('notice');
-let noticeTimer,activePerson=null,observer;
+let activePerson=null,observer;
 function chapterID(key,index){return (key==='nathaniel'?'':key+'-')+'kapitola-'+(index+1);}
 function renderProfile(key){
  const person=people[key];
  profile.classList.toggle('scarlet-profile',key==='scarlet');
  profile.classList.toggle('daniel-profile',key==='daniel');
  profile.classList.toggle('katie-profile',key==='katie');
+ profile.classList.toggle('sophie-profile',key==='sophie');
  profile.querySelector('.profile-heading>.eyebrow').textContent='OSOBNÍ SPIS № '+person.number+' · NEW HORIZON, 1897';
  profile.querySelector('.profile-kicker').textContent=person.kicker;
  profile.querySelector('h1').innerHTML='<span>'+escapeHTML(person.given)+'</span>'+escapeHTML(person.surname||'RAVEN');
@@ -95,7 +104,6 @@ function route(){
  const key=prefixedKey||((hash==='#pribeh'||/^#kapitola-\d+$/.test(hash))?'nathaniel':null);
  const wasProfile=!profile.hidden;
  const previousPerson=activePerson;
- clearTimeout(noticeTimer);notice.hidden=true;
  if(key&&activePerson!==key)renderProfile(key);
  selection.hidden=!!key;profile.hidden=!key;
  document.title=key?people[key].name+' · New Horizon RP':'New Horizon RP · Pět osudů, jeden horizont';
@@ -106,8 +114,4 @@ function route(){
  });
 }
 window.addEventListener('hashchange',route);route();
-document.querySelectorAll('button.character').forEach(button=>button.addEventListener('click',()=>{
- clearTimeout(noticeTimer);notice.textContent=button.dataset.name+' — příběh připravujeme. Zatím můžeš poznat Nathaniela, Scarlet, Daniela a Katie.';notice.hidden=false;
- noticeTimer=setTimeout(()=>{notice.hidden=true;},4200);
-}));
 window.addEventListener('keydown',event=>{if(event.key==='Escape'&&!profile.hidden)location.hash='';});
