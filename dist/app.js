@@ -108,7 +108,7 @@ function route(){
  requestAnimationFrame(()=>{
   if((key&&hash==='#'+key)||!hash)window.scrollTo({top:0,left:0,behavior:'instant'});
   else document.getElementById(hash.slice(1))?.scrollIntoView({behavior:'instant'});
-  if(!key&&wasProfile)document.querySelector('.character.'+previousPerson)?.focus({preventScroll:true});
+  if(!key&&wasProfile)(matchMedia('(max-width:700px)').matches?document.querySelector('.character.'+previousPerson):document.querySelector('.cast-link.'+previousPerson))?.focus({preventScroll:true});
  });
 }
 window.addEventListener('hashchange',route);route();

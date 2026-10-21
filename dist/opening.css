@@ -1,0 +1,49 @@
+/* One shared scene; names are a quiet typographic index below the artwork. */
+#selection{--scene-width:min(100vw,1672px,calc((100svh - 232px)*1.7768));max-width:none}
+.poster-wrap{min-height:0;padding:0;background:radial-gradient(ellipse at center,#5a351115,transparent 75%)}
+.poster{width:var(--scene-width);aspect-ratio:1672/941;overflow:hidden}
+.poster-base{width:100%;height:100%;object-fit:contain}
+.poster:after{content:"";position:absolute;inset:0;pointer-events:none;z-index:2;box-shadow:inset 0 -25px 35px -30px #100c08}
+.character{inset:0 auto 0 0;height:100%;clip-path:none;width:20%;position:absolute}
+.character.scarlet{left:0;width:24%}.character.daniel{left:24%;width:16%}.character.nathaniel{left:40%;width:19%}.character.katie{left:59%;width:18%}.character.sophie{left:77%;width:23%}
+.character:before{background:radial-gradient(ellipse at 50% 75%,#e4bc6717,transparent 68%);filter:none;inset:0;opacity:0}
+.character:after{content:"";position:absolute;bottom:26px;left:50%;height:1px;width:30px;background:var(--accent);transform:translateX(-50%) scaleX(.3);box-shadow:0 0 20px var(--accent);opacity:0;transition:opacity .25s,transform .25s}
+.character:hover:before,.character:focus-visible:before{opacity:1;filter:none}
+.character:hover:after,.character:focus-visible:after{opacity:.85;transform:translateX(-50%) scaleX(1)}
+.character .label{display:none}
+.cast-nav{width:var(--scene-width);margin:0 auto;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));min-height:100px;align-items:stretch;border-block:1px solid #b18b4d25;background:linear-gradient(180deg,#1b130b70,transparent)}
+.cast-link{position:relative;padding:20px 14px 17px;display:flex;flex-direction:column;justify-content:center;gap:6px;text-align:center;transition:color .25s,background .25s;min-width:0;clip-path:none}
+.cast-number{font:10px 'Barlow Condensed',Arial,sans-serif;letter-spacing:2px;color:var(--accent);opacity:.7}
+.cast-name{font:15px/1.4 Lora,Georgia,serif;color:#d9c9ac;transition:color .25s}
+.cast-role{font:11px/1.4 'Barlow Condensed',Arial,sans-serif;letter-spacing:.9px;color:#a08b70}
+.cast-link:after{content:"";position:absolute;height:1px;width:36px;background:var(--accent);left:50%;bottom:10px;transform:translateX(-50%) scaleX(0);transition:transform .3s}
+.cast-link:hover,.cast-link:focus-visible{background:linear-gradient(0deg,#bc93570b,transparent)}
+.cast-link:hover .cast-name,.cast-link:focus-visible .cast-name{color:#fff0d6}
+.cast-link:hover:after,.cast-link:focus-visible:after{transform:translateX(-50%) scaleX(1)}
+.cast-link:focus-visible{outline:none;box-shadow:inset 0 -2px var(--accent)}
+.selection-footer{max-width:1672px;margin:auto;border:0;height:56px}
+.selection-footer p{font-size:17px}
+.poster-transition-image{background-image:url('assets/arrival.png')}
+#selection:has(.cast-link.scarlet:hover) .character.scarlet:before,#selection:has(.cast-link.scarlet:focus-visible) .character.scarlet:before,#selection:has(.cast-link.daniel:hover) .character.daniel:before,#selection:has(.cast-link.daniel:focus-visible) .character.daniel:before,#selection:has(.cast-link.nathaniel:hover) .character.nathaniel:before,#selection:has(.cast-link.nathaniel:focus-visible) .character.nathaniel:before,#selection:has(.cast-link.katie:hover) .character.katie:before,#selection:has(.cast-link.katie:focus-visible) .character.katie:before,#selection:has(.cast-link.sophie:hover) .character.sophie:before,#selection:has(.cast-link.sophie:focus-visible) .character.sophie:before{opacity:1}
+#selection:has(.character.scarlet:hover) .cast-link.scarlet .cast-name,#selection:has(.character.daniel:hover) .cast-link.daniel .cast-name,#selection:has(.character.nathaniel:hover) .cast-link.nathaniel .cast-name,#selection:has(.character.katie:hover) .cast-link.katie .cast-name,#selection:has(.character.sophie:hover) .cast-link.sophie .cast-name{color:#fff1d9}
+@media(max-width:1100px) and (min-width:701px){.cast-name{font-size:13px}.cast-link{padding-inline:8px}.cast-role{font-size:10px;letter-spacing:.5px}}
+@media(max-width:700px){
+ .edition{font-size:0}
+ #selection{--scene-width:100vw}
+ .poster-wrap{display:block;overflow-x:auto;min-height:0}
+ .poster{width:420vw;height:min(680px,calc(100svh - 150px));display:flex;aspect-ratio:auto;background:none}
+ .poster-base{display:none}
+ .poster:after{display:none}
+ .character,.character.scarlet,.character.daniel,.character.nathaniel,.character.katie,.character.sophie{position:relative;left:auto;top:auto;bottom:auto;inset:auto;width:20%;height:100%;flex:0 0 20%;border-right:1px solid #4b3520;clip-path:none;background-image:linear-gradient(0deg,#100a04f5 2%,#100a0477 22%,#100a0400 60%),url('assets/arrival.png');background-size:100% 100%,500% auto;background-position:center,var(--crop) top;background-repeat:no-repeat}
+ .character.scarlet{--crop:6.25%}.character.daniel{--crop:27.5%}.character.nathaniel{--crop:48.75%}.character.katie{--crop:70%}.character.sophie{--crop:92.5%}
+ .character:before,.character:after{display:none}
+ .character .label{display:flex;top:auto;bottom:30px;left:50%;width:100%;padding:0 16px;gap:5px}
+ .label:before{display:none}
+ .character .given{font:500 13px 'Barlow Condensed',Arial,sans-serif;letter-spacing:2px;color:var(--accent)}
+ .character .label strong{font:24px/1.3 Lora,Georgia,serif;letter-spacing:1px}
+ .character .label em{font:42px/1 'Mrs Saint Delafield',cursive;margin-top:4px}
+ .character .symbol,.character .action{display:none}
+ .cast-nav{display:none}
+ .selection-footer{height:64px}
+ .selection-footer p{font-size:15px}
+}

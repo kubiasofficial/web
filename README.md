@@ -15,3 +15,7 @@ Každý profil má tři vlastní ilustrace, které se vykreslují z řádků pů
 Navigace obsahuje portrét, letopočty převzaté z nadpisů, aktivní kapitolu a průběh čtení. Na menších displejích lze obsah rozbalit. Čtenářská lišta umožňuje návrat k postavám i na začátek profilu. Úvodní přechod respektuje systémové omezení pohybu a běžné otevírání odkazů do nové karty.
 
 Soubor `reader.js` doplňuje vizuální vrstvu a `visual.css` čtenářský vzhled. Texty lore zůstávají v původních Markdown souborech.
+
+## Nový společný úvod
+
+Úvodní `assets/arrival.png` je nová společná scéna pěti postav na nádraží. Na počítači jsou jména v jednoduché navigaci pod obrazem. Klikat lze také přímo na postavy. Na mobilu zůstávají velké posuvné výřezy s nenápadnými jmenovkami. Původní `postavy.png` je zachován pro atmosférické pozadí profilů a jako zdrojová předloha. Nový prompt je v `arrival-image-prompt.txt`.

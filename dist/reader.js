@@ -85,8 +85,17 @@
   },
   syncVisibility(key){activeKey=key;if(!key)toolbar.hidden=true;schedule();}
  };
+ function selectionAccess(){
+  const mobile=matchMedia('(max-width:700px)').matches;
+  document.querySelectorAll('.character[href]').forEach(link=>{
+   link.tabIndex=mobile?0:-1;
+   link.setAttribute('aria-hidden',mobile?'false':'true');
+  });
+ }
+ selectionAccess();
+ matchMedia('(max-width:700px)').addEventListener('change',selectionAccess);
  addEventListener('scroll',schedule,{passive:true});addEventListener('resize',schedule,{passive:true});
- document.querySelectorAll('.character[href]').forEach(link=>link.addEventListener('click',event=>{
+ document.querySelectorAll('.character[href], .cast-link[href]').forEach(link=>link.addEventListener('click',event=>{
   if(event.button!==0||event.metaKey||event.ctrlKey||event.shiftKey||event.altKey||reduced())return;
   if(matchMedia('(max-width:700px)').matches){
    requestAnimationFrame(()=>profile.animate([{opacity:0},{opacity:1}],{duration:330,easing:'ease-out'}));return;

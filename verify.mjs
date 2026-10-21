@@ -212,6 +212,27 @@ try {
  assert(await evaluate('!!document.querySelector(".poster-transition")'),'Normal poster click starts cinematic zoom');
  await sleep(750);
  assert(await evaluate('!document.querySelector(".poster-transition") && !document.querySelector("#profile").hidden'),'Zoom overlay cleans up and leaves working profile');
+ await evaluate('document.querySelector(".back").click()');await sleep(150);
+ await send('Input.dispatchMouseEvent',{type:'mouseMoved',x:5,y:5});await sleep(300);
+ assert(await evaluate('document.querySelector(".poster-base").src.endsWith("arrival.png") && document.querySelector(".poster-base").naturalWidth>1500'),'New original ensemble scene loaded');
+ assert(await evaluate('[...document.querySelectorAll(".character .label")].every(e=>getComputedStyle(e).display==="none")'),'Desktop artwork is free of overlaid titles');
+ assert(await evaluate('document.querySelectorAll(".cast-link").length===5 && [...document.querySelectorAll(".cast-link")].every(a=>getComputedStyle(a).clipPath==="none")'),'Five unclipped name links sit below artwork');
+ assert(await evaluate('document.documentElement.scrollWidth<=innerWidth'),'New opening desktop no overflow');
+ await screenshot('new-opening-desktop');
+ for(const key of ['scarlet','daniel','nathaniel','katie','sophie']){
+  await evaluate('document.querySelector(".cast-link.'+key+'").click()');await sleep(150);
+  assert(await evaluate('location.hash==="#'+key+'" && !document.querySelector("#profile").hidden'),'Name navigation opens '+key);
+  await evaluate('document.querySelector(".back").click()');await sleep(100);
+  assert(await evaluate('document.activeElement.classList.contains("cast-link") && document.activeElement.hash==="#'+key+'"'),'Return focuses '+key+' name');
+ }
+ await sleep(700);
+ await send('Emulation.setDeviceMetricsOverride',{width:390,height:844,deviceScaleFactor:1,mobile:true});await sleep(200);
+ assert(await evaluate('getComputedStyle(document.querySelector(".cast-nav")).display==="none" && [...document.querySelectorAll(".character")].every(a=>a.tabIndex===0 && a.getAttribute("aria-hidden")==="false")'),'Mobile image selection remains keyboard and screen reader accessible');
+ await evaluate('document.querySelector(".poster-wrap").scrollLeft=0');await sleep(300);
+ await screenshot('new-opening-mobile');
+ assert(await evaluate('document.documentElement.scrollWidth<=innerWidth'),'New opening mobile no page overflow');
+ await evaluate('document.querySelector(".sophie").click()');await sleep(150);
+ assert(await evaluate('location.hash==="#sophie"'),'Mobile character selection opens Sophie');
  console.log('Screenshots saved in '+qa);
  await send('Browser.close');
 }finally{clearInterval(keepAlive);ws?.close();chrome.kill();}
