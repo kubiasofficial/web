@@ -56,6 +56,14 @@ const people = {
   family:[{label:'SPOLEČNÉ CESTY A OBCHODY',name:'Katharine Jane Hunter',text:'S Katie ji spojují společné cesty, obchodování s domorodými obyvateli i jazyk, který se během těchto cest naučily.',href:'#katie'},{label:'JEJÍ NEJVĚTŠÍ ZALÍBENÍ',name:'Koně plemene Shire',text:'Obdivuje jejich sílu, klidnou povahu a věrnost. Sní o malé stáji, kde by se jim mohla věnovat po zbytek života.',status:'Její sen · vlastní stáj a kousek země'}]
  }
 
+ ,vincent: {
+  name:'Vincent Elias Mercer',given:'VINCENT ELIAS',surname:'MERCER',nickname:'Vince',file:'vincent-elias-mercer.md',image:'vincent.png',number:'006',birth:'17. IV. 1869',origin:'SEDALIA · MISSOURI',stampTitle:'OSOBNÍ ARCHIV · VINCENT MERCER',age:'28 let',occupation:'Obchodník · vyjednavač · přeprava',relatives:'Dakota · Saint Denis',relationLabel:'PŮSOBENÍ',
+  kicker:'Dobrý obchod poznáš podle peněz.',description:'Obchodní instinkt. Úsměv, který otevírá dveře.<br>Druhá šance vybudovat něco trvalého.',cta:'POZNAT JEHO MINULOST',sidebar:'JEHO PŘÍBĚH',storyChapterCount:8,
+  alt:'Vincent Elias Mercer v černém klobouku, elegantním tmavém kabátu a vestě, s kapesními hodinkami a prsteny',
+  quote:'Dobrý obchod poznáš podle peněz.<br>Dobrého člověka podle toho, kdo zůstane,<br>když peníze dojdou.',closing:'Zná hodnotu slova, cenu zrady<br><em>a význam přátelství.</em>',chapters:window.VINCENT_CHAPTERS||[],
+  familyTitle:'Společníci. Přátelé. Druhá šance.',familyEyebrow:'DŮVĚRA MÁ VĚTŠÍ CENU NEŽ ZLATO.',familyDescription:'Nathaniel plánuje, Vincent vyjednává a Daniel dává věci do pohybu. Do Dakoty přijíždějí se společnou vizí Raven Railway Company.',
+  family:[{label:'PŘÍTEL A OBCHODNÍ SPOLEČNÍK',name:'Nathaniel James Raven',text:'Respektuje jeho úsudek a věří jeho plánům. Přesto si nenechá ujít příležitost provokovat jeho vážnou povahu.',href:'#nathaniel'},{label:'BLÍZKÝ PŘÍTEL',name:'Daniel Thomas Raven',text:'Společná dobrodružství, slovní přestřelky a přátelství, které nekončí tam, kde začínají problémy.',href:'#daniel'}]
+ }
 };
 const selection=document.getElementById('selection');
 const profile=document.getElementById('profile');
@@ -69,6 +77,7 @@ function renderProfile(key){
  profile.classList.toggle('daniel-profile',key==='daniel');
  profile.classList.toggle('katie-profile',key==='katie');
  profile.classList.toggle('sophie-profile',key==='sophie');
+ profile.classList.toggle('vincent-profile',key==='vincent');
  profile.querySelector('.profile-heading>.eyebrow').textContent='OSOBNÍ SPIS № '+person.number+' · NEW HORIZON, 1897';
  profile.querySelector('.profile-kicker').textContent=person.kicker;
  profile.querySelector('h1').innerHTML='<span>'+escapeHTML(person.given)+'</span>'+escapeHTML(person.surname||'RAVEN');
@@ -104,7 +113,7 @@ archiveLock.innerHTML=`<form class="archive-lock-form"><button class="archive-cl
 document.body.append(archiveLock);
 const archiveCode=archiveLock.querySelector('input');
 const archiveStatus=archiveLock.querySelector('#archive-status');
-const archiveCodes={nathaniel:'2811',sophie:'6984',daniel:'4536',katie:'4691',scarlett:'5817'};
+const archiveCodes={nathaniel:'2811',sophie:'6984',daniel:'4536',katie:'4691',scarlett:'5817',vincent:'3362'};
 let archiveUnlocked=null,archivePerson=null;
 function closeArchive(){const key=archivePerson;archiveLock.close();location.hash='';requestAnimationFrame(()=>document.querySelector('.cast-link.'+key)?.focus());}
 archiveLock.querySelector('.archive-close').addEventListener('click',closeArchive);
@@ -130,7 +139,7 @@ function route(){
   archivePerson=key;
   const person=people[key];
   archiveLock.classList.toggle('archive-sophie',key==='sophie');
-  archiveLock.classList.toggle('archive-daniel',key==='daniel');
+  archiveLock.classList.toggle('archive-daniel',key==='daniel'||key==='vincent');
   archiveLock.classList.toggle('archive-katie',key==='katie');
   archiveLock.classList.toggle('archive-scarlett',key==='scarlett');
   archiveLock.querySelector('.archive-lock-seal img').src='assets/icon-'+key+'.png';
@@ -147,7 +156,7 @@ function route(){
  if(key&&activePerson!==key)renderProfile(key);
  selection.hidden=!!key;profile.hidden=!key;
  window.VisualReading?.syncVisibility(key);
- document.title=key?people[key].name+' · New Horizon RP':'New Horizon RP · Pět osudů, jeden horizont';
+ document.title=key?people[key].name+' · New Horizon RP':'New Horizon RP · Šest osudů, jeden horizont';
  requestAnimationFrame(()=>{
   if((key&&hash==='#'+key)||!hash)window.scrollTo({top:0,left:0,behavior:'instant'});
   else document.getElementById(hash.slice(1))?.scrollIntoView({behavior:'instant'});

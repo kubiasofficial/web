@@ -1,4 +1,4 @@
-# New Horizon RP — pět příběhů
+# New Horizon RP — šest příběhů
 
 Čisté HTML/CSS/JavaScript. Otevřete `dist/index.html` v prohlížeči bez instalace a serveru. Funguje i přes file://. Google Fonts mají systémové náhrady pro offline režim.
 
@@ -31,3 +31,9 @@ Run `node verify-medallions.mjs` for browser verification of the new opening, al
 Všech pět profilů používá společný vzhled v `dist/chronicle.css`. Prostředí úvodu se vykresluje z příslušného souboru `assets/jmeno-scenes.png`: Nathaniel má noční železnici, Daniel stáje, Katharine ranč, Scarlett hostinec a Sophie lesní tábořiště. Barvy navazují na medailony na hlavní stránce. `reader.js` doplňuje medailony, vztahy, atmosféru a jemné nástupy kapitol; respektuje omezení pohybu. Příběhy zůstávají beze změny.
 
 Kontrola `node verify-chronicle.mjs` ověřuje všech pět profilů na čtyřech šířkách, zachování textů, kapitoly, přímé odkazy, medailony vztahů a návrat na hlavní stránku. Náhledy ukládá do `../.qa/chronicle-*.png`.
+
+## Vincent Elias Mercer
+
+Šestá postava má adresu `#vincent`, osobní spis 006, oranžový medailon, vlastní portrét a tři ilustrace v `dist/assets/vincent-scenes.png`. Originál dodaného textu je v `content/vincent-original.txt`; Markdown pro sestavení v `dist/assets/vincent-elias-mercer.md`. Všech osm kapitol, charakteristika i pokyny pro RP jsou zachované. Prompty obrázků vytvořených vestavěným image_gen jsou v `vincent-image-prompts.json`.
+
+Aktuální kontroly: `node verify-vincent.mjs` pro šest medailonů a Vincentův profil na pěti šířkách; `node verify-all-locks.mjs` pro všechny archivní zámky. Starší skripty zachycují předchozí verze webu. Zámky jsou klientské, nikoli serverová ochrana obsahu.
