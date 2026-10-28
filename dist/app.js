@@ -104,7 +104,7 @@ archiveLock.innerHTML=`<form class="archive-lock-form"><button class="archive-cl
 document.body.append(archiveLock);
 const archiveCode=archiveLock.querySelector('input');
 const archiveStatus=archiveLock.querySelector('#archive-status');
-const archiveCodes={nathaniel:'2811',sophie:'6984'};
+const archiveCodes={nathaniel:'2811',sophie:'6984',daniel:'4536'};
 let archiveUnlocked=null,archivePerson=null;
 function closeArchive(){const key=archivePerson;archiveLock.close();location.hash='';requestAnimationFrame(()=>document.querySelector('.cast-link.'+key)?.focus());}
 archiveLock.querySelector('.archive-close').addEventListener('click',closeArchive);
@@ -130,6 +130,7 @@ function route(){
   archivePerson=key;
   const person=people[key];
   archiveLock.classList.toggle('archive-sophie',key==='sophie');
+  archiveLock.classList.toggle('archive-daniel',key==='daniel');
   archiveLock.querySelector('.archive-lock-seal img').src='assets/icon-'+key+'.png';
   archiveLock.querySelector('.archive-owner').textContent=person.name;
   archiveLock.querySelector('.archive-file').textContent='OSOBNÍ SPIS № '+person.number;

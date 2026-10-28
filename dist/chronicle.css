@@ -100,3 +100,11 @@
 .archive-sophie #archive-code:focus{border-color:#d58ab4;box-shadow:0 0 0 3px #d58ab412,0 0 30px #c54b8c1a}
 .archive-sophie .archive-unlock{background:linear-gradient(110deg,#79365466,#31202c77);border-color:#bf78a355;color:#edc6df}.archive-sophie .archive-unlock:hover{background:#79365488;box-shadow:0 0 28px #a54a8025}
 .archive-sophie.archive-error #archive-code{border-color:#d36353}
+.archive-lock.archive-daniel{border-color:#bc85495f;background:radial-gradient(ellipse at 50% 0,#a762252c,transparent 65%),linear-gradient(145deg,#201912,#101113);box-shadow:0 30px 130px #000c,0 0 70px #ca893215}
+.archive-daniel .archive-lock-seal img{filter:drop-shadow(0 0 23px #e1974549)}
+.archive-daniel .archive-owner,.archive-daniel .archive-divider,.archive-daniel .archive-eyebrow{color:#e6a366}
+.archive-daniel .archive-lock-seal>span{border-color:#b58049;color:#ebbc86;background:#241b13}
+.archive-daniel #archive-code{color:#f0d0a5;border-color:#b585494d;background:linear-gradient(#111013,#241b13)}
+.archive-daniel #archive-code:focus{border-color:#dca56b;box-shadow:0 0 0 3px #dca56b12,0 0 30px #c985341a}
+.archive-daniel .archive-unlock{background:linear-gradient(110deg,#794e2666,#31281c77);border-color:#bf915555;color:#edd1a8}.archive-daniel .archive-unlock:hover{background:#79502688;box-shadow:0 0 28px #a5793025}
+.archive-daniel.archive-error #archive-code{border-color:#d36353}
