@@ -85,28 +85,9 @@
   },
   syncVisibility(key){activeKey=key;if(!key)toolbar.hidden=true;schedule();}
  };
- function selectionAccess(){
-  const mobile=matchMedia('(max-width:700px)').matches;
-  document.querySelectorAll('.character[href]').forEach(link=>{
-   link.tabIndex=mobile?0:-1;
-   link.setAttribute('aria-hidden',mobile?'false':'true');
-  });
- }
- selectionAccess();
- matchMedia('(max-width:700px)').addEventListener('change',selectionAccess);
- addEventListener('scroll',schedule,{passive:true});addEventListener('resize',schedule,{passive:true});
- document.querySelectorAll('.character[href], .cast-link[href]').forEach(link=>link.addEventListener('click',event=>{
+ document.querySelectorAll('.medallion-card').forEach(link=>link.addEventListener('click',event=>{
   if(event.button!==0||event.metaKey||event.ctrlKey||event.shiftKey||event.altKey||reduced())return;
-  if(matchMedia('(max-width:700px)').matches){
-   requestAnimationFrame(()=>profile.animate([{opacity:0},{opacity:1}],{duration:330,easing:'ease-out'}));return;
-  }
-  transitionLayer?.remove();
-  const rect=document.querySelector('.poster').getBoundingClientRect();
-  const layer=document.createElement('div');layer.className='poster-transition';layer.setAttribute('aria-hidden','true');
-  const image=document.createElement('div');image.className='poster-transition-image';
-  Object.assign(image.style,{left:rect.left+'px',top:rect.top+'px',width:rect.width+'px',height:rect.height+'px',transformOrigin:(link.style.getPropertyValue('--center')||'50%')+' 29%'});
-  layer.append(image);document.body.append(layer);transitionLayer=layer;
-  image.animate([{transform:'scale(1)',opacity:1},{transform:'scale(1.6)',opacity:0}],{duration:650,easing:'cubic-bezier(.2,.65,.2,1)',fill:'forwards'});
-  layer.animate([{opacity:1},{opacity:1,offset:.2},{opacity:0}],{duration:650,easing:'ease-out',fill:'forwards'}).finished.catch(()=>{}).finally(()=>{layer.remove();if(transitionLayer===layer)transitionLayer=null;});
+  requestAnimationFrame(()=>profile.animate([{opacity:0,transform:'translateY(12px)'},{opacity:1,transform:'translateY(0)'}],{duration:420,easing:'ease-out'}));
  }));
+ addEventListener('scroll',schedule,{passive:true});addEventListener('resize',schedule,{passive:true});
 })();

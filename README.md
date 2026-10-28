@@ -19,3 +19,9 @@ Soubor `reader.js` doplňuje vizuální vrstvu a `visual.css` čtenářský vzhl
 ## Nový společný úvod
 
 Úvodní `assets/arrival.png` je nová společná scéna pěti postav na nádraží. Na počítači jsou jména v jednoduché navigaci pod obrazem. Klikat lze také přímo na postavy. Na mobilu zůstávají velké posuvné výřezy s nenápadnými jmenovkami. Původní `postavy.png` je zachován pro atmosférické pozadí profilů a jako zdrojová předloha. Nový prompt je v `arrival-image-prompt.txt`.
+
+## Medallion opening
+
+The opening uses the five supplied character icons in `dist/assets/icon-*.png`, a typographic New Horizon logo, CSS atmosphere and hover/focus auras. All character hash routes and lore remain available. Mobile uses a two-column layout with Nathaniel first. Reduced-motion preferences disable atmospheric animation.
+
+Run `node verify-medallions.mjs` for browser verification of the new opening, all five lore routes, chapter navigation, focus restoration and responsive layouts. Screenshots are saved in `../.qa/medallions-*.png`.

@@ -1,49 +1,39 @@
-/* One shared scene; names are a quiet typographic index below the artwork. */
-#selection{--scene-width:min(100vw,1672px,calc((100svh - 232px)*1.7768));max-width:none}
-.poster-wrap{min-height:0;padding:0;background:radial-gradient(ellipse at center,#5a351115,transparent 75%)}
-.poster{width:var(--scene-width);aspect-ratio:1672/941;overflow:hidden}
-.poster-base{width:100%;height:100%;object-fit:contain}
-.poster:after{content:"";position:absolute;inset:0;pointer-events:none;z-index:2;box-shadow:inset 0 -25px 35px -30px #100c08}
-.character{inset:0 auto 0 0;height:100%;clip-path:none;width:20%;position:absolute}
-.character.scarlet{left:0;width:24%}.character.daniel{left:24%;width:16%}.character.nathaniel{left:40%;width:19%}.character.katie{left:59%;width:18%}.character.sophie{left:77%;width:23%}
-.character:before{background:radial-gradient(ellipse at 50% 75%,#e4bc6717,transparent 68%);filter:none;inset:0;opacity:0}
-.character:after{content:"";position:absolute;bottom:26px;left:50%;height:1px;width:30px;background:var(--accent);transform:translateX(-50%) scaleX(.3);box-shadow:0 0 20px var(--accent);opacity:0;transition:opacity .25s,transform .25s}
-.character:hover:before,.character:focus-visible:before{opacity:1;filter:none}
-.character:hover:after,.character:focus-visible:after{opacity:.85;transform:translateX(-50%) scaleX(1)}
-.character .label{display:none}
-.cast-nav{width:var(--scene-width);margin:0 auto;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));min-height:100px;align-items:stretch;border-block:1px solid #b18b4d25;background:linear-gradient(180deg,#1b130b70,transparent)}
-.cast-link{position:relative;padding:20px 14px 17px;display:flex;flex-direction:column;justify-content:center;gap:6px;text-align:center;transition:color .25s,background .25s;min-width:0;clip-path:none}
-.cast-number{font:10px 'Barlow Condensed',Arial,sans-serif;letter-spacing:2px;color:var(--accent);opacity:.7}
-.cast-name{font:15px/1.4 Lora,Georgia,serif;color:#d9c9ac;transition:color .25s}
-.cast-role{font:11px/1.4 'Barlow Condensed',Arial,sans-serif;letter-spacing:.9px;color:#a08b70}
-.cast-link:after{content:"";position:absolute;height:1px;width:36px;background:var(--accent);left:50%;bottom:10px;transform:translateX(-50%) scaleX(0);transition:transform .3s}
-.cast-link:hover,.cast-link:focus-visible{background:linear-gradient(0deg,#bc93570b,transparent)}
-.cast-link:hover .cast-name,.cast-link:focus-visible .cast-name{color:#fff0d6}
-.cast-link:hover:after,.cast-link:focus-visible:after{transform:translateX(-50%) scaleX(1)}
-.cast-link:focus-visible{outline:none;box-shadow:inset 0 -2px var(--accent)}
-.selection-footer{max-width:1672px;margin:auto;border:0;height:56px}
-.selection-footer p{font-size:17px}
-.poster-transition-image{background-image:url('assets/arrival.png')}
-#selection:has(.cast-link.scarlet:hover) .character.scarlet:before,#selection:has(.cast-link.scarlet:focus-visible) .character.scarlet:before,#selection:has(.cast-link.daniel:hover) .character.daniel:before,#selection:has(.cast-link.daniel:focus-visible) .character.daniel:before,#selection:has(.cast-link.nathaniel:hover) .character.nathaniel:before,#selection:has(.cast-link.nathaniel:focus-visible) .character.nathaniel:before,#selection:has(.cast-link.katie:hover) .character.katie:before,#selection:has(.cast-link.katie:focus-visible) .character.katie:before,#selection:has(.cast-link.sophie:hover) .character.sophie:before,#selection:has(.cast-link.sophie:focus-visible) .character.sophie:before{opacity:1}
-#selection:has(.character.scarlet:hover) .cast-link.scarlet .cast-name,#selection:has(.character.daniel:hover) .cast-link.daniel .cast-name,#selection:has(.character.nathaniel:hover) .cast-link.nathaniel .cast-name,#selection:has(.character.katie:hover) .cast-link.katie .cast-name,#selection:has(.character.sophie:hover) .cast-link.sophie .cast-name{color:#fff1d9}
-@media(max-width:1100px) and (min-width:701px){.cast-name{font-size:13px}.cast-link{padding-inline:8px}.cast-role{font-size:10px;letter-spacing:.5px}}
-@media(max-width:700px){
- .edition{font-size:0}
- #selection{--scene-width:100vw}
- .poster-wrap{display:block;overflow-x:auto;min-height:0}
- .poster{width:420vw;height:min(680px,calc(100svh - 150px));display:flex;aspect-ratio:auto;background:none}
- .poster-base{display:none}
- .poster:after{display:none}
- .character,.character.scarlet,.character.daniel,.character.nathaniel,.character.katie,.character.sophie{position:relative;left:auto;top:auto;bottom:auto;inset:auto;width:20%;height:100%;flex:0 0 20%;border-right:1px solid #4b3520;clip-path:none;background-image:linear-gradient(0deg,#100a04f5 2%,#100a0477 22%,#100a0400 60%),url('assets/arrival.png');background-size:100% 100%,500% auto;background-position:center,var(--crop) top;background-repeat:no-repeat}
- .character.scarlet{--crop:6.25%}.character.daniel{--crop:27.5%}.character.nathaniel{--crop:48.75%}.character.katie{--crop:70%}.character.sophie{--crop:92.5%}
- .character:before,.character:after{display:none}
- .character .label{display:flex;top:auto;bottom:30px;left:50%;width:100%;padding:0 16px;gap:5px}
- .label:before{display:none}
- .character .given{font:500 13px 'Barlow Condensed',Arial,sans-serif;letter-spacing:2px;color:var(--accent)}
- .character .label strong{font:24px/1.3 Lora,Georgia,serif;letter-spacing:1px}
- .character .label em{font:42px/1 'Mrs Saint Delafield',cursive;margin-top:4px}
- .character .symbol,.character .action{display:none}
- .cast-nav{display:none}
- .selection-footer{height:64px}
- .selection-footer p{font-size:15px}
-}
+﻿/* New Horizon: animated character medallions. */
+#selection.medallion-selection{position:relative;isolation:isolate;max-width:none;min-height:calc(100svh - 76px);overflow:hidden;background:radial-gradient(ellipse at 50% 15%,#6d43172b,transparent 55%),linear-gradient(#100d0b,#08090b 75%,#100c08);display:flex;flex-direction:column;justify-content:center;padding:42px 4% 0}
+.frontier-atmosphere{position:absolute;inset:0;z-index:-1;pointer-events:none;background:linear-gradient(#0a0b0dcc,#090a0df0),url('assets/postavy.png') center/cover;opacity:.8}
+.frontier-mist{position:absolute;inset:15% -30% -10%;background:radial-gradient(ellipse at 25% 70%,#b6b3b215,transparent 45%),radial-gradient(ellipse at 75% 40%,#d0a47712,transparent 45%);animation:frontier-drift 24s ease-in-out infinite alternate}
+.frontier-atmosphere i{position:absolute;bottom:-20px;left:calc(var(--i)*6.2%);width:2px;height:2px;background:#d2a166;border-radius:50%;box-shadow:0 0 9px 2px #d28d4850;opacity:0;animation:frontier-embers calc(12s + var(--i)*.4s) linear infinite;animation-delay:calc(var(--i)*-1.7s)}
+.frontier-intro{text-align:center;margin:0 auto 34px}
+.frontier-overline{font:10px 'Barlow Condensed',sans-serif;letter-spacing:5px;color:#a48c6b;margin:0 0 24px}
+.frontier-logo{display:flex;align-items:center;justify-content:center;gap:30px;color:#e7ca92;text-shadow:0 2px 2px #000,0 0 45px #bc812329;font:27px/.95 Rye,Georgia,serif;letter-spacing:8px}
+.logo-horizon{display:block;font-size:clamp(42px,5.2vw,78px);letter-spacing:5px;margin-top:9px}
+.logo-star{font:30px Georgia;color:#a98049;opacity:.8}
+.frontier-motto{font:italic 20px 'IM Fell English',Georgia,serif;color:#cfb890;margin:23px 0 20px}
+.frontier-rule{display:flex;align-items:center;justify-content:center;gap:15px;color:#ae814a;font-size:17px}.frontier-rule:before,.frontier-rule:after{content:'';width:92px;height:1px;background:linear-gradient(90deg,transparent,#a9824266)}.frontier-rule:after{transform:rotate(180deg)}
+.frontier-invitation{font:12px 'Barlow Condensed',sans-serif;letter-spacing:2px;text-transform:uppercase;color:#a29685;margin-top:18px}.frontier-invitation em{font-style:normal;color:#d6c3a5}
+.medallion-cast{width:100%;max-width:1450px;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:26px;margin:0 auto 45px;align-items:start}
+#selection .medallion-card{clip-path:none;display:flex;flex-direction:column;align-items:center;padding:0;text-align:center;gap:0;min-width:0;background:none;position:relative;transition:transform .4s ease}
+#selection .medallion-card:after{display:none}
+.medallion-art{position:relative;width:100%;max-width:248px;aspect-ratio:1;display:block;isolation:isolate;margin-bottom:22px}
+.medallion-art img{display:block;width:100%;height:100%;object-fit:contain;border-radius:50%;position:relative;z-index:1;transition:filter .45s,transform .45s;filter:brightness(.85);}
+.aura-ring{position:absolute;inset:5%;border-radius:50%;border:1px solid color-mix(in srgb,var(--aura),transparent 65%);box-shadow:0 0 20px color-mix(in srgb,var(--aura),transparent 85%);transition:box-shadow .45s,opacity .45s,transform .45s;opacity:.4}
+.aura-ring:before{content:'';position:absolute;inset:-20%;border-radius:50%;background:radial-gradient(circle,transparent 40%,color-mix(in srgb,var(--aura),transparent 78%) 55%,transparent 73%);opacity:0;transition:opacity .45s}
+.aura-ring:after{content:'';position:absolute;inset:-7%;border:1px dashed color-mix(in srgb,var(--aura),transparent 50%);border-radius:50%;opacity:0;transition:opacity .45s;animation:aura-orbit 45s linear infinite}
+.medallion-name{font:16px/1.5 Lora,Georgia,serif;color:#c9bea9}.medallion-name strong{display:block;font:25px/1.3 'IM Fell English',Georgia,serif;letter-spacing:3px;text-transform:uppercase;color:#ead7b5;margin-top:1px}
+.medallion-nickname{font:38px/1 'Mrs Saint Delafield',cursive;color:var(--aura);margin-top:9px}.medallion-role{font:11px 'Barlow Condensed',sans-serif;letter-spacing:1px;color:#9b9182;margin-top:10px}
+.medallion-action{font:10px 'Barlow Condensed',sans-serif;letter-spacing:2px;color:var(--aura);margin-top:20px;opacity:0;transform:translateY(5px);transition:opacity .3s,transform .3s}
+#selection .medallion-card:hover,#selection .medallion-card:focus-visible{transform:translateY(-7px);outline:none;box-shadow:none}
+.medallion-card:is(:hover,:focus-visible) .medallion-art img{filter:brightness(1.1);transform:scale(1.035)}
+.medallion-card:is(:hover,:focus-visible) .aura-ring{opacity:1;transform:scale(1.04);box-shadow:0 0 22px var(--aura),0 0 65px color-mix(in srgb,var(--aura),transparent 55%),inset 0 0 25px color-mix(in srgb,var(--aura),transparent 65%)}
+.medallion-card:is(:hover,:focus-visible) .aura-ring:before,.medallion-card:is(:hover,:focus-visible) .aura-ring:after{opacity:1}
+.medallion-card:is(:hover,:focus-visible) .medallion-action{opacity:1;transform:translateY(0)}
+.medallion-card:focus-visible .medallion-name{outline:1px solid var(--aura);outline-offset:7px}
+#selection .medallion-card.nathaniel .medallion-art{transform:scale(1.075)}
+#selection .selection-footer{width:100%;max-width:1450px;margin:auto auto 0;padding:20px 0;min-height:65px;height:auto;border-top:1px solid #ad824329;gap:20px}#selection .selection-footer p{font-size:16px}
+@keyframes frontier-drift{from{transform:translateX(-5%)}to{transform:translateX(8%)}}
+@keyframes frontier-embers{0%{transform:translate(0,0);opacity:0}15%{opacity:.5}80%{opacity:.25}100%{transform:translate(70px,-80vh);opacity:0}}
+@keyframes aura-orbit{to{transform:rotate(360deg)}}
+@media(min-width:1500px){.medallion-cast{gap:42px}.frontier-intro{margin-bottom:55px}}
+@media(max-width:1000px){.medallion-cast{gap:15px}.medallion-name{font-size:13px}.medallion-name strong{font-size:21px}.medallion-role{font-size:10px}.frontier-logo{font-size:23px}}
+@media(max-width:700px){#selection.medallion-selection{padding:30px 6% 0;min-height:calc(100svh - 68px)}.frontier-overline{font-size:9px;letter-spacing:3px}.frontier-logo{font-size:21px;gap:15px;letter-spacing:5px}.logo-horizon{font-size:43px;letter-spacing:2px}.logo-star{font-size:19px}.frontier-motto{font-size:18px}.frontier-invitation{font-size:10px;line-height:1.8;max-width:260px;margin:15px auto 0}.frontier-invitation em{display:block}.medallion-cast{grid-template-columns:repeat(2,minmax(0,1fr));gap:32px 22px;max-width:440px;margin-bottom:35px}.medallion-card.nathaniel{grid-column:1/-1;grid-row:1;width:55%;justify-self:center}.medallion-art{margin-bottom:14px}.medallion-name{font-size:13px}.medallion-name strong{font-size:22px}.medallion-nickname{font-size:34px}.medallion-role{font-size:10px;letter-spacing:.6px}.medallion-action{opacity:.75;transform:none;font-size:9px;letter-spacing:1px;margin-top:12px}#selection .selection-footer{justify-content:center;text-align:center}#selection .selection-footer>span{display:none}#selection .selection-footer p{max-width:none;font-size:15px}.frontier-intro{margin-bottom:32px}}
+@media(prefers-reduced-motion:reduce){.frontier-mist,.frontier-atmosphere i,.aura-ring:after{animation:none}.frontier-atmosphere i{display:none}#selection .medallion-card,.medallion-art img,.aura-ring,.aura-ring:before,.aura-ring:after,.medallion-action{transition:none}#selection .medallion-card:is(:hover,:focus-visible){transform:none}}
