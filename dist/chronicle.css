@@ -1,0 +1,53 @@
+﻿/* Nathaniel's cinematic chronicle. Scoped to the prototype profile. */
+.nathaniel-profile{--gold:#d38870;--accent-rgb:196,69,49;background:radial-gradient(ellipse at 0 20%,#6a211213,transparent 40%),#0c0c0e}
+.nathaniel-profile .profile-hero{max-width:none;min-height:760px;background:#0b1015;isolation:isolate;border-bottom:1px solid #a44b3438}
+.nathaniel-profile .profile-hero:before{content:'';position:absolute;inset:0;z-index:-2;background:url('assets/nathaniel-scenes.png') center center/auto 300% no-repeat;opacity:.7}
+.nathaniel-profile .profile-hero:after{content:'';position:absolute;inset:0;z-index:-1;background:linear-gradient(90deg,#090b10f5 2%,#0c1014dc 30%,#10101933 65%,#0c0e1166),linear-gradient(0deg,#0c0c0e,transparent 25%,transparent 80%,#080b1066)}
+.nathaniel-profile .hero-panorama{display:none}
+.nathaniel-profile .back{left:6%;top:25px;color:#d2baa1}
+.nathaniel-profile .profile-heading{padding:90px 0 85px 9%;width:60%;max-width:1000px;min-height:760px}
+.chronicle-seal{display:flex;gap:16px;align-items:center;margin-bottom:28px;color:#c9aa86;font:10px 'Barlow Condensed',sans-serif;letter-spacing:3px}
+.chronicle-seal img{width:73px;height:73px;filter:drop-shadow(0 0 16px #c5442b50)}
+.chronicle-seal small{display:block;margin-top:8px;font-size:9px;letter-spacing:2px;color:#9f9590}
+.nathaniel-profile .profile-heading>.eyebrow{font-size:10px;letter-spacing:3px;color:#bd7960}
+.nathaniel-profile .profile-kicker{font-size:22px;color:#cabda9;margin:25px 0 23px;max-width:420px}
+.nathaniel-profile .profile-heading h1{font-size:clamp(76px,8vw,135px);color:#f1dfbd;text-shadow:0 4px 25px #0008}
+.nathaniel-profile .profile-heading h1>span{font-size:clamp(19px,2vw,30px);letter-spacing:6px;color:#dfcdb2}
+.nathaniel-profile .signature{color:#db7961;font-size:96px;margin:14px 0 30px 25%}
+.nathaniel-profile .hero-description{font-family:Lora,Georgia,serif;font-size:16px;color:#bdbaaf;line-height:1.9}
+.nathaniel-profile .hero-character{height:940px;top:0;right:9%;z-index:0;filter:drop-shadow(-15px 0 35px #0008);mask-image:linear-gradient(#000 65%,transparent 87%)}
+.nathaniel-profile .profile-heading .story-button{border-color:#b75e4577;background:linear-gradient(110deg,#7d302433,#0e0e1488);padding:17px 25px;color:#edc0a0;letter-spacing:2px}
+.nathaniel-profile .stamp{bottom:55px;right:6%;border:1px solid #b6785155;color:#d5b295;background:#100c0cc7;padding:18px 25px;box-shadow:inset 0 0 0 4px #171212;transform:rotate(-8deg)}
+.chronicle-atmosphere{position:absolute;inset:0;pointer-events:none;z-index:1;overflow:hidden}
+.chronicle-fog{position:absolute;inset:35% -30% -10%;background:radial-gradient(ellipse at 70% 70%,#c7c2bf17,transparent 55%),radial-gradient(ellipse at 40% 70%,#c64b2412,transparent 40%);animation:chronicle-fog 22s ease-in-out infinite alternate}
+.chronicle-atmosphere i{position:absolute;width:2px;height:2px;border-radius:50%;background:#e78353;box-shadow:0 0 8px #ed652a;left:calc(38% + var(--i)*5%);bottom:-10px;opacity:0;animation:chronicle-sparks calc(10s + var(--i)*.5s) linear infinite;animation-delay:calc(var(--i)*-2s)}
+.nathaniel-profile .facts{max-width:1400px;position:relative;padding:28px 4%;gap:25px;background:linear-gradient(100deg,#251915,#131315);border:1px solid #b47c4533;margin:0 auto;box-shadow:0 15px 60px #0004}
+.nathaniel-profile .facts>div{padding-left:17px;border-left:1px solid #b4614544}.nathaniel-profile .facts span{color:#b78066;letter-spacing:2px}.nathaniel-profile .facts strong{font-size:17px}
+.nathaniel-profile .quote{max-width:1100px;margin:0 auto;padding:75px 30px 85px;background:radial-gradient(ellipse,#aa45210b,transparent 70%)}
+.nathaniel-profile .quote blockquote{font-size:30px;line-height:1.6;color:#dccdb7}.nathaniel-profile .quote-mark{color:#b85b42}
+.nathaniel-profile .story-shell{max-width:1350px;grid-template-columns:250px minmax(0,770px);gap:90px}
+.nathaniel-profile .sidebar-person{background:linear-gradient(140deg,#4a201c40,#121216);border-color:#b8734838}
+.nathaniel-profile .sidebar-portrait{height:205px;background:radial-gradient(ellipse,#8f30202b,transparent 70%)}
+.nathaniel-profile .sidebar-portrait img{width:180px;height:180px;top:16px;object-fit:contain;filter:drop-shadow(0 0 15px #b7322725)}
+.nathaniel-profile .sidebar-portrait:after,.nathaniel-profile .sidebar-signature{display:none}
+.nathaniel-profile .sidebar-identity{text-align:center}.nathaniel-profile .sidebar-world{font-size:13px}
+.nathaniel-profile .chapter{position:relative;padding-bottom:70px}
+.nathaniel-profile .chapter h2{font-size:37px;line-height:1.3;color:#e4d6c0;padding-top:20px}
+.nathaniel-profile .chapter-number{font-size:11px;letter-spacing:4px;color:#c27c60;margin-bottom:19px}
+.nathaniel-profile .chapter p,.nathaniel-profile .chapter li{color:#c2bcb2;font-size:17px;line-height:2}
+.nathaniel-profile .chapter>h2+p:first-letter{font-size:2.5em;line-height:1;color:#d99c7b}
+.nathaniel-profile .scene-figure{margin-bottom:35px}.nathaniel-profile .scene-media{aspect-ratio:2.5/1;box-shadow:0 15px 45px #0006}
+.nathaniel-profile .scene-media:after{box-shadow:inset 0 0 0 1px #c3895644,inset 0 -30px 50px -40px #0c0c0e}
+.nathaniel-profile .scene-side{float:none;width:100%;margin:0 0 35px;padding:0;border:0;background:none;transform:none;box-shadow:none}.nathaniel-profile .scene-side .scene-media{aspect-ratio:2.5/1}.nathaniel-profile .scene-side figcaption{display:flex;padding:12px 0 0;font-size:12px}.nathaniel-profile .scene-side figcaption span{margin:0;font-size:9px}
+.nathaniel-profile .identity-note{background:linear-gradient(130deg,#652a1e22,#131317);border-color:#a9673b44;padding:32px}
+.nathaniel-profile .family{max-width:1190px;gap:60px;padding:50px 0;border-color:#b8734833}.nathaniel-profile .family-members>div{min-height:145px;padding:20px;border:1px solid #aa633b33;background:linear-gradient(120deg,#4d251822,#141418);margin-bottom:15px;display:flow-root}.nathaniel-profile .family h3{font-size:24px}.nathaniel-profile .family-members p{font-size:15px}.relation-medallion{float:left;margin:2px 20px 45px 0;width:94px}.relation-medallion img{width:100%;height:auto;transition:filter .3s,transform .3s}.relation-medallion:hover img{filter:drop-shadow(0 0 10px #e6975860);transform:scale(1.04)}
+.nathaniel-profile .profile-footer{background:radial-gradient(ellipse at bottom,#8c34231f,transparent 65%);padding-bottom:40px}
+@keyframes chronicle-fog{to{transform:translateX(9%)}}
+@keyframes chronicle-sparks{0%{opacity:0;transform:translate(0,0)}20%{opacity:.65}90%{opacity:.2}100%{opacity:0;transform:translate(-70px,-600px)}}
+@media(max-width:1100px){.nathaniel-profile .profile-heading{padding-left:6%;width:65%}.nathaniel-profile .hero-character{right:-7%;height:900px}.nathaniel-profile .story-shell{grid-template-columns:210px minmax(0,1fr);gap:40px}.nathaniel-profile .family{margin-inline:5%;gap:35px}.nathaniel-profile .profile-heading h1{font-size:90px}}
+@media(max-width:900px){.nathaniel-profile .story-shell{display:block;max-width:820px}.nathaniel-profile .sidebar-portrait{width:115px;height:115px}.nathaniel-profile .sidebar-portrait img{width:103px;height:103px;top:6px}.nathaniel-profile .sidebar-identity{text-align:left}.nathaniel-profile .family{display:block}.nathaniel-profile .family-members{margin-top:25px}}
+@media(max-width:700px){.nathaniel-profile .profile-hero{min-height:850px}.nathaniel-profile .profile-hero:before{background-size:auto 300%;opacity:.55}.nathaniel-profile .profile-hero:after{background:linear-gradient(0deg,#0c0c0e 0%,#0c1014f2 29%,#10101911 73%,#080b1099)}.nathaniel-profile .back{top:13px;left:6%}.nathaniel-profile .profile-heading{padding:68px 6% 40px;width:100%;min-height:850px;background:none}.chronicle-seal{margin-bottom:20px;gap:12px;letter-spacing:2px}.chronicle-seal img{height:58px;width:58px}.chronicle-seal small{font-size:8px}.nathaniel-profile .profile-heading>.eyebrow{font-size:9px;letter-spacing:1.5px}.nathaniel-profile .profile-kicker{font-size:18px;margin:20px 0;max-width:190px}.nathaniel-profile .hero-character{height:650px;right:-100px;top:115px;opacity:.95;mask-image:linear-gradient(#000 50%,transparent 88%)}.nathaniel-profile .profile-heading h1{margin-top:240px;font-size:clamp(59px,16vw,90px);letter-spacing:-1px}.nathaniel-profile .profile-heading h1>span{font-size:18px;letter-spacing:3px}.nathaniel-profile .signature{font-size:75px;margin:12px 0 25px 30%}.nathaniel-profile .hero-description{max-width:300px;font-size:14px}.nathaniel-profile .profile-heading .story-button{font-size:10px;padding:14px 18px}.nathaniel-profile .facts{margin:0 5%;grid-template-columns:1fr 1fr;gap:23px 13px;padding:23px 13px}.nathaniel-profile .facts strong{font-size:14px}.nathaniel-profile .facts span{font-size:8px;letter-spacing:1.2px}.nathaniel-profile .facts>div{padding-left:10px}.nathaniel-profile .quote{padding:50px 7% 55px}.nathaniel-profile .quote blockquote{font-size:24px}.nathaniel-profile .chapter h2{font-size:29px}.nathaniel-profile .chapter p,.nathaniel-profile .chapter li{font-size:16px;line-height:1.95}.nathaniel-profile .chapter{padding-bottom:42px}.nathaniel-profile .scene-media,.nathaniel-profile .scene-side .scene-media{aspect-ratio:1.8/1}.nathaniel-profile .scene-side figcaption{display:block;font-size:11px}.nathaniel-profile .scene-side figcaption span{font-size:8px;margin-top:5px}.nathaniel-profile .family{margin-inline:6%}.relation-medallion{width:72px;margin:0 15px 12px 0}.nathaniel-profile .family h3{font-size:22px}.nathaniel-profile .family-members>div{padding:16px}.nathaniel-profile .family-members>div>span{font-size:8px;letter-spacing:1px}.nathaniel-profile .identity-note{padding:23px}}
+@media(prefers-reduced-motion:reduce){.chronicle-fog,.chronicle-atmosphere i{animation:none}.chronicle-atmosphere i{display:none}.relation-medallion img{transition:none}}
+
+.chronicle-seal img,.nathaniel-profile .sidebar-portrait img,.relation-medallion img{border-radius:50%}
+

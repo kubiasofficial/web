@@ -18,6 +18,7 @@
   sophie:{world:'Divočina & koně Shire',kind:'woods',title:'Lovecký deník',note:'V lese nachází klid, u koní důvěru. Loví s respektem a ne zbytečně. Jejím snem je malá stáj, pár věrných koní a kousek vlastní země.',tags:['LESNÍ TICHO','PLEMENO SHIRE','SVOBODA'],scenes:[{at:1,row:0,title:'Ticho lesa, ve kterém nemusí nic dokazovat.'},{at:2,row:1,side:true,title:'Síla a klid plemene Shire.'},{at:6,row:2,title:'Kousek země, který by mohla nazývat domovem.'}]}
  };
  let activeKey=null,lastChapter=null,frame=0,transitionLayer=null;
+ let chapterObserver=null;
  const cleanTitle=title=>title.replace(/^[IVXLCDM]+\.\s*/,'').replace(/\s*\([^)]*\)\s*$/,'');
  function figure(key,scene,escape){
   return `<figure class="scene-figure${scene.side?' scene-side':''}"><div class="scene-media" style="--scene-row:${scene.row}"><img src="assets/${key}-scenes.png" alt="${escape(scene.title)}" loading="lazy" decoding="async" width="1254" height="1254"></div><figcaption>${escape(scene.title)}<span>ILUSTRACE K PŘÍBĚHU</span></figcaption></figure>`;
@@ -56,8 +57,19 @@
  window.VisualReading={
   render(key,person,helpers){
    activeKey=key;lastChapter=null;
+   chapterObserver?.disconnect();
    const theme=themes[key],escape=helpers.escapeHTML;
+   profile.querySelectorAll('.chronicle-seal,.chronicle-atmosphere,.relation-medallion').forEach(node=>node.remove());
+   if(key==='nathaniel'){
+    profile.querySelector('.profile-hero').insertAdjacentHTML('afterbegin','<div class="chronicle-atmosphere" aria-hidden="true"><div class="chronicle-fog"></div>'+Array.from({length:12},(_,i)=>'<i style="--i:'+i+'"></i>').join('')+'</div>');
+    profile.querySelector('.profile-heading').insertAdjacentHTML('afterbegin','<div class="chronicle-seal"><img src="assets/icon-nathaniel.png" alt="" width="96" height="96"><span>NEW HORIZON ARCHIVES<small>SEDALIA · MISSOURI</small></span></div>');
+    profile.querySelectorAll('.family-members>div').forEach((card,index)=>{
+     const member=person.family[index];
+     if(member.href)card.insertAdjacentHTML('afterbegin','<a class="relation-medallion" href="'+member.href+'" aria-label="'+escape(member.name)+'"><img src="assets/icon-'+member.href.slice(1)+'.png" alt="" width="100" height="100" loading="lazy"></a>');
+    });
+   }
    const photo=profile.querySelector('.sidebar-portrait img');photo.src='assets/'+person.image;
+   if(key==='nathaniel')photo.src='assets/icon-nathaniel.png';
    photo.alt='Portrét: '+person.name;
    profile.querySelector('.sidebar-signature').textContent=person.nickname;
    profile.querySelector('.sidebar-identity>.eyebrow').textContent='OSOBNÍ SPIS № '+person.number;
@@ -69,6 +81,14 @@
     return `<a href="#${helpers.chapterID(key,index)}"><span class="nav-step">${String(index+1).padStart(2,'0')}</span><span class="nav-copy"><small>${escape(year)}</small><span>${escape(cleanTitle(chapter.title))}</span></span></a>`;
    }).join('');
    const chapters=[...document.querySelectorAll('#story>.chapter')];
+   if(key==='nathaniel'&&!reduced()&&'IntersectionObserver' in window){
+    chapterObserver=new IntersectionObserver(entries=>entries.forEach(entry=>{
+     if(!entry.isIntersecting)return;
+     entry.target.animate([{opacity:.65,transform:'translateY(14px)'},{opacity:1,transform:'translateY(0)'}],{duration:550,easing:'ease-out'});
+     chapterObserver.unobserve(entry.target);
+    }),{threshold:.05});
+    chapters.forEach(chapter=>chapterObserver.observe(chapter));
+   }
    theme.scenes.forEach(scene=>{
     const chapter=chapters[scene.at];if(!chapter)return;
     if(scene.side)chapter.querySelector('h2').insertAdjacentHTML('afterend',figure(key,scene,escape));

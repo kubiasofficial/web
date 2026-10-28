@@ -63,6 +63,7 @@ let activePerson=null;
 function chapterID(key,index){return (key==='nathaniel'?'':key+'-')+'kapitola-'+(index+1);}
 function renderProfile(key){
  const person=people[key];
+ profile.classList.toggle('nathaniel-profile',key==='nathaniel');
  profile.classList.toggle('scarlet-profile',key==='scarlet');
  profile.classList.toggle('daniel-profile',key==='daniel');
  profile.classList.toggle('katie-profile',key==='katie');
