@@ -37,3 +37,9 @@ Kontrola `node verify-chronicle.mjs` ověřuje všech pět profilů na čtyřech
 Šestá postava má adresu `#vincent`, osobní spis 006, oranžový medailon, vlastní portrét a tři ilustrace v `dist/assets/vincent-scenes.png`. Originál dodaného textu je v `content/vincent-original.txt`; Markdown pro sestavení v `dist/assets/vincent-elias-mercer.md`. Všech osm kapitol, charakteristika i pokyny pro RP jsou zachované. Prompty obrázků vytvořených vestavěným image_gen jsou v `vincent-image-prompts.json`.
 
 Aktuální kontroly: `node verify-vincent.mjs` pro šest medailonů a Vincentův profil na pěti šířkách; `node verify-all-locks.mjs` pro všechny archivní zámky. Starší skripty zachycují předchozí verze webu. Zámky jsou klientské, nikoli serverová ochrana obsahu.
+
+## Animace
+
+`dist/motion.css` a `dist/motion.js` přidávají postupný nástup úvodu, jemné naklánění medailonů, částice a pohyb pozadí pro myš. Profily mají páru, prach, mlhu, světelné částice, listí nebo modrý kouř podle postavy. Odemykání archivu doplňuje záře pečeti a přechod do profilu; chybný kód krátce zavrtí formulářem. Zavření nebo změna adresy probíhající přechod zruší. Na dotykových zařízeních jsou efekty omezené a systémové omezení pohybu vypíná pohyb i čekání na odemčení. Závěry příběhů zůstávají bez nových animací.
+
+`node verify-motion.mjs` ověřuje reakci na myš, všechny efekty profilů, odemčení, přerušení přechodu a omezení pohybu.

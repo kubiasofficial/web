@@ -35,7 +35,7 @@ try {
  if(width===1440||width===390)await screenshot('vincent-home-'+width);
  await evaluate('document.querySelector(".cast-link.vincent").click()');await sleep(100);
  assert(await evaluate('document.querySelector(".archive-lock").open && document.querySelector(".archive-owner").textContent==="Vincent Elias Mercer"'),'Vincent lock');
- await evaluate('document.querySelector("#archive-code").value="3362";document.querySelector(".archive-lock-form").requestSubmit()');await sleep(150);
+ await evaluate('document.querySelector("#archive-code").value="3362";document.querySelector(".archive-lock-form").requestSubmit()');await sleep(750);
  assert(await evaluate('!document.querySelector("#profile").hidden && document.querySelector("#profile").classList.contains("vincent-profile")'),'Vincent opens');
  await evaluate('Promise.all([...document.querySelectorAll(".hero-character,.chronicle-seal img,.scene-media img")].map(i=>{i.loading="eager";return i.decode()}))');
  assert(await evaluate('document.querySelectorAll(".chapter").length===10 && document.querySelectorAll(".scene-figure").length===3'),'All lore sections and illustrations');

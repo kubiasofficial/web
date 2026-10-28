@@ -115,19 +115,35 @@ const archiveCode=archiveLock.querySelector('input');
 const archiveStatus=archiveLock.querySelector('#archive-status');
 const archiveCodes={nathaniel:'2811',sophie:'6984',daniel:'4536',katie:'4691',scarlett:'5817',vincent:'3362'};
 let archiveUnlocked=null,archivePerson=null;
-function closeArchive(){const key=archivePerson;archiveLock.close();location.hash='';requestAnimationFrame(()=>document.querySelector('.cast-link.'+key)?.focus());}
+let archiveOpening=false,archiveAnimation=null;
+const motionAllowed=()=>!matchMedia('(prefers-reduced-motion: reduce)').matches;
+function resetArchiveAnimation(){archiveAnimation?.cancel();archiveAnimation=null;archiveOpening=false;archiveLock.classList.remove('archive-opening');archiveLock.querySelector('.archive-unlock').disabled=false;}
+function closeArchive(){const key=archivePerson;resetArchiveAnimation();archiveLock.close();location.hash='';requestAnimationFrame(()=>document.querySelector('.cast-link.'+key)?.focus());}
 archiveLock.querySelector('.archive-close').addEventListener('click',closeArchive);
 archiveLock.querySelector('.archive-return').addEventListener('click',closeArchive);
 archiveLock.addEventListener('cancel',event=>{event.preventDefault();closeArchive();});
 archiveCode.addEventListener('input',()=>{archiveCode.value=archiveCode.value.replace(/\D/g,'');archiveCode.removeAttribute('aria-invalid');archiveStatus.textContent='Pouze pro ty, kterým byla svěřena důvěra.';archiveLock.classList.remove('archive-error');});
-archiveLock.querySelector('form').addEventListener('submit',event=>{
+archiveLock.querySelector('form').addEventListener('submit',async event=>{
  event.preventDefault();
+ if(archiveOpening)return;
  if(archiveCode.value!==archiveCodes[archivePerson]){
-  archiveCode.setAttribute('aria-invalid','true');archiveLock.classList.add('archive-error');archiveStatus.textContent='Tento kód archiv neotevře. Zkus to znovu.';archiveCode.select();return;
+  archiveCode.setAttribute('aria-invalid','true');archiveLock.classList.add('archive-error');archiveStatus.textContent='Tento kód archiv neotevře. Zkus to znovu.';archiveCode.select();
+  if(motionAllowed())archiveLock.querySelector('form').animate([{transform:'translateX(0)'},{transform:'translateX(-6px)'},{transform:'translateX(5px)'},{transform:'translateX(-3px)'},{transform:'translateX(0)'}],{duration:320});
+  return;
  }
- archiveUnlocked=archivePerson;archiveLock.close();route();
+ const openingPerson=archivePerson;
+ archiveOpening=true;archiveLock.querySelector('.archive-unlock').disabled=true;
+ archiveStatus.textContent='Pečeť ověřena. Archiv se otevírá…';
+ if(motionAllowed()){
+  archiveLock.classList.add('archive-opening');
+  archiveAnimation=archiveLock.animate([{opacity:1,transform:'scale(1)',offset:0},{opacity:1,transform:'scale(1.015)',offset:.4},{opacity:0,transform:'scale(1.05) translateY(-8px)',offset:1}],{duration:620,easing:'ease-in-out'});
+  try{await archiveAnimation.finished;}catch{return;}
+ }
+ archiveUnlocked=openingPerson;resetArchiveAnimation();archiveLock.close();route();
+ if(motionAllowed())profile.animate([{opacity:0,transform:'translateY(16px)'},{opacity:1,transform:'translateY(0)'}],{duration:650,easing:'ease-out'});
 });
 function route(){
+ if(archiveOpening)resetArchiveAnimation();
  const hash=location.hash;
  const prefixedKey=Object.keys(people).find(name=>hash==='#'+name||hash.startsWith('#'+name+'-'));
  const key=prefixedKey||((hash==='#pribeh'||/^#kapitola-\d+$/.test(hash))?'nathaniel':null);

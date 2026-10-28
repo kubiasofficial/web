@@ -34,7 +34,7 @@ try {
  assert(await evaluate('document.querySelector(".archive-lock-seal img").src.endsWith("icon-'+key+'.png")'),'Correct identity '+key);
  await evaluate('document.querySelector("#archive-code").value="0000";document.querySelector(".archive-lock-form").requestSubmit()');
  assert(await evaluate('document.querySelector(".archive-lock").open && document.querySelector("#profile").hidden'),'Wrong code rejected '+key);
- await evaluate('document.querySelector("#archive-code").value="'+code+'";document.querySelector(".archive-lock-form").requestSubmit()');await sleep(100);
+ await evaluate('document.querySelector("#archive-code").value="'+code+'";document.querySelector(".archive-lock-form").requestSubmit()');await sleep(750);
  assert(await evaluate('!document.querySelector(".archive-lock").open && !document.querySelector("#profile").hidden'),'Correct code '+key);
  await evaluate('document.querySelector("#chapter-nav a:nth-child(4)").click()');await sleep(60);
  assert(await evaluate('!document.querySelector(".archive-lock").open'),'Chapters unlocked '+key);
