@@ -72,3 +72,23 @@
 .chronicle-profile.sophie-profile .chronicle-atmosphere i{background:#d9b4c7;box-shadow:0 0 7px #df8ebb66;animation-duration:26s}
 @media(min-width:701px){.chronicle-profile.katie-profile .profile-heading h1{font-size:clamp(68px,7.4vw,125px)}.chronicle-profile.sophie-profile .profile-heading h1{font-size:clamp(68px,7.4vw,125px)}}
 @media(max-width:700px){.chronicle-profile .profile-kicker{max-width:190px}.chronicle-profile.katie-profile .profile-hero:after,.chronicle-profile.scarlett-profile .profile-hero:after,.chronicle-profile.sophie-profile .profile-hero:after{background:linear-gradient(0deg,#0c0c0e 0%,#0c1014f2 29%,#10101911 73%,#080b1099)}.chronicle-profile.katie-profile .profile-heading h1,.chronicle-profile.sophie-profile .profile-heading h1{font-size:clamp(52px,14.5vw,82px)}}
+/* Nathaniel's private archive lock. */
+.archive-lock{border:1px solid #ab634b66;padding:0;width:min(490px,calc(100vw - 32px));max-height:calc(100svh - 32px);color:#eadbc4;background:radial-gradient(ellipse at 50% 0,#8c2f242a,transparent 65%),linear-gradient(145deg,#1b1516,#0d1014);box-shadow:0 30px 130px #000c,0 0 70px #a43c2015;overflow:auto;scrollbar-width:thin;scrollbar-color:#6e4536 #141114}
+.archive-lock::backdrop{background:#05080be8;backdrop-filter:blur(12px)}
+.archive-lock-form{position:relative;padding:35px 42px 20px;text-align:center;border:1px solid #b17b4125;margin:7px}
+.archive-close{position:absolute;top:10px;right:13px;background:none;border:0;color:#bc9c83;font-size:27px;width:38px;height:38px;cursor:pointer}
+.archive-lock-seal{position:relative;width:124px;margin:0 auto 24px}.archive-lock-seal img{display:block;width:124px;height:124px;border-radius:50%;filter:drop-shadow(0 0 23px #b43f323d)}
+.archive-lock-seal>span{position:absolute;bottom:-10px;left:calc(50% - 16px);border:1px solid #a45b43;background:#1b1515;color:#dda487;border-radius:50%;width:32px;height:32px;font:25px/30px Georgia}
+.archive-eyebrow,.archive-file,.archive-bottom{font:9px 'Barlow Condensed',sans-serif;letter-spacing:2.6px;color:#b0836b}.archive-file{font-size:9px;letter-spacing:3px;margin:14px 0 19px;color:#8f8175}
+.archive-lock h2{font:32px/1.25 'IM Fell English',Georgia,serif;font-weight:400;margin:0;color:#edddc2}.archive-owner{font:italic 17px 'IM Fell English',Georgia,serif;color:#cf8e74;margin:14px 0 0}
+.archive-divider{display:flex;align-items:center;justify-content:center;gap:14px;margin:19px 0;color:#b97652}.archive-divider:before,.archive-divider:after{content:'';height:1px;width:72px;background:linear-gradient(90deg,transparent,#995f414f)}.archive-divider:after{transform:rotate(180deg)}
+.archive-lock label{display:block;font:12px 'Barlow Condensed',sans-serif;letter-spacing:1.1px;color:#c0b09a;margin-bottom:14px}
+#archive-code{display:block;width:220px;max-width:100%;height:62px;margin:auto;padding:0 0 0 17px;text-align:center;font:30px monospace;letter-spacing:17px;color:#f1cfaa;background:linear-gradient(#0c0d11,#1c1415);border:1px solid #a56d454d;border-bottom:2px solid #be79534d;border-radius:3px;outline:none;caret-color:#d9a37e;transition:box-shadow .25s,border-color .25s}
+#archive-code:focus{border-color:#cb8765;box-shadow:0 0 0 3px #cb876512,0 0 30px #a43b241a}
+#archive-status{font:italic 12px/1.5 'IM Fell English',Georgia,serif;color:#9c8b7c;min-height:36px;margin:13px 0}
+.archive-unlock{width:100%;padding:17px 15px;background:linear-gradient(110deg,#71362266,#31201c77);border:1px solid #bc785555;color:#e8c6a6;font:11px 'Barlow Condensed',sans-serif;letter-spacing:2.5px;cursor:pointer;transition:background .25s,box-shadow .25s}.archive-unlock span{margin-left:15px}.archive-unlock:hover{background:#71362288;box-shadow:0 0 28px #a54a2025}
+.archive-return{display:block;margin:17px auto 0;padding:8px;background:none;border:0;color:#a89988;cursor:pointer;font:12px 'IM Fell English',Georgia,serif}.archive-return:hover,.archive-close:hover{color:#f1d1b0}
+.archive-bottom{display:flex;justify-content:space-between;border-top:1px solid #ac714329;padding-top:17px;margin:17px 0 0;font-size:8px}.archive-bottom span{color:#ca9972}
+.archive-error #archive-code{border-color:#d36353}.archive-error #archive-status{color:#e49383}
+@media(max-width:500px){.archive-lock-form{padding:25px 23px 18px}.archive-lock-seal{margin-bottom:20px;width:98px}.archive-lock-seal img{width:98px;height:98px}.archive-lock h2{font-size:29px}.archive-eyebrow{font-size:8px;letter-spacing:2px}}
+@media(prefers-reduced-motion:reduce){#archive-code,.archive-unlock{transition:none}}

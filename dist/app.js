@@ -97,12 +97,40 @@ function renderProfile(key){
  window.VisualReading?.render(key,person,{chapterID,escapeHTML});
 }
 
+const archiveLock=document.createElement('dialog');
+archiveLock.className='archive-lock';
+archiveLock.setAttribute('aria-labelledby','archive-title');
+archiveLock.innerHTML=`<form class="archive-lock-form"><button class="archive-close" type="button" aria-label="Zavřít">×</button><div class="archive-lock-seal"><img src="assets/icon-nathaniel.png" alt="" width="132" height="132"><span aria-hidden="true">⌑</span></div><p class="archive-eyebrow">NEW HORIZON · SOUKROMÝ ARCHIV</p><p class="archive-file">OSOBNÍ SPIS № 003</p><h2 id="archive-title">Některá tajemství<br>zůstávají pod zámkem.</h2><p class="archive-owner">Nathaniel James Raven</p><div class="archive-divider" aria-hidden="true">✦</div><label for="archive-code">Zadej čtyřmístný přístupový kód</label><input id="archive-code" name="code" type="password" inputmode="numeric" pattern="[0-9]{4}" maxlength="4" minlength="4" autocomplete="off" required aria-describedby="archive-status"><p id="archive-status" role="status" aria-live="polite">Pouze pro ty, kterým byla svěřena důvěra.</p><button class="archive-unlock" type="submit">ODEMKNOUT PŘÍBĚH <span aria-hidden="true">↗</span></button><button class="archive-return" type="button">← Zpět k postavám</button><p class="archive-bottom">SEDALIA, MISSOURI <span>1897</span></p></form>`;
+document.body.append(archiveLock);
+const archiveCode=archiveLock.querySelector('input');
+const archiveStatus=archiveLock.querySelector('#archive-status');
+let archiveUnlocked=false;
+function closeArchive(){archiveLock.close();location.hash='';requestAnimationFrame(()=>document.querySelector('.cast-link.nathaniel')?.focus());}
+archiveLock.querySelector('.archive-close').addEventListener('click',closeArchive);
+archiveLock.querySelector('.archive-return').addEventListener('click',closeArchive);
+archiveLock.addEventListener('cancel',event=>{event.preventDefault();closeArchive();});
+archiveCode.addEventListener('input',()=>{archiveCode.value=archiveCode.value.replace(/\D/g,'');archiveCode.removeAttribute('aria-invalid');archiveStatus.textContent='Pouze pro ty, kterým byla svěřena důvěra.';archiveLock.classList.remove('archive-error');});
+archiveLock.querySelector('form').addEventListener('submit',event=>{
+ event.preventDefault();
+ if(archiveCode.value!=='2811'){
+  archiveCode.setAttribute('aria-invalid','true');archiveLock.classList.add('archive-error');archiveStatus.textContent='Tento kód archiv neotevře. Zkus to znovu.';archiveCode.select();return;
+ }
+ archiveUnlocked=true;archiveLock.close();route();
+});
 function route(){
  const hash=location.hash;
  const prefixedKey=Object.keys(people).find(name=>hash==='#'+name||hash.startsWith('#'+name+'-'));
  const key=prefixedKey||((hash==='#pribeh'||/^#kapitola-\d+$/.test(hash))?'nathaniel':null);
  const wasProfile=!profile.hidden;
  const previousPerson=activePerson;
+ if(key!=='nathaniel')archiveUnlocked=false;
+ if(key==='nathaniel'&&!archiveUnlocked){
+  selection.hidden=false;profile.hidden=true;window.VisualReading?.syncVisibility(null);
+  document.title='Uzamčený archiv · New Horizon RP';
+  if(!archiveLock.open){archiveCode.value='';archiveCode.removeAttribute('aria-invalid');archiveLock.classList.remove('archive-error');archiveStatus.textContent='Pouze pro ty, kterým byla svěřena důvěra.';archiveLock.showModal();archiveCode.focus();}
+  return;
+ }
+ if(archiveLock.open)archiveLock.close();
  if(key&&activePerson!==key)renderProfile(key);
  selection.hidden=!!key;profile.hidden=!key;
  window.VisualReading?.syncVisibility(key);
