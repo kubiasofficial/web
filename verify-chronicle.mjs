@@ -1,4 +1,4 @@
-﻿import { spawn } from 'node:child_process';
+import { spawn } from 'node:child_process';
 import { mkdirSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -27,7 +27,7 @@ try {
  const {writeFileSync}=await import('node:fs');
  const screenshot=async name=>{if(await evaluate('!!document.querySelector(".poster-transition")'))await sleep(700);const shot=await send('Page.captureScreenshot',{format:'png'});writeFileSync(path.join(qa,name+'.png'),Buffer.from(shot.data,'base64'));};
  const errors=[];await send('Runtime.enable');const previous=ws.onmessage;ws.onmessage=event=>{const message=JSON.parse(event.data);if(message.method==='Runtime.exceptionThrown')errors.push(message.params.exceptionDetails.text);previous(event);};
- const counts={nathaniel:11,daniel:11,scarlet:12,katie:8,sophie:9};
+ const counts={nathaniel:11,daniel:11,scarlett:12,katie:8,sophie:9};
  for(const width of [1440,390,320,768]){
  await send('Emulation.setDeviceMetricsOverride',{width,height:1000,deviceScaleFactor:1,mobile:width<701});
  for(const key of Object.keys(counts)){

@@ -1,4 +1,4 @@
-﻿/* Shared cinematic chronicle with a distinct environment and palette per character. */
+/* Shared cinematic chronicle with a distinct environment and palette per character. */
 .chronicle-profile{background:radial-gradient(ellipse at 0 20%,rgba(var(--accent-rgb),.075),transparent 40%),#0c0c0e}
 .chronicle-profile .profile-hero{max-width:none;min-height:760px;background:#0b1015;isolation:isolate;border-bottom:1px solid #a44b3438}
 .chronicle-profile .profile-hero:before{content:'';position:absolute;inset:0;z-index:-2;background:var(--chronicle-scene) center var(--chronicle-row,50%)/auto 300% no-repeat;opacity:.7}
@@ -55,7 +55,7 @@
 .chronicle-profile{--gold:#d38870;--accent-rgb:196,69,49;--chronicle-scene:url('assets/nathaniel-scenes.png')}
 .chronicle-profile.daniel-profile{--gold:#e6a366;--accent-rgb:224,137,60;--chronicle-scene:url('assets/daniel-scenes.png');--chronicle-row:0%}
 .chronicle-profile.katie-profile{--gold:#9ac9e9;--accent-rgb:118,188,235;--chronicle-scene:url('assets/katie-scenes.png');--chronicle-row:0%}
-.chronicle-profile.scarlet-profile{--gold:#8faef2;--accent-rgb:71,120,232;--chronicle-scene:url('assets/scarlet-scenes.png');--chronicle-row:0%}
+.chronicle-profile.scarlett-profile{--gold:#8faef2;--accent-rgb:71,120,232;--chronicle-scene:url('assets/scarlett-scenes.png');--chronicle-row:0%}
 .chronicle-profile.sophie-profile{--gold:#df9cbd;--accent-rgb:218,104,158;--chronicle-scene:url('assets/sophie-scenes.png');--chronicle-row:0%}
 .chronicle-profile .profile-heading .story-button{border-color:rgba(var(--accent-rgb),.5);background:linear-gradient(110deg,rgba(var(--accent-rgb),.15),#0e0e1488);color:var(--gold)}
 .chronicle-profile :is(.facts,.sidebar-person,.identity-note,.family,.family-members>div){border-color:rgba(var(--accent-rgb),.22)}
@@ -64,11 +64,11 @@
 .chronicle-profile .chronicle-fog{background:radial-gradient(ellipse at 70% 70%,#c7c2bf17,transparent 55%),radial-gradient(ellipse at 40% 70%,rgba(var(--accent-rgb),.09),transparent 40%)}
 .chronicle-profile .profile-kicker{max-width:420px;line-height:1.5}
 .chronicle-profile.katie-profile .profile-hero:after{background:linear-gradient(90deg,#090e15f5 2%,#0d1822dc 30%,#10243933 65%,#0c152066),linear-gradient(0deg,#0c0c0e,transparent 30%)}
-.chronicle-profile.scarlet-profile .profile-hero:after{background:linear-gradient(90deg,#090d19f5 2%,#10152bdc 30%,#12203b33 65%,#10152566),linear-gradient(0deg,#0c0c0e,transparent 30%)}
+.chronicle-profile.scarlett-profile .profile-hero:after{background:linear-gradient(90deg,#090d19f5 2%,#10152bdc 30%,#12203b33 65%,#10152566),linear-gradient(0deg,#0c0c0e,transparent 30%)}
 .chronicle-profile.sophie-profile .profile-hero:after{background:linear-gradient(90deg,#0b1010f5 2%,#101a1adc 30%,#24382a22 65%,#101b1866),linear-gradient(0deg,#0c0c0e,transparent 30%)}
 .chronicle-profile.daniel-profile .chronicle-atmosphere i{background:#e6c293;box-shadow:0 0 5px #dbb47f55;animation-duration:20s}
 .chronicle-profile.katie-profile .chronicle-atmosphere i{background:#c7e7ee;box-shadow:0 0 7px #99d2ee44;animation-duration:24s}
-.chronicle-profile.scarlet-profile .chronicle-atmosphere i{background:#c5cffa;box-shadow:0 0 7px #7d9aee66;animation-duration:19s}
+.chronicle-profile.scarlett-profile .chronicle-atmosphere i{background:#c5cffa;box-shadow:0 0 7px #7d9aee66;animation-duration:19s}
 .chronicle-profile.sophie-profile .chronicle-atmosphere i{background:#d9b4c7;box-shadow:0 0 7px #df8ebb66;animation-duration:26s}
 @media(min-width:701px){.chronicle-profile.katie-profile .profile-heading h1{font-size:clamp(68px,7.4vw,125px)}.chronicle-profile.sophie-profile .profile-heading h1{font-size:clamp(68px,7.4vw,125px)}}
-@media(max-width:700px){.chronicle-profile .profile-kicker{max-width:190px}.chronicle-profile.katie-profile .profile-hero:after,.chronicle-profile.scarlet-profile .profile-hero:after,.chronicle-profile.sophie-profile .profile-hero:after{background:linear-gradient(0deg,#0c0c0e 0%,#0c1014f2 29%,#10101911 73%,#080b1099)}.chronicle-profile.katie-profile .profile-heading h1,.chronicle-profile.sophie-profile .profile-heading h1{font-size:clamp(52px,14.5vw,82px)}}
+@media(max-width:700px){.chronicle-profile .profile-kicker{max-width:190px}.chronicle-profile.katie-profile .profile-hero:after,.chronicle-profile.scarlett-profile .profile-hero:after,.chronicle-profile.sophie-profile .profile-hero:after{background:linear-gradient(0deg,#0c0c0e 0%,#0c1014f2 29%,#10101911 73%,#080b1099)}.chronicle-profile.katie-profile .profile-heading h1,.chronicle-profile.sophie-profile .profile-heading h1{font-size:clamp(52px,14.5vw,82px)}}

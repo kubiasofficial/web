@@ -1,4 +1,4 @@
-﻿import { spawn } from 'node:child_process';
+import { spawn } from 'node:child_process';
 import { mkdirSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -38,7 +38,7 @@ try {
  assert(await evaluate('location.hash==="#nathaniel" && !document.querySelector("#profile").hidden'),'Real icon click opens lore');
  for(const width of [1440,390,700,320]){
  await send('Emulation.setDeviceMetricsOverride',{width,height:900,deviceScaleFactor:1,mobile:width<701});
- for(const key of ['daniel','katie','nathaniel','scarlet','sophie']){
+ for(const key of ['daniel','katie','nathaniel','scarlett','sophie']){
  await evaluate('location.hash=""');await sleep(60);
  assert(await evaluate('document.documentElement.scrollWidth<=innerWidth'),'Selection fits '+width);
  await evaluate('document.querySelector(".cast-link.'+key+'").click()');await sleep(100);

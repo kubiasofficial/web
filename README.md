@@ -2,7 +2,7 @@
 
 Čisté HTML/CSS/JavaScript. Otevřete `dist/index.html` v prohlížeči bez instalace a serveru. Funguje i přes file://. Google Fonts mají systémové náhrady pro offline režim.
 
-Dostupné jsou všechny postavy: Nathaniel James Raven, Scarlet Sky Raven, Daniel Thomas Raven, Katharine Jane Hunter a Sophie Cherry. Každá má samostatnou adresu pomocí #jméno, kapitoly, portrét a lore ke stažení. Na mobilu se portréty posouvají vodorovně. Escape vrací k výběru.
+Dostupné jsou všechny postavy: Nathaniel James Raven, Scarlett Sky Raven, Daniel Thomas Raven, Katharine Jane Hunter a Sophie Cherry. Každá má samostatnou adresu pomocí #jméno, kapitoly, portrét a lore ke stažení. Na mobilu se portréty posouvají vodorovně. Escape vrací k výběru.
 
 Zdrojové příběhy jsou v `dist/assets/*.md`. Po jejich úpravě spusťte `python build-lore.py`. Poznámky k přepisům a nesjednocené rodinné chronologii jsou v `content/`. Původní obrázky v `../obrazky` zůstávají beze změny. Prompty generovaných portrétů jsou v kořeni projektu.
 
@@ -28,6 +28,6 @@ Run `node verify-medallions.mjs` for browser verification of the new opening, al
 
 ## Filmové kroniky postav
 
-Všech pět profilů používá společný vzhled v `dist/chronicle.css`. Prostředí úvodu se vykresluje z příslušného souboru `assets/jmeno-scenes.png`: Nathaniel má noční železnici, Daniel stáje, Katharine ranč, Scarlet hostinec a Sophie lesní tábořiště. Barvy navazují na medailony na hlavní stránce. `reader.js` doplňuje medailony, vztahy, atmosféru a jemné nástupy kapitol; respektuje omezení pohybu. Příběhy zůstávají beze změny.
+Všech pět profilů používá společný vzhled v `dist/chronicle.css`. Prostředí úvodu se vykresluje z příslušného souboru `assets/jmeno-scenes.png`: Nathaniel má noční železnici, Daniel stáje, Katharine ranč, Scarlett hostinec a Sophie lesní tábořiště. Barvy navazují na medailony na hlavní stránce. `reader.js` doplňuje medailony, vztahy, atmosféru a jemné nástupy kapitol; respektuje omezení pohybu. Příběhy zůstávají beze změny.
 
 Kontrola `node verify-chronicle.mjs` ověřuje všech pět profilů na čtyřech šířkách, zachování textů, kapitoly, přímé odkazy, medailony vztahů a návrat na hlavní stránku. Náhledy ukládá do `../.qa/chronicle-*.png`.

@@ -1,11 +1,11 @@
-# Scarlet Sky Raven
+# Scarlett Sky Raven
 **Životní příběh | New Horizon Roleplay | Rok 1897**
 
-**Celé jméno:** Scarlet Sky Raven  
+**Celé jméno:** Scarlett Sky Raven  
 **Přezdívka:** Sky, Scar  
-**Datum narození:** 12. dubna 1877  
+**Datum narození:** 12. dubna 1879  
 **Místo narození:** Sedalia, Missouri, USA  
-**Věk:** 20 let  
+**Věk:** 18 let  
 **Národnost:** Američanka  
 **Povolání:** Příležitostná obchodnice, pomocnice ve stájích a hostincích  
 **Nelegální minulost:** Drobné krádeže, podvody a zprostředkování pochybných obchodů
@@ -18,23 +18,23 @@
 
 ---
 
-## I. Nejmladší z Ravenových (1877–1887)
+## I. Nejmladší z Ravenových (1879–1887)
 
-Scarlet Sky Raven se narodila 12. dubna 1877 v americkém městě Sedalia ve státě Missouri.
+Scarlett Sky Raven se narodila 12. dubna 1879 v americkém městě Sedalia ve státě Missouri.
 
 Přišla na svět do rodiny, která už měla za sebou těžké období.
 
-Její otec Samuel Raven zahynul čtyři roky před jejím narozením při železniční nehodě. Scarlet ho proto nikdy nepoznala.
+Její otec Samuel Raven zahynul čtyři roky před jejím narozením při železniční nehodě. Scarlett ho proto nikdy nepoznala.
 
 Vyrůstala pouze s matkou Margaret a dvěma staršími bratry, Nathanielem a Danielem.
 
 Nathaniel byl o patnáct let starší a už v době jejího narození pracoval kolem železnice. Danielovi bylo deset let a většinu volného času trávil mezi koňmi.
 
-Scarlet tak od dětství vyrůstala ve světě, kde se mísila vůně uhlí, koňských stájí a tvrdé práce.
+Scarlett tak od dětství vyrůstala ve světě, kde se mísila vůně uhlí, koňských stájí a tvrdé práce.
 
 Matka se snažila vychovat z dcery slušnou mladou ženu. Učila ji číst, psát, šít a starat se o domácnost.
 
-Jenže Scarlet měla úplně jiné představy.
+Jenže Scarlett měla úplně jiné představy.
 
 Mnohem raději běhala za Danielem do stájí, pozorovala koně a poslouchala historky železničářů, které Nathaniel občas vyprávěl při návštěvách domova.
 
@@ -44,21 +44,21 @@ Nebála se odporovat dospělým, pokud měla pocit, že s ní jednají nespraved
 
 Daniel ji často brával mezi koně a učil ji základům jízdy. Nathaniel naopak představoval staršího bratra, který se ji snažil chránit před problémy.
 
-Scarlet však nesnášela, když jí někdo říkal, co smí a nesmí.
+Scarlett však nesnášela, když jí někdo říkal, co smí a nesmí.
 
 A právě tato vlastnost ji měla provázet celý život.
 
 ## II. Dívka s vlastní hlavou (1887–1892)
 
-S přibývajícími roky začala Scarlet stále více toužit po samostatnosti.
+S přibývajícími roky začala Scarlett stále více toužit po samostatnosti.
 
 V deseti letech už dokázala pomáhat ve stájích, starat se o menší domácí zvířata a obstojně jezdit na klidnějších koních.
 
-Matka ji vedla k domácím pracím, ale Scarlet se často vymlouvala na nejrůznější povinnosti, jen aby mohla trávit čas venku.
+Matka ji vedla k domácím pracím, ale Scarlett se často vymlouvala na nejrůznější povinnosti, jen aby mohla trávit čas venku.
 
 Postupně si oblíbila tmavé barvy, především hluboké odstíny fialové.
 
-Zatímco ostatní dívky v jejím okolí často dávaly přednost světlejším šatům, Scarlet si vybírala tmavé látky, které jí připadaly elegantnější a praktičtější.
+Zatímco ostatní dívky v jejím okolí často dávaly přednost světlejším šatům, Scarlett si vybírala tmavé látky, které jí připadaly elegantnější a praktičtější.
 
 Nejraději nosila tmavé sukně, jednoduché halenky a později také jezdecké oblečení.
 
@@ -70,7 +70,7 @@ Právě zde se naučila jednu důležitou věc.
 
 Lidé často mluví mnohem více, než by měli.
 
-Scarlet měla výbornou paměť na jména, tváře a rozhovory.
+Scarlett měla výbornou paměť na jména, tváře a rozhovory.
 
 Dokázala nenápadně poslouchat obchodníky, cestující i místní obyvatele a postupně si vytvářela vlastní představu o tom, jak svět funguje.
 
@@ -78,7 +78,7 @@ Brzy pochopila, že peníze a informace mají mnohdy větší hodnotu než fyzic
 
 ## III. První kroky za hranicí zákona (1892–1895)
 
-V patnácti letech se Scarlet začala pohybovat mezi obchodníky a cestujícími, kteří pravidelně projížděli Sedalií.
+V patnácti letech se Scarlett začala pohybovat mezi obchodníky a cestujícími, kteří pravidelně projížděli Sedalií.
 
 Zpočátku si přivydělávala drobnými službami.
 
@@ -92,7 +92,7 @@ Někdy šlo o předání dopisu.
 
 Jindy o vyhledání určité osoby nebo zjištění, kdy obchodník opustí město.
 
-Scarlet zpočátku nepřemýšlela nad tím, k čemu budou informace použity.
+Scarlett zpočátku nepřemýšlela nad tím, k čemu budou informace použity.
 
 Zajímala ji především odměna.
 
@@ -110,23 +110,23 @@ Během těchto let se také dozvěděla více o minulosti svých bratrů.
 
 Nathaniel se zapletl do nelegálních železničních obchodů a Daniel měl zkušenosti s krádežemi koní.
 
-Scarlet jejich jednání ne vždy schvalovala.
+Scarlett jejich jednání ne vždy schvalovala.
 
 Zároveň však začínala chápat, proč se oba rozhodli vydělávat peníze i mimo zákon.
 
 ## IV. Obchod, který ji málem zničil (1895)
 
-V osmnácti letech Scarlet přijala nabídku od obchodníka, kterého poznala během práce v hostinci.
+V osmnácti letech Scarlett přijala nabídku od obchodníka, kterého poznala během práce v hostinci.
 
 Měla mu pomoci zprostředkovat prodej několika cenných předmětů.
 
 Za svou pomoc měla dostat slušnou odměnu.
 
-Scarlet nabídku přijala.
+Scarlett nabídku přijala.
 
 Netušila však, že předměty pocházely z krádeže.
 
-Když se obchod začal vyšetřovat, muž zmizel a Scarlet zůstala jedinou osobou, kterou někteří svědci dokázali identifikovat.
+Když se obchod začal vyšetřovat, muž zmizel a Scarlett zůstala jedinou osobou, kterou někteří svědci dokázali identifikovat.
 
 Najednou se ocitla v situaci, na kterou nebyla připravená.
 
@@ -146,7 +146,7 @@ Přesto neztratila svou drzost ani schopnost udělat si legraci z nepříjemné 
 
 ## V. Na vlastní pěst (1895–1896)
 
-Po odchodu ze Sedalie Scarlet cestovala mezi menšími městy a osadami.
+Po odchodu ze Sedalie Scarlett cestovala mezi menšími městy a osadami.
 
 Příležitostně pracovala v hostincích, pomáhala obchodníkům a vypomáhala ve stájích.
 
@@ -156,7 +156,7 @@ Během cest poznala nejrůznější lidi.
 
 Někteří jí pomohli, jiní se ji pokusili podvést.
 
-Scarlet se postupně naučila být samostatnější.
+Scarlett se postupně naučila být samostatnější.
 
 Dokázala se postarat o koně, najít si příležitostnou práci a vyjednat si odměnu.
 
@@ -168,7 +168,7 @@ Své bratry vídala jen příležitostně.
 
 Nathaniel i Daniel vedli vlastní životy a často se pohybovali daleko od domova.
 
-Scarlet jim občas posílala dopisy, ale ne vždy jim sdělovala celou pravdu o svých problémech.
+Scarlett jim občas posílala dopisy, ale ne vždy jim sdělovala celou pravdu o svých problémech.
 
 Nechtěla, aby ji stále považovali za malou holčičku.
 
@@ -178,9 +178,9 @@ A čím déle cestovala, tím více si uvědomovala, že mít někoho blízkého
 
 ## VI. Nový horizont (1897)
 
-V roce 1897 se Scarlet Sky Raven rozhodla přesunout do oblasti New Horizon.
+V roce 1897 se Scarlett Sky Raven rozhodla přesunout do oblasti New Horizon.
 
-Je jí dvacet let.
+Je jí osmnáct let.
 
 Má tmavě hnědé vlasy, jemné pihy, štíhlou postavu a výrazný pohled.
 
@@ -194,7 +194,7 @@ Ráda by pracovala v obchodě, hostinci nebo v jiném podniku, kde by mohla vyu�
 
 Zároveň se však nechce zcela vzdát příležitostí, které jí mohou přinést rychlejší výdělek.
 
-Scarlet dobře ví, že její minulost není úplně čistá.
+Scarlett dobře ví, že její minulost není úplně čistá.
 
 Přesto se nepovažuje za zločince.
 
@@ -204,7 +204,7 @@ Do oblasti New Horizon přicházejí také její dva starší bratři.
 
 Nathaniel se chce věnovat železnici a Daniel plánuje pracovat jako trenér koní.
 
-Scarlet je ráda, že bude mít rodinu opět nablízku.
+Scarlett je ráda, že bude mít rodinu opět nablízku.
 
 Zároveň však odmítá, aby bratři rozhodovali o jejím životě.
 
@@ -216,7 +216,7 @@ A pokud ji někdo bude podceňovat kvůli jejímu věku nebo tomu, že je žena,
 
 ## Povaha a charakter
 
-Scarlet je sebevědomá, temperamentní a tvrdohlavá mladá žena.
+Scarlett je sebevědomá, temperamentní a tvrdohlavá mladá žena.
 
 Má výrazný smysl pro sarkasmus a nebojí se říct svůj názor.
 
@@ -232,7 +232,7 @@ Rodinu miluje, ale málokdy to dává otevřeně najevo.
 
 ## Vzhled
 
-Scarlet je přibližně 168 centimetrů vysoká mladá žena štíhlé postavy.
+Scarlett je přibližně 168 centimetrů vysoká mladá žena štíhlé postavy.
 
 Má tmavě hnědé, lehce zvlněné vlasy, které nejčastěji nosí částečně sepnuté nebo svázané.
 
@@ -250,15 +250,15 @@ Přestože si potrpí na svůj vzhled, dává přednost oblečení, které jí u
 
 **Nathaniel James Raven (35 let)**
 
-Scarlet svého nejstaršího bratra respektuje, ale často si z něj utahuje kvůli jeho vážnému vystupování.
+Scarlett svého nejstaršího bratra respektuje, ale často si z něj utahuje kvůli jeho vážnému vystupování.
 
-Nathaniel má tendenci ji chránit a poučovat, což Scarlet nesnáší.
+Nathaniel má tendenci ji chránit a poučovat, což Scarlett nesnáší.
 
 Přesto ví, že pokud by se dostala do skutečných problémů, může se na něj spolehnout.
 
 **Daniel Thomas Raven (30 let)**
 
-S Danielem má Scarlet temperamentnější vztah.
+S Danielem má Scarlett temperamentnější vztah.
 
 Právě Daniel ji v dětství učil jezdit na koni a trávil s ní více času než Nathaniel.
 
@@ -287,7 +287,7 @@ Přesto mezi nimi existuje silné sourozenecké pouto.
 
 ## Cíle na New Horizonu
 
-Scarlet chce především získat vlastní nezávislost a stabilní postavení.
+Scarlett chce především získat vlastní nezávislost a stabilní postavení.
 
 Ráda by si našla zaměstnání, vydělala vlastní peníze a časem se případně pustila do podnikání.
 
@@ -301,4 +301,4 @@ Zda se rozhodne pokračovat v nelegálních aktivitách, nebo se vydá poctivěj
 
 *„Podceňuj mě dál. Je to tvoje největší chyba.“*
 
-**Scarlet Sky Raven — New Horizon, 1897**
+**Scarlett Sky Raven — New Horizon, 1897**

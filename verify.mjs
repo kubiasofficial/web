@@ -59,28 +59,28 @@ try {
  await send('Input.dispatchKeyEvent',{type:'keyDown',key:'Escape',code:'Escape',windowsVirtualKeyCode:27});await sleep(150);
  assert(await evaluate('!document.querySelector("#selection").hidden'),'Escape returns to poster');
  await send('Emulation.setDeviceMetricsOverride',{width:1440,height:1000,deviceScaleFactor:1,mobile:false});
- await evaluate('document.querySelector(".scarlet").click()');await sleep(250);
- assert(await evaluate('location.hash==="#scarlet" && !document.querySelector("#profile").hidden'),'Scarlet panel opens her dedicated page');
- assert(await evaluate('document.title.includes("Scarlet") && document.querySelector(".facts").textContent.includes("18 let")'),'Scarlet age is 18');
- assert(await evaluate('document.querySelector(".stamp").textContent.includes("1879")'),'Scarlet birth year matches approved age');
- assert(await evaluate('document.querySelectorAll(".chapter").length===12 && document.querySelector("#story").textContent.includes("Obchod, který ji málem zničil")'),'All 12 Scarlet lore sections rendered');
+ await evaluate('document.querySelector(".scarlett").click()');await sleep(250);
+ assert(await evaluate('location.hash==="#scarlett" && !document.querySelector("#profile").hidden'),'Scarlett panel opens her dedicated page');
+ assert(await evaluate('document.title.includes("Scarlett") && document.querySelector(".facts").textContent.includes("18 let")'),'Scarlett age is 18');
+ assert(await evaluate('document.querySelector(".stamp").textContent.includes("1879")'),'Scarlett birth year matches approved age');
+ assert(await evaluate('document.querySelectorAll(".chapter").length===12 && document.querySelector("#story").textContent.includes("Obchod, který ji málem zničil")'),'All 12 Scarlett lore sections rendered');
  await evaluate('document.querySelector(".hero-character").decode()');
- assert(await evaluate('document.querySelector(".hero-character").naturalWidth===1024 && document.querySelector(".hero-character").src.endsWith("scarlet.png")'),'Scarlet portrait loaded');
- assert(await evaluate('document.documentElement.scrollWidth<=innerWidth'),'Scarlet desktop no overflow');
- await screenshot('scarlet-desktop');
+ assert(await evaluate('document.querySelector(".hero-character").naturalWidth===1024 && document.querySelector(".hero-character").src.endsWith("scarlett.png")'),'Scarlett portrait loaded');
+ assert(await evaluate('document.documentElement.scrollWidth<=innerWidth'),'Scarlett desktop no overflow');
+ await screenshot('scarlett-desktop');
  await evaluate('document.querySelector("#chapter-nav a:nth-child(4)").click()');await sleep(150);
- assert(await evaluate('location.hash==="#scarlet-kapitola-4" && document.title.includes("Scarlet")'),'Scarlet chapter navigation stays on Scarlet');
+ assert(await evaluate('location.hash==="#scarlett-kapitola-4" && document.title.includes("Scarlett")'),'Scarlett chapter navigation stays on Scarlett');
  await send('Page.reload');await sleep(800);
- assert(await evaluate('document.title.includes("Scarlet") && document.querySelectorAll(".chapter").length===12'),'Scarlet chapter deep link survives reload');
+ assert(await evaluate('document.title.includes("Scarlett") && document.querySelectorAll(".chapter").length===12'),'Scarlett chapter deep link survives reload');
  await evaluate('document.querySelector(".family-link").click()');await sleep(200);
  assert(await evaluate('location.hash==="#nathaniel" && document.querySelector(".facts").textContent.includes("35 let") && document.querySelectorAll(".chapter").length===11'),'Family link restores Nathaniel and his original lore');
- await evaluate('[...document.querySelectorAll(".family-link")].find(a=>a.hash==="#scarlet").click()');await sleep(200);
- assert(await evaluate('location.hash==="#scarlet" && document.querySelector(".hero-character").src.endsWith("scarlet.png")'),'Nathaniel links back to Scarlet');
+ await evaluate('[...document.querySelectorAll(".family-link")].find(a=>a.hash==="#scarlett").click()');await sleep(200);
+ assert(await evaluate('location.hash==="#scarlett" && document.querySelector(".hero-character").src.endsWith("scarlett.png")'),'Nathaniel links back to Scarlett');
  await send('Emulation.setDeviceMetricsOverride',{width:390,height:844,deviceScaleFactor:1,mobile:true});await sleep(200);
- assert(await evaluate('document.documentElement.scrollWidth<=innerWidth'),'Scarlet mobile no overflow');
- await screenshot('scarlet-mobile');
+ assert(await evaluate('document.documentElement.scrollWidth<=innerWidth'),'Scarlett mobile no overflow');
+ await screenshot('scarlett-mobile');
  await evaluate('document.querySelector(".back").click()');await sleep(150);
- assert(await evaluate('!document.querySelector("#selection").hidden && document.activeElement.classList.contains("scarlet")'),'Return restores focus to Scarlet');
+ assert(await evaluate('!document.querySelector("#selection").hidden && document.activeElement.classList.contains("scarlett")'),'Return restores focus to Scarlett');
  await send('Emulation.setDeviceMetricsOverride',{width:1440,height:1000,deviceScaleFactor:1,mobile:false});
  await evaluate('document.querySelector(".daniel").click()');await sleep(200);
  assert(await evaluate('location.hash==="#daniel" && document.title.includes("Daniel Thomas Raven")'),'Daniel panel opens his profile');
@@ -93,10 +93,10 @@ try {
  assert(await evaluate('location.hash==="#daniel-kapitola-4" && document.title.includes("Daniel")'),'Daniel chapter link stays on Daniel');
  await send('Page.reload');await sleep(800);
  assert(await evaluate('document.querySelectorAll(".chapter").length===11 && document.title.includes("Daniel")'),'Daniel chapter reload works');
- await evaluate('[...document.querySelectorAll(".family-link")].find(a=>a.hash==="#scarlet").click()');await sleep(150);
- assert(await evaluate('location.hash==="#scarlet" && document.querySelector(".facts").textContent.includes("18 let")'),'Daniel to Scarlet keeps age 18');
+ await evaluate('[...document.querySelectorAll(".family-link")].find(a=>a.hash==="#scarlett").click()');await sleep(150);
+ assert(await evaluate('location.hash==="#scarlett" && document.querySelector(".facts").textContent.includes("18 let")'),'Daniel to Scarlett keeps age 18');
  await evaluate('[...document.querySelectorAll(".family-link")].find(a=>a.hash==="#daniel").click()');await sleep(150);
- assert(await evaluate('location.hash==="#daniel"'),'Scarlet links to Daniel');
+ assert(await evaluate('location.hash==="#daniel"'),'Scarlett links to Daniel');
  await evaluate('[...document.querySelectorAll(".family-link")].find(a=>a.hash==="#nathaniel").click()');await sleep(150);
  assert(await evaluate('location.hash==="#nathaniel" && document.querySelector(".facts").textContent.includes("35 let")'),'Daniel links to Nathaniel');
  await evaluate('[...document.querySelectorAll(".family-link")].find(a=>a.hash==="#daniel").click()');await sleep(150);
@@ -168,7 +168,7 @@ try {
  await screenshot('all-five-complete');
  await send('Input.dispatchMouseEvent',{type:'mouseMoved',x:5,y:5});await sleep(400);
  assert(await evaluate('[...document.querySelectorAll(".character .action")].every(a=>getComputedStyle(a).opacity==="0"||a.closest(".character").matches(":focus-visible"))'),'Selection calls to action hidden until hover or focus');
- for(const key of ['nathaniel','daniel','scarlet','katie','sophie']){
+ for(const key of ['nathaniel','daniel','scarlett','katie','sophie']){
   await evaluate('location.hash="#'+key+'"');await sleep(150);
   assert(await evaluate('document.querySelectorAll("#story .scene-figure").length===3 && document.querySelectorAll("#story .scene-side").length===1'),'Three chapter illustrations with mixed compositions for '+key);
   assert(await evaluate('document.querySelector(".sidebar-identity h2").textContent===document.querySelector(".facts strong").textContent'),'Sidebar portrait identity matches '+key);
@@ -219,7 +219,7 @@ try {
  assert(await evaluate('document.querySelectorAll(".cast-link").length===5 && [...document.querySelectorAll(".cast-link")].every(a=>getComputedStyle(a).clipPath==="none")'),'Five unclipped name links sit below artwork');
  assert(await evaluate('document.documentElement.scrollWidth<=innerWidth'),'New opening desktop no overflow');
  await screenshot('new-opening-desktop');
- for(const key of ['scarlet','daniel','nathaniel','katie','sophie']){
+ for(const key of ['scarlett','daniel','nathaniel','katie','sophie']){
   await evaluate('document.querySelector(".cast-link.'+key+'").click()');await sleep(150);
   assert(await evaluate('location.hash==="#'+key+'" && !document.querySelector("#profile").hidden'),'Name navigation opens '+key);
   await evaluate('document.querySelector(".back").click()');await sleep(100);

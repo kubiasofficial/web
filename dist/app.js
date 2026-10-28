@@ -14,28 +14,28 @@ function blocks(text) {
 
 const people = {
  nathaniel: {
-  name:'Nathaniel James Raven',given:'NATHANIEL JAMES',nickname:'Nate',file:'nathaniel-james-raven.md',image:'nathaniel.png',number:'003',birth:'14. XI. 1862',age:'35 let',occupation:'Železničář & mechanik',relatives:'Daniel & Scarlet Raven',
+  name:'Nathaniel James Raven',given:'NATHANIEL JAMES',nickname:'Nate',file:'nathaniel-james-raven.md',image:'nathaniel.png',number:'003',birth:'14. XI. 1862',age:'35 let',occupation:'Železničář & mechanik',relatives:'Daniel & Scarlett Raven',
   kicker:'Ne každý náklad je zapsaný v knihách.',description:'Železničář. Obchodník. Muž, který se<br>naučil znát cenu mlčení.',cta:'POZNAT JEHO MINULOST',sidebar:'JEHO PŘÍBĚH',
   alt:'Nathaniel Raven v černém klobouku a dlouhém kabátu, s hodinkovým řetízkem na vestě',
   quote:'Jestli hledáte slušnýho chlapa, zkuste kostel.<br>Jestli hledáte někoho, kdo svou práci odvede,<br>možná se domluvíme.',
   closing:'Tentokrát chce být tím,<br><em>kdo rozhoduje o směru své cesty.</em>',chapters:window.RAVEN_CHAPTERS||[],
-  family:[{label:'MLADŠÍ BRATR',name:'Daniel Thomas Raven',text:'Chce se věnovat výcviku koní. Temperament a tvrdohlavost si přiváží z Missouri.',href:'#daniel'},{label:'MLADŠÍ SESTRA',name:'Scarlet Sky Raven',text:'Hledá vlastní životní cestu. Nathaniel k ní od dětství cítí silné ochranné pouto.',href:'#scarlet'}]
+  family:[{label:'MLADŠÍ BRATR',name:'Daniel Thomas Raven',text:'Chce se věnovat výcviku koní. Temperament a tvrdohlavost si přiváží z Missouri.',href:'#daniel'},{label:'MLADŠÍ SESTRA',name:'Scarlett Sky Raven',text:'Hledá vlastní životní cestu. Nathaniel k ní od dětství cítí silné ochranné pouto.',href:'#scarlett'}]
  },
- scarlet: {
-  name:'Scarlet Sky Raven',given:'SCARLET SKY',nickname:'Sky',file:'scarlet-sky-raven.md',image:'scarlet.png',number:'001',birth:'12. IV. 1879',age:'18 let',occupation:'Obchodnice · stáje & hostince',relatives:'Nathaniel & Daniel Raven',
+ scarlett: {
+  name:'Scarlett Sky Raven',given:'SCARLETT SKY',nickname:'Sky',file:'scarlett-sky-raven.md',image:'scarlett.png',number:'001',birth:'12. IV. 1879',age:'18 let',occupation:'Obchodnice · stáje & hostince',relatives:'Nathaniel & Daniel Raven',
   kicker:'Podceňuj mě dál. Je to tvoje největší chyba.',description:'Vlastní hlava. Ostrý jazyk.<br>Svoboda, o které rozhoduje sama.',cta:'POZNAT JEJÍ MINULOST',sidebar:'JEJÍ PŘÍBĚH',
-  alt:'Scarlet Sky Raven, mladá pihovatá žena v černém klobouku, indigové košili a vysokých jezdeckých botách',
+  alt:'Scarlett Sky Raven, mladá pihovatá žena v černém klobouku, indigové košili a vysokých jezdeckých botách',
   quote:'Podceňuj mě dál.<br>Je to tvoje největší chyba.',
-  closing:'Nechce, aby rozhodovali za ni.<br><em>Svou cestu si vybere sama.</em>',chapters:window.SCARLET_CHAPTERS||[],
+  closing:'Nechce, aby rozhodovali za ni.<br><em>Svou cestu si vybere sama.</em>',chapters:window.SCARLETT_CHAPTERS||[],
   family:[{label:'NEJSTARŠÍ BRATR',name:'Nathaniel James Raven',text:'Respektuje ho a ví, že se na něj může spolehnout. Jeho ochranitelské poučování jí ale leze na nervy.',href:'#nathaniel'},{label:'STARŠÍ BRATR',name:'Daniel Thomas Raven',text:'Učil ji jezdit na koni. Dokážou se hádat a provokovat, ale spojuje je silné sourozenecké pouto.',href:'#daniel'}]
  }
  ,daniel: {
-  name:'Daniel Thomas Raven',given:'DANIEL THOMAS',nickname:'Dan',file:'daniel-thomas-raven.md',image:'daniel.png',number:'002',birth:'1867',age:'30 let',occupation:'Trenér a cvičitel koní',relatives:'Nathaniel & Scarlet Raven',
+  name:'Daniel Thomas Raven',given:'DANIEL THOMAS',nickname:'Dan',file:'daniel-thomas-raven.md',image:'daniel.png',number:'002',birth:'1867',age:'30 let',occupation:'Trenér a cvičitel koní',relatives:'Nathaniel & Scarlett Raven',
   kicker:'Když to nejde po dobrým, půjde to po mým.',description:'Trpělivost pro koně. Ostrý jazyk pro lidi.<br>Nový začátek s minulostí v sedle.',cta:'POZNAT JEHO MINULOST',sidebar:'JEHO PŘÍBĚH',
   alt:'Daniel Thomas Raven, muž s rozcuchanými hnědými vlasy, krátkými vousy a tmavým praktickým jezdeckým oblečením',
   quote:'Koně jsou jednoduchý. Když se tě bojí, poznáš to. Když ti věří, poznáš to taky. Zato člověk se na tebe usměje, potřese ti rukou a druhej den tě klidně prodá za pár dolarů.',
   closing:'Jeho největší předností není schopnost koně ukrást.<br><em>Je to schopnost ho vycvičit.</em>',chapters:window.DANIEL_CHAPTERS||[],
-  family:[{label:'STARŠÍ BRATR',name:'Nathaniel James Raven',text:'Nathaniel plánuje a promýšlí. Daniel častěji jedná podle situace. Rozdílné povahy ale rodinné pouto nepřetrhly.',href:'#nathaniel'},{label:'MLADŠÍ SESTRA',name:'Scarlet Sky Raven',text:'Učil ji jezdit na koni a dodnes ji rád provokuje. Přes všechny hádky by se jí neváhal zastat.',href:'#scarlet'}]
+  family:[{label:'STARŠÍ BRATR',name:'Nathaniel James Raven',text:'Nathaniel plánuje a promýšlí. Daniel častěji jedná podle situace. Rozdílné povahy ale rodinné pouto nepřetrhly.',href:'#nathaniel'},{label:'MLADŠÍ SESTRA',name:'Scarlett Sky Raven',text:'Učil ji jezdit na koni a dodnes ji rád provokuje. Přes všechny hádky by se jí neváhal zastat.',href:'#scarlett'}]
  }
 
  ,katie: {
@@ -65,7 +65,7 @@ function renderProfile(key){
  const person=people[key];
  profile.classList.add('chronicle-profile');
  profile.classList.toggle('nathaniel-profile',key==='nathaniel');
- profile.classList.toggle('scarlet-profile',key==='scarlet');
+ profile.classList.toggle('scarlett-profile',key==='scarlett');
  profile.classList.toggle('daniel-profile',key==='daniel');
  profile.classList.toggle('katie-profile',key==='katie');
  profile.classList.toggle('sophie-profile',key==='sophie');

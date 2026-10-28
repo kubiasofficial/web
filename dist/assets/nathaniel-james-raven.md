@@ -14,7 +14,7 @@
 - Otec: Samuel Raven (zemřel roku 1873)
 - Matka: Margaret Ravenová
 - Bratr: Daniel Thomas Raven (dvojče)
-- Sestra: Scarlet Sky Raven (narozena roku 1868)
+- Sestra: Scarlett Sky Raven (narozena roku 1868)
 
 ---
 
@@ -34,7 +34,7 @@ Přestože byli bratři stejně staří, povahově se značně lišili. Daniel b
 
 Oba však spojovala tvrdohlavost a neochota nechat si od ostatních poroučet.
 
-V roce 1868 se narodila jejich mladší sestra Scarlet Sky Raven. Nathaniel si k ní postupně vytvořil silné pouto a často měl potřebu ji chránit, přestože o to Scarlet ne vždy stála.
+V roce 1868 se narodila jejich mladší sestra Scarlett Sky Raven. Nathaniel si k ní postupně vytvořil silné pouto a často měl potřebu ji chránit, přestože o to Scarlett ne vždy stála.
 
 Roku 1873 rodinu zasáhla tragédie.
 
@@ -206,11 +206,11 @@ Přestože měl za sebou řadu pochybných rozhodnutí, nikdy zcela neztratil vl
 
 Rodina pro něj zůstávala důležitá.
 
-S Danielem a Scarlet sice nebyl neustále v kontaktu, ale snažil se udržovat alespoň občasné spojení prostřednictvím dopisů a známých.
+S Danielem a Scarlett sice nebyl neustále v kontaktu, ale snažil se udržovat alespoň občasné spojení prostřednictvím dopisů a známých.
 
 Věděl, že ani jeho sourozenci nevedou zcela bezproblémový život.
 
-Daniel měl za sebou zkušenosti s krádežemi koní a Scarlet se pohybovala mezi obchodníky a překupníky.
+Daniel měl za sebou zkušenosti s krádežemi koní a Scarlett se pohybovala mezi obchodníky a překupníky.
 
 Nathaniel jim jejich rozhodnutí příliš nevyčítal.
 
@@ -244,7 +244,7 @@ Podnik, který by mu umožnil získat finanční nezávislost, zaměstnávat vla
 
 Zda se společnost stane poctivým podnikem, nebo krytím pro nelegální obchod, zatím není rozhodnuto.
 
-Do oblasti New Horizon míří také jeho bratr Daniel, který se chce věnovat výcviku koní, a mladší sestra Scarlet, která hledá vlastní životní cestu.
+Do oblasti New Horizon míří také jeho bratr Daniel, který se chce věnovat výcviku koní, a mladší sestra Scarlett, která hledá vlastní životní cestu.
 
 Po letech cestování tak Ravenovi dostávají možnost být znovu poblíž sebe.
 

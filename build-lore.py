@@ -6,7 +6,7 @@ from pathlib import Path
 root = Path(__file__).resolve().parent
 for filename, output, variable in [
     ('nathaniel-james-raven.md', 'lore.js', 'RAVEN_CHAPTERS'),
-    ('scarlet-sky-raven.md', 'scarlet-lore.js', 'SCARLET_CHAPTERS'),
+    ('scarlett-sky-raven.md', 'scarlett-lore.js', 'SCARLETT_CHAPTERS'),
     ('daniel-thomas-raven.md', 'daniel-lore.js', 'DANIEL_CHAPTERS'),
     ('katharine-jane-hunter.md', 'katie-lore.js', 'KATIE_CHAPTERS'),
     ('sophie-cherry.md', 'sophie-lore.js', 'SOPHIE_CHAPTERS'),

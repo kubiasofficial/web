@@ -14,7 +14,7 @@
 - Otec: Samuel Raven (zemřel roku 1873)
 - Matka: Margaret Ravenová
 - Starší bratr: Nathaniel James Raven (narozen 1862)
-- Mladší sestra: Scarlet Sky Raven (narozena 1868)
+- Mladší sestra: Scarlett Sky Raven (narozena 1868)
 
 ---
 
@@ -28,7 +28,7 @@ Danielův starší bratr Nathaniel byl už od dětství fascinován parními lok
 
 Už jako malý chlapec se často pohyboval kolem místních stájí, kde pozoroval práci stájníků a obchodníků.
 
-V roce 1868 se narodila jeho mladší sestra Scarlet Sky Raven.
+V roce 1868 se narodila jeho mladší sestra Scarlett Sky Raven.
 
 Daniel tak vyrůstal mezi starším bratrem, který se často snažil působit rozumně, a mladší sestrou, která mu postupně začala být v nejrůznějších lumpárnách rovnocenným soupeřem.
 
@@ -182,7 +182,7 @@ Během těchto let si také udržoval občasný kontakt se svými sourozenci.
 
 Jeho starší bratr Nathaniel pracoval na železnici a později se rovněž zapletl do nelegálních obchodů.
 
-Mladší sestra Scarlet si mezitím budovala vlastní život mezi obchodníky a lidmi, kteří se ne vždy pohybovali v mezích zákona.
+Mladší sestra Scarlett si mezitím budovala vlastní život mezi obchodníky a lidmi, kteří se ne vždy pohybovali v mezích zákona.
 
 Přestože sourozenci nežili společně, rodinné pouto mezi nimi přetrvávalo.
 
@@ -210,7 +210,7 @@ O krádežích koní příliš nemluví a na otázky týkající se předchozíh
 
 Přestože se chce živit především poctivou prací, možnost rychlého výdělku ho stále dokáže zlákat.
 
-Do oblasti New Horizon přichází také jeho starší bratr Nathaniel, který se chce věnovat železnici, a mladší sestra Scarlet, která hledá vlastní životní cestu.
+Do oblasti New Horizon přichází také jeho starší bratr Nathaniel, který se chce věnovat železnici, a mladší sestra Scarlett, která hledá vlastní životní cestu.
 
 Po letech cestování tak Ravenovi dostávají příležitost být znovu poblíž sebe.
 
@@ -218,7 +218,7 @@ Daniel však dobře ví, že společný život nebude vždy jednoduchý.
 
 Nathaniel má sklony všechno plánovat a promýšlet, zatímco Daniel se často rozhoduje podle momentální situace.
 
-Scarlet se zase odmítá nechat svými bratry poučovat.
+Scarlett se zase odmítá nechat svými bratry poučovat.
 
 Přesto Daniel považuje rodinu za jednu z mála věcí, které mají skutečnou hodnotu.
 
