@@ -60,16 +60,15 @@
    chapterObserver?.disconnect();
    const theme=themes[key],escape=helpers.escapeHTML;
    profile.querySelectorAll('.chronicle-seal,.chronicle-atmosphere,.relation-medallion').forEach(node=>node.remove());
-   if(key==='nathaniel'){
+   {
     profile.querySelector('.profile-hero').insertAdjacentHTML('afterbegin','<div class="chronicle-atmosphere" aria-hidden="true"><div class="chronicle-fog"></div>'+Array.from({length:12},(_,i)=>'<i style="--i:'+i+'"></i>').join('')+'</div>');
-    profile.querySelector('.profile-heading').insertAdjacentHTML('afterbegin','<div class="chronicle-seal"><img src="assets/icon-nathaniel.png" alt="" width="96" height="96"><span>NEW HORIZON ARCHIVES<small>SEDALIA · MISSOURI</small></span></div>');
+    profile.querySelector('.profile-heading').insertAdjacentHTML('afterbegin','<div class="chronicle-seal"><img src="assets/icon-'+key+'.png" alt="" width="96" height="96"><span>NEW HORIZON ARCHIVES<small>'+escape(theme.world.toUpperCase())+'</small></span></div>');
     profile.querySelectorAll('.family-members>div').forEach((card,index)=>{
      const member=person.family[index];
      if(member.href)card.insertAdjacentHTML('afterbegin','<a class="relation-medallion" href="'+member.href+'" aria-label="'+escape(member.name)+'"><img src="assets/icon-'+member.href.slice(1)+'.png" alt="" width="100" height="100" loading="lazy"></a>');
     });
    }
-   const photo=profile.querySelector('.sidebar-portrait img');photo.src='assets/'+person.image;
-   if(key==='nathaniel')photo.src='assets/icon-nathaniel.png';
+   const photo=profile.querySelector('.sidebar-portrait img');photo.src='assets/icon-'+key+'.png';
    photo.alt='Portrét: '+person.name;
    profile.querySelector('.sidebar-signature').textContent=person.nickname;
    profile.querySelector('.sidebar-identity>.eyebrow').textContent='OSOBNÍ SPIS № '+person.number;
@@ -81,7 +80,7 @@
     return `<a href="#${helpers.chapterID(key,index)}"><span class="nav-step">${String(index+1).padStart(2,'0')}</span><span class="nav-copy"><small>${escape(year)}</small><span>${escape(cleanTitle(chapter.title))}</span></span></a>`;
    }).join('');
    const chapters=[...document.querySelectorAll('#story>.chapter')];
-   if(key==='nathaniel'&&!reduced()&&'IntersectionObserver' in window){
+   if(!reduced()&&'IntersectionObserver' in window){
     chapterObserver=new IntersectionObserver(entries=>entries.forEach(entry=>{
      if(!entry.isIntersecting)return;
      entry.target.animate([{opacity:.65,transform:'translateY(14px)'},{opacity:1,transform:'translateY(0)'}],{duration:550,easing:'ease-out'});

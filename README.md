@@ -25,3 +25,9 @@ Soubor `reader.js` doplňuje vizuální vrstvu a `visual.css` čtenářský vzhl
 The opening uses the five supplied character icons in `dist/assets/icon-*.png`, a typographic New Horizon logo, CSS atmosphere and hover/focus auras. All character hash routes and lore remain available. Mobile uses a two-column layout with Nathaniel first. Reduced-motion preferences disable atmospheric animation.
 
 Run `node verify-medallions.mjs` for browser verification of the new opening, all five lore routes, chapter navigation, focus restoration and responsive layouts. Screenshots are saved in `../.qa/medallions-*.png`.
+
+## Filmové kroniky postav
+
+Všech pět profilů používá společný vzhled v `dist/chronicle.css`. Prostředí úvodu se vykresluje z příslušného souboru `assets/jmeno-scenes.png`: Nathaniel má noční železnici, Daniel stáje, Katharine ranč, Scarlet hostinec a Sophie lesní tábořiště. Barvy navazují na medailony na hlavní stránce. `reader.js` doplňuje medailony, vztahy, atmosféru a jemné nástupy kapitol; respektuje omezení pohybu. Příběhy zůstávají beze změny.
+
+Kontrola `node verify-chronicle.mjs` ověřuje všech pět profilů na čtyřech šířkách, zachování textů, kapitoly, přímé odkazy, medailony vztahů a návrat na hlavní stránku. Náhledy ukládá do `../.qa/chronicle-*.png`.
