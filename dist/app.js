@@ -139,9 +139,9 @@ function route(){
   archivePerson=key;
   const person=people[key];
   archiveLock.classList.toggle('archive-sophie',key==='sophie');
-  archiveLock.classList.toggle('archive-daniel',key==='daniel'||key==='vincent');
+  archiveLock.classList.toggle('archive-daniel',key==='daniel');
   archiveLock.classList.toggle('archive-katie',key==='katie');
-  archiveLock.classList.toggle('archive-scarlett',key==='scarlett');
+  archiveLock.classList.toggle('archive-scarlett',key==='scarlett'||key==='vincent');
   archiveLock.querySelector('.archive-lock-seal img').src='assets/icon-'+key+'.png';
   archiveLock.querySelector('.archive-owner').textContent=person.name;
   archiveLock.querySelector('.archive-file').textContent='OSOBNÍ SPIS № '+person.number;
