@@ -104,18 +104,19 @@ archiveLock.innerHTML=`<form class="archive-lock-form"><button class="archive-cl
 document.body.append(archiveLock);
 const archiveCode=archiveLock.querySelector('input');
 const archiveStatus=archiveLock.querySelector('#archive-status');
-let archiveUnlocked=false;
-function closeArchive(){archiveLock.close();location.hash='';requestAnimationFrame(()=>document.querySelector('.cast-link.nathaniel')?.focus());}
+const archiveCodes={nathaniel:'2811',sophie:'6984'};
+let archiveUnlocked=null,archivePerson=null;
+function closeArchive(){const key=archivePerson;archiveLock.close();location.hash='';requestAnimationFrame(()=>document.querySelector('.cast-link.'+key)?.focus());}
 archiveLock.querySelector('.archive-close').addEventListener('click',closeArchive);
 archiveLock.querySelector('.archive-return').addEventListener('click',closeArchive);
 archiveLock.addEventListener('cancel',event=>{event.preventDefault();closeArchive();});
 archiveCode.addEventListener('input',()=>{archiveCode.value=archiveCode.value.replace(/\D/g,'');archiveCode.removeAttribute('aria-invalid');archiveStatus.textContent='Pouze pro ty, kterým byla svěřena důvěra.';archiveLock.classList.remove('archive-error');});
 archiveLock.querySelector('form').addEventListener('submit',event=>{
  event.preventDefault();
- if(archiveCode.value!=='2811'){
+ if(archiveCode.value!==archiveCodes[archivePerson]){
   archiveCode.setAttribute('aria-invalid','true');archiveLock.classList.add('archive-error');archiveStatus.textContent='Tento kód archiv neotevře. Zkus to znovu.';archiveCode.select();return;
  }
- archiveUnlocked=true;archiveLock.close();route();
+ archiveUnlocked=archivePerson;archiveLock.close();route();
 });
 function route(){
  const hash=location.hash;
@@ -123,8 +124,16 @@ function route(){
  const key=prefixedKey||((hash==='#pribeh'||/^#kapitola-\d+$/.test(hash))?'nathaniel':null);
  const wasProfile=!profile.hidden;
  const previousPerson=activePerson;
- if(key!=='nathaniel')archiveUnlocked=false;
- if(key==='nathaniel'&&!archiveUnlocked){
+ if(key!==archiveUnlocked)archiveUnlocked=null;
+ if(archiveCodes[key]&&archiveUnlocked!==key){
+  if(archivePerson!==key&&archiveLock.open)archiveLock.close();
+  archivePerson=key;
+  const person=people[key];
+  archiveLock.classList.toggle('archive-sophie',key==='sophie');
+  archiveLock.querySelector('.archive-lock-seal img').src='assets/icon-'+key+'.png';
+  archiveLock.querySelector('.archive-owner').textContent=person.name;
+  archiveLock.querySelector('.archive-file').textContent='OSOBNÍ SPIS № '+person.number;
+  archiveLock.querySelector('.archive-bottom').innerHTML=(key==='sophie'?'MISSOURI':'SEDALIA, MISSOURI')+' <span>1897</span>';
   selection.hidden=false;profile.hidden=true;window.VisualReading?.syncVisibility(null);
   document.title='Uzamčený archiv · New Horizon RP';
   if(!archiveLock.open){archiveCode.value='';archiveCode.removeAttribute('aria-invalid');archiveLock.classList.remove('archive-error');archiveStatus.textContent='Pouze pro ty, kterým byla svěřena důvěra.';archiveLock.showModal();archiveCode.focus();}
