@@ -43,6 +43,8 @@
 .cast-gallery{width:100%;max-width:1800px;margin:0 auto 35px;min-width:0}
 .medallion-cast{display:flex;flex-wrap:nowrap;justify-content:space-between;align-items:flex-start;gap:20px;max-width:none;width:100%;margin:0;padding:28px 40px 12px;overflow-x:auto;scroll-snap-type:x proximity;scrollbar-width:none}
 .medallion-cast::-webkit-scrollbar{display:none}
+/* Desktop does not need a scroll clipping box around the glow. */
+@media(min-width:1280px){.medallion-cast{overflow:visible}}
 #selection .medallion-card{flex:0 0 calc((100% - 120px)/7);min-width:0;scroll-snap-align:center}
 .medallion-art{width:100%;max-width:220px;margin-bottom:20px}
 #selection .medallion-card.nathaniel .medallion-art{transform:none}
@@ -58,3 +60,8 @@
 .server-logo{display:block;width:clamp(210px,27svh,290px);height:auto;max-width:70vw;object-fit:contain;filter:drop-shadow(0 8px 25px #0005)}
 .frontier-overline{margin-bottom:16px}.frontier-motto{margin-top:17px}
 @media(max-width:700px){.server-logo{width:220px;max-width:68vw}.frontier-overline{margin-bottom:14px}.frontier-intro{margin-bottom:8px}}
+/* Scroll containers clip both axes: reserve space for the full hover halo.
+   Negative vertical margins retain the medallions' existing position. */
+@media(max-width:1279px){
+ .medallion-cast{padding:96px 80px 48px;margin-block:-68px -36px;scroll-padding-inline:80px}
+}
