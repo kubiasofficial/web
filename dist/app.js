@@ -64,6 +64,14 @@ const people = {
   familyTitle:'Společníci. Přátelé. Druhá šance.',familyEyebrow:'DŮVĚRA MÁ VĚTŠÍ CENU NEŽ ZLATO.',familyDescription:'Nathaniel plánuje, Vincent vyjednává a Daniel dává věci do pohybu. Do Dakoty přijíždějí se společnou vizí Raven Railway Company.',
   family:[{label:'PŘÍTEL A OBCHODNÍ SPOLEČNÍK',name:'Nathaniel James Raven',text:'Respektuje jeho úsudek a věří jeho plánům. Přesto si nenechá ujít příležitost provokovat jeho vážnou povahu.',href:'#nathaniel'},{label:'BLÍZKÝ PŘÍTEL',name:'Daniel Thomas Raven',text:'Společná dobrodružství, slovní přestřelky a přátelství, které nekončí tam, kde začínají problémy.',href:'#daniel'}]
  }
+ ,elijah: {
+  name:'Elijah Cole Walker',given:'ELIJAH COLE',surname:'WALKER',nickname:'Young Walker',file:'elijah-cole-walker.md',image:'elijah.png',number:'007',birth:'12. III. 1872',origin:'FORT SMITH · ARKANSAS',stampTitle:'OSOBNÍ ARCHIV · ELIJAH WALKER',age:'25 let',occupation:'Stopař · honák · bývalý pašerák',relatives:'Služba zákonu',relationLabel:'AMBICE',
+  kicker:'Hvězdu musí člověk nejprve zasloužit.',description:'Minulost psance. Zásady, které neopustí.<br>Do Dakoty přijíždí zasloužit si nový začátek.',cta:'POZNAT JEHO MINULOST',sidebar:'JEHO PŘÍBĚH',storyChapterCount:8,
+  alt:'Elijah Cole Walker, mladý muž s tmavými vlnitými vlasy, v černém klobouku, obnošeném kabátu a světlé košili',
+  quote:'Celý život jsem utíkal před zákonem.<br>Teď chci dokázat, že zákon nemusí být tím,<br>před čím lidé utíkají.',closing:'Spravedlnost musí nejdřív<br><em>přijít od člověka.</em>',chapters:window.ELIJAH_CHAPTERS||[],
+  familyTitle:'Lidé a stopy jeho minulosti',familyEyebrow:'HVĚZDA TI NEDÁ CHARAKTER.',familyDescription:'Do Dakoty přijíždí sám. S bratry Ravenovými ani jejich společností nemá dosavadní vazby. Přiváží si doporučení, vlastní zásady a minulost, před kterou nelze utíkat navždy.',
+  family:[{label:'MUŽ, KTERÝ MU DAL DRUHOU ŠANCI',name:'Benjamin Hayes',text:'Poctivý zástupce šerifa. Ukázal mu, že zákon může chránit nevinné, a před odjezdem mu napsal doporučení.',status:'Respekt · důvěra · doporučující dopis'},{label:'STÍN PAŠERÁCKÉ MINULOSTI',name:'Caleb Hargrove',text:'Bývalý vůdce pašerácké skupiny. Elijah se mu postavil, když odmítl obětovat nevinné cestující dostavníku.',status:'Nevyřešená minulost'},{label:'SPOLEČNÍK NA CESTĚ',name:'Ash',text:'Tmavý hnědák, se kterým přijíždí do Dakoty hledat nový začátek.',status:'Jeho kůň'}]
+ }
 };
 const selection=document.getElementById('selection');
 const profile=document.getElementById('profile');
@@ -78,6 +86,7 @@ function renderProfile(key){
  profile.classList.toggle('katie-profile',key==='katie');
  profile.classList.toggle('sophie-profile',key==='sophie');
  profile.classList.toggle('vincent-profile',key==='vincent');
+ profile.classList.toggle('elijah-profile',key==='elijah');
  profile.querySelector('.profile-heading>.eyebrow').textContent='OSOBNÍ SPIS № '+person.number+' · NEW HORIZON, 1897';
  profile.querySelector('.profile-kicker').textContent=person.kicker;
  profile.querySelector('h1').innerHTML='<span>'+escapeHTML(person.given)+'</span>'+escapeHTML(person.surname||'RAVEN');
@@ -113,7 +122,7 @@ archiveLock.innerHTML=`<form class="archive-lock-form"><button class="archive-cl
 document.body.append(archiveLock);
 const archiveCode=archiveLock.querySelector('input');
 const archiveStatus=archiveLock.querySelector('#archive-status');
-const archiveCodes={nathaniel:'2811',sophie:'6984',daniel:'4536',katie:'4691',scarlett:'5817',vincent:'3362'};
+const archiveCodes={nathaniel:'2811',sophie:'6984',daniel:'4536',katie:'4691',scarlett:'5817',vincent:'3362',elijah:'1470'};
 let archiveUnlocked=null,archivePerson=null;
 let archiveOpening=false,archiveAnimation=null;
 const motionAllowed=()=>!matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -155,7 +164,7 @@ function route(){
   archivePerson=key;
   const person=people[key];
   archiveLock.classList.toggle('archive-sophie',key==='sophie');
-  archiveLock.classList.toggle('archive-daniel',key==='daniel');
+  archiveLock.classList.toggle('archive-daniel',key==='daniel'||key==='elijah');
   archiveLock.classList.toggle('archive-katie',key==='katie');
   archiveLock.classList.toggle('archive-scarlett',key==='scarlett'||key==='vincent');
   archiveLock.querySelector('.archive-lock-seal img').src='assets/icon-'+key+'.png';
@@ -172,7 +181,7 @@ function route(){
  if(key&&activePerson!==key)renderProfile(key);
  selection.hidden=!!key;profile.hidden=!key;
  window.VisualReading?.syncVisibility(key);
- document.title=key?people[key].name+' · New Horizon RP':'New Horizon RP · Šest osudů, jeden horizont';
+ document.title=key?people[key].name+' · New Horizon RP':'New Horizon RP · Sedm osudů, jeden horizont';
  requestAnimationFrame(()=>{
   if((key&&hash==='#'+key)||!hash)window.scrollTo({top:0,left:0,behavior:'instant'});
   else document.getElementById(hash.slice(1))?.scrollIntoView({behavior:'instant'});

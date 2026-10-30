@@ -37,7 +37,16 @@
 @media(max-width:1000px){.medallion-cast{gap:15px}.medallion-name{font-size:13px}.medallion-name strong{font-size:21px}.medallion-role{font-size:10px}.frontier-logo{font-size:23px}}
 @media(max-width:700px){#selection.medallion-selection{padding:30px 6% 0;min-height:calc(100svh - 68px)}.frontier-overline{font-size:9px;letter-spacing:3px}.frontier-logo{font-size:21px;gap:15px;letter-spacing:5px}.logo-horizon{font-size:43px;letter-spacing:2px}.logo-star{font-size:19px}.frontier-motto{font-size:18px}.frontier-invitation{font-size:10px;line-height:1.8;max-width:260px;margin:15px auto 0}.frontier-invitation em{display:block}.medallion-cast{grid-template-columns:repeat(2,minmax(0,1fr));gap:32px 22px;max-width:440px;margin-bottom:35px}.medallion-card.nathaniel{grid-column:1/-1;grid-row:1;width:55%;justify-self:center}.medallion-art{margin-bottom:14px}.medallion-name{font-size:13px}.medallion-name strong{font-size:22px}.medallion-nickname{font-size:34px}.medallion-role{font-size:10px;letter-spacing:.6px}.medallion-action{opacity:.75;transform:none;font-size:9px;letter-spacing:1px;margin-top:12px}#selection .selection-footer{justify-content:center;text-align:center}#selection .selection-footer>span{display:none}#selection .selection-footer p{max-width:none;font-size:15px}.frontier-intro{margin-bottom:32px}}
 @media(prefers-reduced-motion:reduce){.frontier-mist,.frontier-atmosphere i,.aura-ring:after{animation:none}.frontier-atmosphere i{display:none}#selection .medallion-card,.medallion-art img,.aura-ring,.aura-ring:before,.aura-ring:after,.medallion-action{transition:none}#selection .medallion-card:is(:hover,:focus-visible){transform:none}}
-/* Six character medallions keep a balanced row on desktop and paired rows on mobile. */
-@media(min-width:1101px){.medallion-cast{grid-template-columns:repeat(6,minmax(0,1fr));gap:25px;max-width:1560px}.medallion-name{font-size:14px}.medallion-name strong{font-size:24px}}
-@media(min-width:701px) and (max-width:1100px){.medallion-cast{grid-template-columns:repeat(3,minmax(0,1fr));max-width:850px;gap:35px 32px}.medallion-art{max-width:210px}}
-@media(max-width:700px){.medallion-card.nathaniel{grid-column:auto;grid-row:auto;width:100%;justify-self:stretch}}
+/* Seven equal medallions: four above, three centered below. DOM order follows reading order. */
+#selection.medallion-selection{padding-top:28px}
+.frontier-intro{margin-bottom:26px}
+.frontier-logo{font-size:23px}.logo-horizon{font-size:clamp(43px,4.4vw,64px)}
+.frontier-overline{margin-bottom:18px}.frontier-motto{margin:17px 0 13px}.frontier-invitation{margin-top:12px}
+.medallion-cast{display:flex;flex-wrap:wrap;justify-content:center;align-items:flex-start;max-width:1080px;gap:26px 34px;margin-bottom:35px}
+#selection .medallion-card{flex:0 0 calc((100% - 102px)/4)}
+.medallion-art{width:min(100%,205px);margin-bottom:15px}
+#selection .medallion-card.nathaniel .medallion-art{transform:none}
+.medallion-name{font-size:14px}.medallion-name strong{font-size:24px}.medallion-nickname{font-size:34px;margin-top:6px}.medallion-role{margin-top:7px}.medallion-action{margin-top:12px}
+@media(min-width:1500px){.medallion-cast{max-width:1160px;gap:30px 42px}#selection .medallion-card{flex-basis:calc((100% - 126px)/4)}.medallion-art{width:min(100%,215px)}.frontier-intro{margin-bottom:30px}}
+@media(min-width:701px) and (max-width:1000px){.medallion-cast{gap:25px 18px}#selection .medallion-card{flex-basis:calc((100% - 54px)/4)}.medallion-name{font-size:12px}.medallion-name strong{font-size:21px}.medallion-role{font-size:10px;letter-spacing:.4px}}
+@media(max-width:700px){#selection.medallion-selection{padding-top:27px}.medallion-cast{max-width:440px;gap:30px 22px}#selection .medallion-card{flex:0 0 calc((100% - 22px)/2);width:auto;grid-column:auto;grid-row:auto}.medallion-art{width:100%}.medallion-name{font-size:13px}.medallion-name strong{font-size:22px}.medallion-action{margin-top:12px}.frontier-logo{font-size:21px}.logo-horizon{font-size:43px}}

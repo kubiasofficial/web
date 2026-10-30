@@ -11,6 +11,7 @@ for filename, output, variable in [
     ('katharine-jane-hunter.md', 'katie-lore.js', 'KATIE_CHAPTERS'),
     ('sophie-cherry.md', 'sophie-lore.js', 'SOPHIE_CHAPTERS'),
     ('vincent-elias-mercer.md', 'vincent-lore.js', 'VINCENT_CHAPTERS'),
+    ('elijah-cole-walker.md', 'elijah-lore.js', 'ELIJAH_CHAPTERS'),
 ]:
     text = (root / 'dist/assets' / filename).read_text(encoding='utf-8-sig')
     parts = re.split(r'^## (.+)$', text, flags=re.MULTILINE)

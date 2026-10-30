@@ -1,0 +1,315 @@
+# Elijah Cole Walker
+OSOBNÍ SPIS № 007 · NEW HORIZON RP · DAKOTA, 1897
+
+„Celý život jsem utíkal před zákonem. Teď chci dokázat, že zákon nemusí být tím, před čím lidé utíkají.“
+Jméno: Elijah Cole Walker
+
+Datum narození: 12. března 1872
+
+Věk: 25 let
+
+Místo narození: Fort Smith, Arkansas
+
+Povolání: Bývalý pašerák, stopař, honák a příležitostný lovec odměn
+
+Ambice: Vstoupit do služeb zákona a stát se šerifem
+
+Rodinný stav: Svobodný
+
+Kůň: Ash, tmavý hnědák
+
+## I. Dítě spravedlnosti (1872–1886)
+Elijah Cole Walker se narodil 12. března 1872 ve městě Fort Smith v Arkansasu. Vyrůstal v prosté rodině kováře Thomase Walkera a jeho ženy Margaret.
+
+Otec ho od útlého věku učil pracovat rukama, zacházet s koňmi a především držet slovo. Matka mu vštěpovala, že člověk nemá právo soudit ostatní podle jejich majetku nebo původu.
+
+Rodina neměla mnoho peněz, ale žila spokojeně. Elijah obdivoval místní strážce zákona. Když jako malý chlapec viděl projíždět šerifa s hvězdou na hrudi, představoval si, že jednou bude stejně statečný.
+
+Jenže roku 1886 se všechno změnilo.
+
+Vlivnému obchodníkovi Richardu Bellamymu zmizelo několik drahých koní. Bellamy obvinil Elijahova otce, přestože Thomas neměl s krádeží nic společného.
+
+Skuteční zloději pracovali pro samotného obchodníka a koně prodávali prostřednictvím jeho kontaktů.
+
+Místní představitel zákona dostal zaplaceno, aby případ rychle uzavřel.
+
+Thomas Walker byl zatčen.
+
+Elijah, kterému bylo čtrnáct let, sledoval, jak jeho otec opakovaně žádá spravedlivé vyšetřování. Nikdo ho neposlouchal.
+
+O několik týdnů později přišla zpráva, že Thomas zemřel ve vazbě. Úřední záznam uváděl zdravotní komplikace.
+
+Elijah však viděl otcovo tělo.
+
+Na jeho rukou a obličeji byly známky násilí.
+
+Pokusil se upozornit úřady, ale nikdo se jeho svědectvím nechtěl zabývat.
+
+Tehdy poprvé pochopil, že muž se šerifskou hvězdou může být stejně nebezpečný jako zločinec.
+
+Jeho dětský sen se rozpadl.
+
+A místo touhy chránit zákon v něm začala růst nenávist k lidem, kteří jej zneužívali.
+## II. Cesta do temnoty (1887–1889)
+Po smrti otce se rodina dostala do finančních potíží. Margaret se snažila domácnost udržet, ale bez příjmu manžela postupně přicházela o všechno.
+
+Elijah začal pracovat ve stájích, pomáhal při přepravě zboží a příležitostně doprovázel obchodní vozy.
+
+Ve svých sedmnácti letech se seznámil s mužem jménem Caleb Hargrove.
+
+Hargrove byl zkušený pašerák, který provozoval síť nelegálních přeprav mezi Arkansasem, Missouri a Indiánským teritoriem.
+
+Elijahovi nabídl práci.
+
+Dobře placenou práci.
+
+Zpočátku šlo o přepravu alkoholu a zboží, za které se neplatila příslušná cla a poplatky.
+
+Elijah věděl, že porušuje zákon.
+
+Jenže zákon, který znal, jeho otce neochránil.
+
+A peníze, které vydělával, pomáhaly jeho matce přežít.
+
+Postupně se naučil používat falešná jména, vyhýbat se hlídkám, sledovat stopy a rozpoznávat, kdy mu někdo lže.
+
+Z chlapce, který kdysi obdivoval šerify, se stal mladý muž, který se jim vyhýbal.
+## III. Život mezi psanci (1889–1892)
+Během následujících tří let se Elijah stal důležitým členem Hargroveovy skupiny.
+
+Nebyl nejrychlejším střelcem ani nejnebezpečnějším mužem.
+
+Vynikal však trpělivostí a schopností pozorovat okolí.
+
+Dokázal najít bezpečnou cestu přes neznámé území, odhadnout pohyb hlídek a rozpoznat podezřelé chování.
+
+Jeho společníci mu začali říkat „Young Walker“.
+
+Přestože se pohyboval v nelegálním prostředí, stále měl své hranice.
+
+Odmítal okrádat chudé rodiny.
+
+Nechtěl ubližovat dětem.
+
+A nikdy nedokázal pochopit muže, kteří si násilí užívali.
+
+Zpočátku jeho zásady Hargrove toleroval.
+
+Jenže s rostoucími zisky rostla také chamtivost skupiny.
+
+Pašování přestávalo stačit.
+
+Někteří členové začali přepadávat obchodníky a vybírat výpalné od menších osad.
+
+Elijah si stále častěji uvědomoval, že se z lidí, kteří kdysi tvrdili, že bojují proti nespravedlivému systému, stávají stejní tyrani, jaké nenáviděl.
+## IV. Noc, která všechno změnila (1892)
+Na podzim roku 1892 dostala skupina informaci o dostavníku převážejícím peníze a cenné zboží.
+
+Hargrove rozhodl, že jej přepadnou.
+
+Elijah měl původně pouze prozkoumat cestu a připravit únikovou trasu.
+
+Krátce před přepadením však zjistil, že dostavníkem cestuje také několik civilistů, včetně ženy se dvěma malými dětmi.
+
+Hargrove prohlásil, že svědci nesmějí přežít.
+
+Elijah odmítl.
+
+Pokusil se vůdce přesvědčit, aby plán zrušil.
+
+Místo odpovědi mu Hargrove namířil revolver na hruď.
+
+„Buď jsi s námi, Walkere, nebo proti nám.“
+
+Elijah tehdy pochopil, že pokud ustoupí, bude spoluviníkem něčeho, co už nikdy nevezme zpátky.
+
+Ještě té noci tajně opustil tábor a dostavník varoval.
+
+Když Hargroveova skupina dorazila na místo přepadení, cestující už byli pryč.
+
+Následovala přestřelka.
+
+Elijah zabil jednoho ze svých bývalých společníků a druhého těžce zranil.
+
+Sám utrpěl průstřel levého ramene.
+
+Podařilo se mu uprchnout, ale věděl, že od této chvíle ho jeho bývalí druhové považují za zrádce.
+
+Poprvé v životě se postavil na správnou stranu, přestože za to mohl zaplatit životem.
+## V. Muž bez domova (1893–1894)
+Po útěku se Elijah několik měsíců skrýval.
+
+Nemohl se vrátit do Fort Smith, protože se obával, že Hargroveovi lidé budou hledat jeho rodinu.
+
+Matce poslal peníze a krátký dopis, ve kterém jí oznámil, že je naživu.
+
+O své minulosti jí však neřekl všechno.
+
+Živil se příležitostnou prací na rančích, pomáhal s dobytkem a doprovázel obchodní karavany.
+
+Postupně si začal vydělávat také jako stopař.
+
+Jeho znalosti nelegálních cest a způsobů pašeráků byly překvapivě užitečné.
+
+Dokázal odhadnout, kudy hledaný muž uprchl, kde by mohl ukrýt koně a jaké chyby udělá při útěku.
+
+Právě během tohoto období poprvé pomohl jednomu zástupci šerifa dopadnout hledaného zloděje.
+
+Elijah očekával, že muž bude stejně zkorumpovaný jako představitel zákona z jeho dětství.
+
+Mýlil se.
+
+Zástupce jménem Benjamin Hayes s vězněm zacházel slušně, odmítl falešné svědectví a trval na řádném procesu.
+
+Pro Elijaha to bylo něco neobvyklého.
+
+Poprvé po mnoha letech viděl člověka, který nosil hvězdu a skutečně si ji zasloužil.
+## VI. Druhá strana zákona (1894–1896)
+Elijah začal s Hayesem příležitostně spolupracovat.
+
+Pomáhal mu pátrat po hledaných mužích, vyhledávat ukradený dobytek a doprovázet nebezpečné vězně.
+
+Nikdy nebyl oficiálním strážcem zákona.
+
+Přesto se postupně naučil, že spravedlnost neznamená pouze dopadnout viníka.
+
+Znamená také chránit nevinné, respektovat důkazy a nepodlehnout vlastnímu vzteku.
+
+Hayes si všiml, že Elijah má mimořádně silný odpor vůči zneužívání pravomocí.
+
+Jednou se ho zeptal:
+
+„Walkere, proč tolik nenávidíš špatné šerify?“
+
+Elijah mu poprvé vyprávěl o svém otci.
+
+Hayes dlouho mlčel.
+
+Potom odpověděl:
+
+„Tak se staň lepším, než byli oni.“
+
+Tato věta Elijaha zasáhla více, než čekal.
+
+Začal přemýšlet o možnosti vstoupit do služeb zákona.
+
+Jenže jeho minulost představovala problém.
+
+Byl bývalým pašerákem.
+
+Podílel se na nelegálních přepravách.
+
+A při útěku od Hargroveovy skupiny zastřelil člověka.
+
+Věděl, že pokud se jeho minulost dostane na veřejnost, může zničit všechno, o co se snaží.
+
+Přesto se rozhodl, že před ní nebude utíkat navždy.
+## VII. Poslední rozhovor (1896)
+Koncem roku 1896 se Elijah rozhodl opustit kraj, ve kterém strávil poslední roky.
+
+Chtěl začít znovu na místě, kde ho nikdo nezná.
+
+Před odjezdem navštívil Benjamina Hayese.
+
+Řekl mu, že chce jednou nosit hvězdu šerifa.
+
+Hayes se pousmál.
+
+„Myslíš, že to bude jednoduché?“
+
+„Ne.“
+
+„Myslíš, že tě lidé přijmou, až zjistí, odkud pocházíš?“
+
+„Nevím.“
+
+„A proč to tedy chceš dělat?“
+
+Elijah chvíli přemýšlel.
+
+„Protože jsem jako dítě potřeboval někoho, kdo by se postavil za mého otce. A nikdo takový nepřišel.“
+
+Hayes otevřel zásuvku svého pracovního stolu.
+
+Vytáhl list papíru a začal psát.
+
+Bylo to doporučení, ve kterém potvrzoval Elijahovy schopnosti stopaře, spolehlivost při společných úkolech a ochotu pomáhat při ochraně civilistů.
+
+Nebyla to žádná záruka zaměstnání.
+
+Ale byla to příležitost.
+
+Když Elijah odcházel, Hayes mu řekl:
+
+„Pamatuj si jednu věc, chlapče. Hvězda ti nedá charakter. Jen ostatním ukáže, jaký skutečně máš.“
+## VIII. Dakota, 1897
+Roku 1897 přijíždí pětadvacetiletý Elijah Cole Walker do Dakoty.
+
+Nemá zde žádnou rodinu.
+
+Nemá přátele ani obchodní partnery.
+
+Není napojen na bratry Ravenovy ani na jejich železniční společnost.
+
+Přijíždí jako neznámý muž s několika dolary v kapse, starým revolverem, koněm jménem Ash a doporučujícím dopisem od Benjamina Hayese.
+
+Jeho plán není okamžitě získat šerifskou hvězdu.
+
+Chce nejprve poznat místní obyvatele, pomáhat při řešení problémů a prokázat, že je schopný nést odpovědnost.
+
+Pokud dostane příležitost, rád by začal jako pomocník nebo zástupce šerifa.
+
+Teprve později by se chtěl ucházet o vyšší postavení.
+
+Jenže jeho minulost ho stále pronásleduje.
+
+Caleb Hargrove možná stále žije.
+
+Někteří bývalí společníci mu nikdy neodpustili zradu.
+
+A Elijah dobře ví, že pravda o jeho minulosti může jednoho dne vyplout na povrch.
+
+Přesto je rozhodnutý pokračovat.
+
+Nechce být šerifem kvůli moci.
+
+Nechce, aby se ho lidé báli.
+
+Chce být mužem, kterého by jeho čtrnáctileté já tehdy potřebovalo.
+
+## Osobnost a charakter
+**Povaha:** Klidný, zásadový, odhodlaný, občas tvrdohlavý
+
+**Silné stránky:** Stopování, orientace v terénu, znalost zločineckého prostředí, jízda na koni
+
+**Slabiny:** Nedůvěra k autoritám, potlačovaný vztek, strach z odhalení minulosti
+
+**Největší strach:** Že se sám jednou stane tím, proti čemu bojuje
+
+**Vztah k zákonu:** Respektuje jeho smysl, odmítá jeho zneužívání
+
+**Vztah k násilí:** Použije ho v krajní nouzi, nepovažuje ho za první řešení
+
+**Životní cíl:** Stát se poctivým šerifem a chránit nevinné
+
+**Osobní tajemství:** Jeho působení v Hargroveově pašerácké skupině
+
+
+## Jeho pět zásad
+1. Nikdy neodsoudí člověka bez důkazů.
+2. Nikdy nebude chránit kolegu, který zneužívá svou pravomoc.
+3. Nikdy nebude používat zákon k osobní pomstě.
+4. Každý člověk má právo na spravedlivý proces.
+5. Hvězdu musí člověk nejprve zasloužit, teprve potom nosit.
+## Možné RP linky
+Elijahův příběh otevírá několik zajímavých možností. Může postupně získávat důvěru místních obyvatel, řešit své první případy a bojovat s předsudky starších strážců zákona. Jeho znalost pašeráckých metod může být při vyšetřování výhodou, ale také vyvolávat podezření.
+
+Jeho minulost by nemusela být odhalena hned. Může se stát, že se objeví někdo, kdo ho znal jako pašeráka, nebo že bude muset vyšetřovat zločin, který mu připomene smrt vlastního otce.
+
+A největší zkouška? Co když jednou dostane možnost potrestat člověka, který zneužil zákon úplně stejně jako muž, který kdysi zničil jeho rodinu?
+
+Dokáže Elijah dodržet vlastní zásady, nebo podlehne touze po odplatě?
+
+Závěrečná věta postavy:
+
+„Kdysi jsem věřil, že spravedlnost přichází s hvězdou. Pak jsem poznal muže, kteří ji nosili. Dnes už vím, že spravedlnost musí nejdřív přijít od člověka.“

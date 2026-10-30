@@ -8,9 +8,11 @@
   stable:'M14 8C4 17 6 35 15 40h18c9-5 11-23 1-32l-6 6c7 10 5 17 1 20H19c-4-3-6-10 1-20zM13 20h3M32 20h3M14 29h3M31 29h3',
   letter:'M6 13h36v25H6zM6 13l18 15 18-15M6 38l14-13M42 38L28 25M31 7l7 4',
   ranch:'M6 40h36M10 40V21l14-13 14 13v19M7 24h34M19 40V28h10v12M18 17h12',
-  woods:'M13 40V23M35 40V27M13 6L4 24h18zM35 12L25 29h20zM20 42h10'
+  woods:'M13 40V23M35 40V27M13 6L4 24h18zM35 12L25 29h20zM20 42h10',
+  law:'M24 5l5 11 12 1-8 10 3 12-12-6-12 6 3-12-8-10 12-1zM19 22h10M24 17v11'
  };
  const themes={
+  elijah:{world:'Zásady & druhá šance',kind:'law',title:'Doporučující dopis',note:'Benjamin Hayes mu ukázal jinou tvář zákona. Elijah zatím není šerif ani jeho zástupce. Chce si nejprve získat důvěru obyvatel Dakoty a prokázat, že dokáže chránit nevinné.',tags:['SPRAVEDLIVÝ PROCES','VLASTNÍ ZÁSADY','DAKOTA, 1897'],scenes:[{at:3,row:0,title:'Noc, kdy se rozhodl chránit nevinné.'},{at:6,row:1,side:true,title:'Dopis od Hayese. Příležitost, nikoli záruka.'},{at:7,row:2,title:'Dakota. Nový začátek s koněm jménem Ash.'}]},
   vincent:{world:'Obchod & nové příležitosti',kind:'letter',title:'Obchodní zápisník',note:'Čte smlouvy až do posledního řádku. Po zradě Edmunda Harlowa ví, že výhodná cena ještě neznamená výhodný obchod. S Ravenovými chce vybudovat něco trvalého.',tags:['VYJEDNÁVÁNÍ','KAPESNÍ HODINKY','RAVEN RAILWAY COMPANY'],scenes:[{at:0,row:0,title:'Mezi zbožím a obchodními knihami začala jeho cesta.'},{at:3,row:1,side:true,title:'Účetní knihy. Důvěra, která přišla draho.'},{at:7,row:2,title:'Dakota. Druhá šance a společný podnik.'}]},
   nathaniel:{world:'Železnice & obchod',kind:'rail',title:'Přepravní kniha',note:'Parní stroje, nelegální náklad a informace, které mají svou cenu. Po otci mu zůstaly kapesní hodinky; po noci u Jefferson City jizva a otázka, kdo ho zradil.',tags:['PARNÍ STROJE','MOSAZ & UHLÍ','MISSOURI'],scenes:[{at:0,row:0,title:'Dílny, ve kterých začala jeho cesta.'},{at:3,row:1,side:true,title:'Jefferson City. Noc, která všechno změnila.'},{at:5,row:2,title:'Nový horizont. Tentokrát vlastní směr.'}]},
   daniel:{world:'Koně & vlastní stáje',kind:'stable',title:'Stájní zápisník',note:'U lidí bývá netrpělivý. U koní dokáže strávit hodiny, uklidnit je a získat jejich důvěru. Jeho cílem je jednou provozovat vlastní stáje.',tags:['VÝCVIK KONÍ','OPOTŘEBOVANÁ KŮŽE','DŮVĚRA'],scenes:[{at:1,row:0,title:'Mezi koňmi našel trpělivost.'},{at:3,row:1,side:true,title:'Obchod, po kterém zůstala jen prázdná ohrada.'},{at:5,row:2,title:'Vlastní stáje. Možnost začít znovu.'}]},

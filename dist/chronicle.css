@@ -125,3 +125,10 @@
 @media(max-width:700px){.chronicle-profile.vincent-profile .profile-heading h1{font-size:clamp(52px,14.5vw,82px)}.chronicle-profile.vincent-profile .profile-hero:after{background:linear-gradient(0deg,#0c0c0e 0%,#101a2bf2 29%,#10101911 73%,#080b1099)}}
 
 .chronicle-profile.vincent-profile .profile-hero:before{filter:saturate(.5)}
+/* Elijah: copper, dust and a chance to earn the star. */
+.chronicle-profile.elijah-profile{--gold:#eda56e;--accent-rgb:230,139,64;--chronicle-scene:url('assets/elijah-scenes.png');--chronicle-row:100%}
+.chronicle-profile.elijah-profile .profile-hero:after{background:linear-gradient(90deg,#100e0cf5 2%,#1b1711dc 30%,#34241122 65%,#17120d66),linear-gradient(0deg,#0c0c0e,transparent 30%)}
+.chronicle-profile.elijah-profile .profile-heading h1{font-size:clamp(68px,7.4vw,125px)}
+.chronicle-profile.elijah-profile .signature{font-size:78px;margin-left:15%}
+.note-law{border-left:3px solid #ba804b}
+@media(max-width:700px){.chronicle-profile.elijah-profile .profile-heading h1{font-size:clamp(52px,14.5vw,82px)}.chronicle-profile.elijah-profile .signature{font-size:61px;margin-left:10%}.chronicle-profile.elijah-profile .profile-hero:after{background:linear-gradient(0deg,#0c0c0e 0%,#17130ef2 29%,#10101911 73%,#080b1099)}}
