@@ -17,6 +17,11 @@
 .medallion-art{position:relative;width:100%;max-width:248px;aspect-ratio:1;display:block;isolation:isolate;margin-bottom:22px}
 .medallion-art img{display:block;width:100%;height:100%;object-fit:contain;border-radius:50%;position:relative;z-index:1;transition:filter .45s,transform .45s;filter:brightness(.85);}
 .aura-ring{position:absolute;inset:5%;border-radius:50%;border:1px solid color-mix(in srgb,var(--aura),transparent 65%);box-shadow:0 0 20px color-mix(in srgb,var(--aura),transparent 85%);transition:box-shadow .45s,opacity .45s,transform .45s;opacity:.4}
+.player-badge{position:absolute;z-index:0;top:8px;left:50%;display:flex;flex-direction:column;align-items:center;gap:4px;width:max-content;max-width:calc(100% + 20px);padding:9px 15px 11px;border:1px solid color-mix(in srgb,var(--aura),transparent 45%);border-radius:5px 5px 2px 2px;background:linear-gradient(135deg,color-mix(in srgb,var(--aura) 12%,#111116),#111116f5);box-shadow:0 0 18px color-mix(in srgb,var(--aura),transparent 85%);opacity:0;transform:translate(-50%,14px);transition:transform .28s cubic-bezier(.2,.7,.25,1),opacity .2s ease;pointer-events:none}
+.player-label{font:8px/1 'Barlow Condensed',Arial,sans-serif;letter-spacing:2px;color:var(--aura)}
+.player-handle{max-width:100%;overflow-wrap:anywhere;font:500 14px/1.25 'Barlow Condensed',Arial,sans-serif;letter-spacing:.5px;color:#f1e5d5}
+.medallion-card:is(:hover,:focus-visible) .player-badge{opacity:1;transform:translate(-50%,calc(-100% - 16px))}
+@media(prefers-reduced-motion:reduce){.player-badge{transition:none}}
 .aura-ring:before{content:'';position:absolute;inset:-20%;border-radius:50%;background:radial-gradient(circle,transparent 40%,color-mix(in srgb,var(--aura),transparent 78%) 55%,transparent 73%);opacity:0;transition:opacity .45s}
 .aura-ring:after{content:'';position:absolute;inset:-7%;border:1px dashed color-mix(in srgb,var(--aura),transparent 50%);border-radius:50%;opacity:0;transition:opacity .45s;animation:aura-orbit 45s linear infinite}
 .medallion-name{font:16px/1.5 Lora,Georgia,serif;color:#c9bea9}.medallion-name strong{display:block;font:25px/1.3 'IM Fell English',Georgia,serif;letter-spacing:3px;text-transform:uppercase;color:#ead7b5;margin-top:1px}
