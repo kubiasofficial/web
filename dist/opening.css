@@ -53,3 +53,8 @@
 @media(min-width:1500px){.medallion-cast{gap:25px}#selection .medallion-card{flex-basis:calc((100% - 150px)/7)}.frontier-intro{margin-bottom:40px}}
 @media(max-width:1279px){.medallion-cast{gap:25px;justify-content:flex-start}#selection .medallion-card{flex:0 0 190px}.medallion-art{max-width:none}}
 @media(max-width:700px){#selection.medallion-selection{padding:30px 4% 0}.medallion-cast{gap:25px;padding-inline:18px;scroll-padding-inline:18px}#selection .medallion-card{flex:0 0 min(67vw,250px);width:auto;grid-column:auto;grid-row:auto}.frontier-intro{margin-bottom:12px}.medallion-name{font-size:16px}.medallion-name strong{font-size:26px}.medallion-nickname{font-size:40px}.medallion-role{font-size:12px}.medallion-action{font-size:10px}.cast-gallery{margin-bottom:25px}}
+/* Official server emblem with a transparent exterior. */
+.frontier-logo{display:block;line-height:0;letter-spacing:0;text-shadow:none;margin:0 auto;width:fit-content}
+.server-logo{display:block;width:clamp(210px,27svh,290px);height:auto;max-width:70vw;object-fit:contain;filter:drop-shadow(0 8px 25px #0005)}
+.frontier-overline{margin-bottom:16px}.frontier-motto{margin-top:17px}
+@media(max-width:700px){.server-logo{width:220px;max-width:68vw}.frontier-overline{margin-bottom:14px}.frontier-intro{margin-bottom:8px}}
