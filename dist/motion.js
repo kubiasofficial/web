@@ -3,6 +3,21 @@
  const fine=matchMedia('(hover: hover) and (pointer: fine)');
  const selection=document.getElementById('selection');
  const cards=[...document.querySelectorAll('.medallion-card')];
+ const gallery=document.querySelector('.medallion-cast');
+ const controls=document.querySelector('.cast-gallery-controls');
+ if(controls){
+  const previous=controls.querySelector('.cast-gallery-prev'),next=controls.querySelector('.cast-gallery-next');
+  const updateControls=()=>{
+   controls.hidden=gallery.scrollWidth<=gallery.clientWidth+2;
+   previous.disabled=gallery.scrollLeft<=2;
+   next.disabled=gallery.scrollLeft+gallery.clientWidth>=gallery.scrollWidth-2;
+  };
+  const advance=direction=>gallery.scrollBy({left:direction*(cards[0].getBoundingClientRect().width+25),behavior:reduced.matches?'instant':'smooth'});
+  previous.addEventListener('click',()=>advance(-1));next.addEventListener('click',()=>advance(1));
+  gallery.addEventListener('scroll',updateControls,{passive:true});
+  new ResizeObserver(updateControls).observe(gallery);
+  updateControls();
+ }
  let frame=0,latest=null;
  const reset=()=>{
   cancelAnimationFrame(frame);frame=0;latest=null;

@@ -1,4 +1,4 @@
-# New Horizon RP — šest příběhů
+# New Horizon RP — sedm příběhů
 
 Čisté HTML/CSS/JavaScript. Otevřete `dist/index.html` v prohlížeči bez instalace a serveru. Funguje i přes file://. Google Fonts mají systémové náhrady pro offline režim.
 
@@ -43,3 +43,9 @@ Aktuální kontroly: `node verify-vincent.mjs` pro šest medailonů a Vincentův
 `dist/motion.css` a `dist/motion.js` přidávají postupný nástup úvodu, jemné naklánění medailonů, částice a pohyb pozadí pro myš. Profily mají páru, prach, mlhu, světelné částice, listí nebo modrý kouř podle postavy. Odemykání archivu doplňuje záře pečeti a přechod do profilu; chybný kód krátce zavrtí formulářem. Zavření nebo změna adresy probíhající přechod zruší. Na dotykových zařízeních jsou efekty omezené a systémové omezení pohybu vypíná pohyb i čekání na odemčení. Závěry příběhů zůstávají bez nových animací.
 
 `node verify-motion.mjs` ověřuje reakci na myš, všechny efekty profilů, odemčení, přerušení přechodu a omezení pohybu.
+
+## Elijah Cole Walker a sedm medailonů
+
+Elijah (`#elijah`, spis 007) má oranžový medailon s malým znakem německého ovčáka, portrét bez šerifské hvězdy a archivní zámek. Text zachovává osm kapitol, charakteristiku, pět zásad a možnosti RP. Do Dakoty přichází samostatně a službu zákonu si teprve chce zasloužit. Originál je v `content/elijah-original.txt`; publikovaný Markdown v `dist/assets/elijah-cole-walker.md`. Závěrečný redakční komentář zůstává jen v originálu. Obrázky jsou v `dist/assets/icon-elijah.png`, `elijah.png` a `elijah-scenes.png`; prompty vestavěného image_gen v `elijah-image-prompts.json`.
+
+Aktuální náhled úvodu má všech sedm stejně velkých medailonů v jedné řadě. Od šířky 1280 px se vejdou současně, na menších obrazovkách se galerie posouvá dotykem nebo šipkami. Ovládání šipkami respektuje omezení pohybu; pořadí pro klávesnici odpovídá vizuálnímu pořadí. `node verify-elijah.mjs` ověřuje rozložení na šesti šířkách, posouvání, kód, text příběhu, kapitoly, obnovu stránky a návrat. `node verify-all-locks.mjs` ověřuje všech sedm archivů.

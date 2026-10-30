@@ -26,7 +26,7 @@ try {
  await sleep(1800);
  const {writeFileSync}=await import('node:fs');
  const screenshot=async name=>{if(await evaluate('!!document.querySelector(".poster-transition")'))await sleep(700);const shot=await send('Page.captureScreenshot',{format:'png'});writeFileSync(path.join(qa,name+'.png'),Buffer.from(shot.data,'base64'));};
- const codes={nathaniel:'2811',sophie:'6984',daniel:'4536',katie:'4691',scarlett:'5817',vincent:'3362'};
+ const codes={nathaniel:'2811',sophie:'6984',daniel:'4536',katie:'4691',scarlett:'5817',vincent:'3362',elijah:'1470'};
  for(const [key,code] of Object.entries(codes)){
  await evaluate('location.hash=""');await sleep(60);
  await evaluate('document.querySelector(".cast-link.'+key+'").click()');await sleep(80);

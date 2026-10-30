@@ -26,7 +26,7 @@ try {
  await sleep(1800);
  const {writeFileSync}=await import('node:fs');
  const screenshot=async name=>{if(await evaluate('!!document.querySelector(".poster-transition")'))await sleep(700);const shot=await send('Page.captureScreenshot',{format:'png'});writeFileSync(path.join(qa,name+'.png'),Buffer.from(shot.data,'base64'));};
- assert(await evaluate('document.querySelectorAll(".medallion-card").length===6'),'Six characters on home');
+ assert(await evaluate('document.querySelectorAll(".medallion-card").length===7'),'Seven characters on home');
  await evaluate('Promise.all([...document.querySelectorAll(".medallion-art img")].map(i=>i.decode()))');
  for(const width of [1440,1024,768,390,320]){
  await send('Emulation.setDeviceMetricsOverride',{width,height:1000,deviceScaleFactor:1,mobile:width<701});

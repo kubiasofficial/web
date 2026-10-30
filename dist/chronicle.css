@@ -132,3 +132,9 @@
 .chronicle-profile.elijah-profile .signature{font-size:78px;margin-left:15%}
 .note-law{border-left:3px solid #ba804b}
 @media(max-width:700px){.chronicle-profile.elijah-profile .profile-heading h1{font-size:clamp(52px,14.5vw,82px)}.chronicle-profile.elijah-profile .signature{font-size:61px;margin-left:10%}.chronicle-profile.elijah-profile .profile-hero:after{background:linear-gradient(0deg,#0c0c0e 0%,#17130ef2 29%,#10101911 73%,#080b1099)}}
+/* The three Elijah illustrations occupy unequal bands in the original atlas. */
+.elijah-profile .scene-media[style*="--scene-row:0"] img{height:340%;top:0}
+.elijah-profile .scene-media[style*="--scene-row:1"] img{height:320%;top:-94.7%}
+.elijah-profile .scene-media[style*="--scene-row:2"] img{height:255%;top:-155%}
+.chronicle-profile.elijah-profile .signature{font-size:68px;line-height:1;margin:14px 0 35px 10%;transform:rotate(-5deg)}
+@media(max-width:700px){.chronicle-profile.elijah-profile .signature{font-size:55px;margin:12px 0 28px 7%}}
