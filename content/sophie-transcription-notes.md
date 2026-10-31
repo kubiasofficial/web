@@ -1,7 +1,9 @@
-# Sophie Cherry — přepis a sjednocení
+# Sophia Cherry — aktualizace lore
 
-Zdroje: dva uživatelem vložené obrazové podklady v konverzaci — referenční list Sophie Cherry a příběhový plakát Sophia Cherry.
+Zdroj: nový dodaný příběh, zachovaný v `sophie-original.txt`.
 
-Uživatel výslovně potvrdil jako závazné údaje: **Sophie Cherry, 28 let, narozená 1869 v Missouri**. Proto je první odstavec přepsán podle tohoto potvrzení, místo rozporného data 30. prosince 1870 a okolí Nashvillu v Tennessee. Den a měsíc narození nejsou domýšleny. Jméno je sjednoceno na Sophie.
+Uživatel výslovně zvolil všechny nové údaje: Sophia Cherry, 28 let, 30. prosince 1870, nedaleko Nashvillu v Tennessee. Nahrazují původní Sophie, 1869, Missouri. Rozpor věku s rokem 1897 byl vysvětlen a je vědomě zachován.
 
-Kapitoly I–VII přepisují příběhový plakát, v pořadí dětství, lov, koně, ztráta rodiny, nedůvěra, cesta a současnost. Kapitola VIII vychází z již dodaného Katieina příběhu a uvádí stejnou vzájemnou vazbu z pohledu Sophie. Doplňkový popis vzhledu a charakteru vychází z referenčního listu; tmavé vlasy a modrošedé oči následují hlavní portrét. Konkrétní domorodý národ ani jazyk nebyly domýšleny.
+Sebastian Cherry má 32 let. Sourozenci pečovali o matku a nikdy se nerozdělili. Daniel ho osobně zná, Katie jen z vyprávění. Sebastian neumí jazyk skupiny, se kterou Sophia a Katie obchodovaly.
+
+Příběh je rozdělen do osmi kapitol a doplňujícího vzhledu. Koně a lov mají samostatné kapitoly. Neuzavřené značky tučného písma jsou opraveny, jméno sjednoceno na Sophia. Doplňující vzhled následuje předchozí referenční list s dlouhými černými vlasy podle nového textu. Adresa #sophie a portréty zůstávají zachované.

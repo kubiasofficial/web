@@ -50,9 +50,9 @@ Nemá v úmyslu hledat problémy. Ale pokud si problémy najdou ji, mohou si bý
 
 Osobnost, kterou se Katharine stává v situaci, kde není úplně legální postup. Nemá problém ublížit někomu, kdo sáhne na její blízké. Také je schopna osobu okrást. K tomu využívá občas i své ženské zbraně. Když není jiná možnost, jak získat peníze, udělá cokoliv, aby se postarala o lidi, které má po boku.
 
-## VII. Katie a Sophie
+## VII. Katie a Sophia
 
-Katie s Sophie po cestách měly tu čest obchodovat s indiány, kteří jim důvěřovali. Vyměňovali mezi sebou maso, zeleninu, krmení pro koně a další produkty/věci, které indiáni sami sehnat nemohli. Katie a Sophie se během toho naučily i jejich jazyk, který občas v konverzaci mezi sebou použijí.
+Katie s Sophia po cestách měly tu čest obchodovat s indiány, kteří jim důvěřovali. Vyměňovali mezi sebou maso, zeleninu, krmení pro koně a další produkty/věci, které indiáni sami sehnat nemohli. Katie a Sophia se během toho naučily i jejich jazyk, který občas v konverzaci mezi sebou použijí.
 
 ## Vzhled a osobnost
 

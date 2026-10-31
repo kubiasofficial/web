@@ -44,16 +44,16 @@ const people = {
   alt:'Katharine Jane Hunter s tmavým copem, jizvou na tváři a praktickým koženým jezdeckým oblečením',
   quote:'Některé rány nejsou vidět,<br>ale pořád bolí.',closing:'Někdy je nejtěžší cesta ta,<br><em>která vede domů.</em>',chapters:window.KATIE_CHAPTERS||[],
   familyTitle:'Lidé po jejím boku',familyEyebrow:'DŮVĚRA SE POZNÁ PODLE ČINŮ.',familyDescription:'Nečeká velká gesta. Váží si lidí, kteří drží slovo, přiloží ruku k dílu a nezmizí při prvním problému.',
-  family:[{label:'SPOLEČNÉ CESTY A OBCHODY',name:'Sophie Cherry',text:'Při společných cestách obchodovaly s domorodými obyvateli. Naučily se i jejich jazyk, který občas používají mezi sebou.',href:'#sophie'},{label:'OPORA V NOVÉM KRAJI',name:'Rodina Crowe',text:'S rodinou Crowe přijela do Blackwateru. Je pro ni důležitou oporou, vlastní nezávislosti se však nevzdává.',status:'Opora v Blackwateru'}]
+  family:[{label:'SPOLEČNÉ CESTY A OBCHODY',name:'Sophia Cherry',text:'Při společných cestách obchodovaly s domorodými obyvateli. Naučily se i jejich jazyk, který občas používají mezi sebou.',href:'#sophie'},{label:'OPORA V NOVÉM KRAJI',name:'Rodina Crowe',text:'S rodinou Crowe přijela do Blackwateru. Je pro ni důležitou oporou, vlastní nezávislosti se však nevzdává.',status:'Opora v Blackwateru'}]
  }
 
  ,sophie: {
-  name:'Sophie Cherry',given:'SOPHIE',surname:'CHERRY',nickname:'Soph',file:'sophie-cherry.md',image:'sophie.png',number:'005',birth:'1869',origin:'MISSOURI',stampTitle:'OSOBNÍ ARCHIV · SOPHIE CHERRY',age:'28 let',occupation:'Lovkyně · stopařka · práce s koňmi',relatives:'Katharine Jane Hunter',relationLabel:'BLÍZKÁ OSOBA',
+  name:'Sophia Cherry',given:'SOPHIA',surname:'CHERRY',nickname:'Soph',file:'sophie-cherry.md',image:'sophie.png',number:'005',birth:'30. XII. 1870',origin:'NEDALEKO NASHVILLU · TENNESSEE',stampTitle:'OSOBNÍ ARCHIV · SOPHIA CHERRY',age:'28 let',occupation:'Lovkyně · stopařka · práce s koňmi',relatives:'Sebastian Cherry · starší bratr, 32 let',relationLabel:'RODINA',
   kicker:'Lepší je držet si odstup, než litovat důvěry.',description:'Ticho lesa. Věrnost koní.<br>Svoboda, kterou si nenechá vzít.',cta:'POZNAT JEJÍ MINULOST',sidebar:'JEJÍ PŘÍBĚH',storyChapterCount:8,
-  alt:'Sophie Cherry v černém klobouku s tmavými vlasy, modrošedýma očima, fialovým šátkem a loveckou výbavou',
-  quote:'Lidem nevěřím. Zvířata jsou upřímnější než jakýkoliv člověk.<br>V přírodě nacházím klid, který mi žádný člověk nedokáže dát.',closing:'Kůň člověka nezradí ze zlého úmyslu,<br><em>ale člověk to dokáže udělat i s úsměvem na tváři.</em>',chapters:window.SOPHIE_CHAPTERS||[],
-  familyTitle:'Ti, kterým důvěřuje',familyEyebrow:'DŮVĚRA NENÍ SAMOZŘEJMOST.',familyDescription:'Své soukromí si chrání a o minulosti mluví zřídka. Zvířatům důvěřuje více než lidem, ale vytrvalost a poctivé činy u ní mají váhu.',
-  family:[{label:'SPOLEČNÉ CESTY A OBCHODY',name:'Katharine Jane Hunter',text:'S Katie ji spojují společné cesty, obchodování s domorodými obyvateli i jazyk, který se během těchto cest naučily.',href:'#katie'},{label:'JEJÍ NEJVĚTŠÍ ZALÍBENÍ',name:'Koně plemene Shire',text:'Obdivuje jejich sílu, klidnou povahu a věrnost. Sní o malé stáji, kde by se jim mohla věnovat po zbytek života.',status:'Její sen · vlastní stáj a kousek země'}]
+  alt:'Sophia Cherry v černém klobouku s tmavými vlasy, modrošedýma očima, fialovým šátkem a loveckou výbavou',
+  quote:'Kůň člověka nezradí ze zlého úmyslu,<br>ale člověk to dokáže udělat i s úsměvem na tváři.',closing:'Dokud mají jeden druhého,<br><em>stále mají rodinu.</em>',chapters:window.SOPHIE_CHAPTERS||[],
+  familyTitle:'Rodina a blízcí',familyEyebrow:'RODINA MUSÍ DRŽET POHROMADĚ.',familyDescription:'Sebastian je jediný člověk, kterému bezvýhradně důvěřuje. Od dětství se nikdy nerozdělili a společně hledají nový domov. Své soukromí si před ostatními chrání.',
+  family:[{label:'STARŠÍ BRATR · 32 LET',name:'Sebastian Cherry',text:'Nikdy ji nezradil ani neopustil. Společně pečovali o matku, pracují, loví a cestují. Jejich snem je vlastní hospodářství s pastvinami a stájemi pro koně Shire.',status:'Její nejbližší člověk a opora'},{label:'ZNÁMÝ ZE STÁJÍ',name:'Daniel Thomas Raven',text:'Spojuje je láska ke koním. Daniel je Sebastianovým kamarádem a jako jediný ze Sophiiných známých jejího bratra osobně zná.',href:'#daniel'},{label:'SPOLEČNÉ CESTY A OBCHODY',name:'Katharine Jane Hunter',text:'S Katie obchodovaly s domorodými obyvateli a naučily se jejich jazyk. Katie zná Sebastiana pouze z vyprávění Sophia; osobně se nikdy nesetkali.',href:'#katie'}]
  }
 
  ,vincent: {

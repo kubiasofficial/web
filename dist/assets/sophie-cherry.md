@@ -1,81 +1,102 @@
-# Sophie Cherry
+# Sophia Cherry
 **Životní příběh | New Horizon Roleplay | Rok 1897**
 
-**Celé jméno:** Sophie Cherry  
-**Přezdívka:** Soph, Cherry  
-**Rok narození:** 1869  
-**Místo narození:** Missouri, USA  
-**Věk:** 28 let  
-**Povolání:** Lovkyně, stopařka, práce s koňmi; příležitostná ochránkyně a zprostředkovatelka informací
+**Celé jméno:** Sophia Cherry
+**Přezdívka:** Soph, Cherry
+**Datum narození:** 30. prosince 1870
+**Místo narození:** Nedaleko Nashvillu, Tennessee
+**Věk:** 28 let
+**Rodina:** Sebastian Cherry — starší bratr, 32 let
+**Povolání:** Lovkyně, stopařka, práce s koňmi
 
-## I. Dětství
+## I. Dětství a rodina
 
-Sophie Cherry se narodila roku 1869 v Missouri. Vyrůstala na malém hospodářství se svými rodiči, daleko od ruchu velkých měst. Už od útlého věku byla zvyklá na tvrdou práci, skromný život a každodenní povinnosti, které s sebou život na venkově přinášel.
+Sophia Cherry se narodila na malém hospodářství nedaleko Nashvillu v Tennessee, kde vyrůstala se svými rodiči a starším bratrem Sebastianem. Od dětství byli sourozenci nerozluční. Společně pracovali, vyráželi do přírody a vždy stáli jeden při druhém. Sebastian svou mladší sestru chránil, ale zároveň respektoval její samostatnost.
 
-Její matka ji učila vařit, péct a starat se o domácnost. Otec byl zkušený lovec a dřevorubec. Často ji brával do lesa, kde ji učil poznávat stopy zvěře, rozdělávat oheň, zacházet s puškou a přežít v divočině bez cizí pomoci.
+Matka Sophii učila vařit, péct a starat se o domácnost. Otec, zkušený lovec a dřevorubec, oba sourozence učil stopovat zvěř, zacházet s puškou, orientovat se v lese a přežívat v divočině. Díky jeho výchově se naučili tvrdě pracovat, respektovat přírodu a spoléhat především sami na sebe.
 
-Sophie už jako dítě dávala přednost přírodě a zvířatům před společností ostatních lidí. Nejraději trávila čas venku, kde mohla pozorovat přírodu a naslouchat jejím zvukům.
+Otec jim vždy připomínal, že rodina musí držet pohromadě, ať se stane cokoli. Těmito slovy se oba řídili celý život.
 
-## II. Lov a láska k přírodě
+## II. Koně a plemeno Shire
 
-Sophie miluje přírodu. Hluboké lesy, vysoké hory, řeky a rozlehlé pláně pro ni představují svobodu, klid a místo, kde nemusí nikomu nic dokazovat. K lesu ji přivedl její otec, který ji naučil stopovat zvěř, tiše se pohybovat v divočině, správně používat loveckou pušku a orientovat se v neznámém terénu.
+Sophia už od dětství milovala koně a většinu volného času trávila ve stájích. Naučila se o ně pečovat, ošetřovat je, rozpoznávat jejich chování a pomáhat s výcvikem. Nejvíce si oblíbila mohutné plemeno **Shire**, které ji fascinovalo svou silou, klidnou povahou a věrností.
 
-Postupem let se z ní stala zkušená lovkyně, která se nebojí vydávat ani do nebezpečných oblastí. Nejvíce ji přitahoval lov nebezpečných šelem — medvědů, vlků, pum a černých panterů. Tyto tvory obdivuje pro jejich sílu, nebezpečnost a respekt, který si zaslouží.
+Sebastian ji v její vášni podporoval a společně pracovali na okolních hospodářstvích a rančích.
 
-Loví nejen kvůli masu a kožešinám, ale i proto, že miluje samotný pobyt v přírodě, ticho lesa a ten pocit, kdy je sama se sebou a divočinou. Ke zvířatům chová respekt a věří, že lovec musí znát své hranice a nikdy nezabíjet zbytečně.
+Právě ve stájích Sophia pravidelně vídala také **Daniela**, který stejně jako ona miloval koně a chtěl se v budoucnu věnovat jejich trénování. Daniel byl pro Sophii známou tváří ze stájí a zároveň kamarádem jejího bratra Sebastiana.
 
-## III. Koně a plemeno Shire
+## III. Lov a příroda
 
-Největší zalíbení Sophie našla v koních. Už jako malá trávila více času ve stájích než mezi ostatními dětmi. Pomáhala s krmením, čištěním, ošetřováním a každodenní péčí o zvířata. Postupem času se naučila rozpoznávat jejich nálady, chování a potřeby. Dokázala poznat, kdy je kůň nervózní, vystrašený nebo kdy potřebuje klid a trpělivý přístup.
+Kromě koní Sophia milovala lov a divokou přírodu. Společně se Sebastianem často vyráželi do hlubokých lesů a hor, kde lovili zvěř a zdokonalovali své schopnosti. Sophii nejvíce přitahovali medvědi, vlci, pumy a černí panteři. Ke zvířatům však vždy chovala respekt a nikdy nelovila zbytečně.
 
-Ze všech koní ji nejvíce okouzlilo mohutné plemeno Shire. Fascinovala ji jejich síla, majestátní vzhled, klidná povaha a neobyčejná věrnost.
+Příroda pro ni představovala svobodu, klid a místo, kde nemusela nikomu nic dokazovat.
 
-Na okolních hospodářstvích a rančích se postupně naučila pracovat s různými koňmi, ale právě k plemeni Shire měla vždy nejblíže. Pomáhala s jejich výcvikem, ošetřováním, zapřaháním a prací kolem stájí.
+## IV. Ztráta rodičů
 
-Pro ni nebyli koně jen pracovními zvířaty, ale společníky, jimž dokázala důvěřovat mnohem více než lidem.
+Když bylo Sophii dvaadvacet let a Sebastianovi šestadvacet, jejich otec tragicky zemřel při kácení stromů, když ho zasáhl kmen odražený od skály.
 
-## IV. Ztráta rodiny
+Jeho smrt rodinu hluboce zasáhla. Matka se se ztrátou manžela nedokázala vyrovnat a její zdravotní stav se postupně zhoršoval.
 
-Když bylo Sophii dvaadvacet let, její otec tragicky zemřel při kácení stromu vysoko v horách. Jeden z kmenů se odrazil od skály a zasáhl ho. Jeho smrt rodinu hluboce zasáhla. Matka se s jeho odchodem nikdy nedokázala zcela vyrovnat, postupně ztrácela chuť do života a většinu dní trávila doma.
+Sophia a Sebastian společně převzali péči o hospodářství i nemocnou matku. Sophia se starala o domácnost, koně a přijímala příležitostnou práci, zatímco Sebastian vykonával těžší práce. Společně také lovili, aby zajistili maso a další potřebné zásoby.
 
-Sophie se o ni několik let starala a přijímala každou poctivou práci, aby je obě uživila — vařila pro dělníky, prala prádlo, pomáhala na rančích, starala se o koně a občas vyrážela na lov. Přesto se zdravotní stav její matky postupně zhoršoval a po několika letech vlivem stáří, vyčerpání a smutku zemřela.
+Přes veškerou jejich snahu matka po několika letech zemřela.
 
-Sophie tak zůstala úplně sama.
+Sourozenci tak přišli o oba rodiče, ale **nikdy nezůstali sami, protože měli jeden druhého**. Tato ztráta jejich vzájemné pouto ještě více posílila.
 
 ## V. Nedůvěra k lidem
 
-Během let poznala Sophie odvrácenou stránku lidské povahy. Setkávala se s lidmi, kteří jí slibovali pomoc, ale když ji skutečně potřebovala, obrátili se k ní zády. Někteří se snažili využít její situace, jiní nedodržovali své sliby nebo odmítali zaplatit za poctivou práci.
+Během těžkých let Sophia poznala, že lidem nelze vždy věřit. Někteří jim slibovali pomoc, ale nedodrželi své slovo, jiní se snažili využít jejich složité životní situace nebo odmítali zaplatit za odvedenou práci.
 
-Každá podobná zkušenost v ní zanechala stopu. Postupně se naučila nespoléhat na cizí slova a neposuzovat člověka podle toho, jak mile dokáže mluvit.
+Postupně se z ní stala uzavřená, opatrná a velmi nedůvěřivá žena. O své minulosti mluví jen zřídka, své pocity skrývá a cizí lidi si k sobě téměř nepouští.
 
-Sophie lidem nevěří téměř vůbec. Vždy si drží odstup, své soukromí si pečlivě chrání a o minulosti mluví jen zřídka. Věří, že lidé dokážou své skutečné úmysly skrývat, zatímco zvířata jsou ve svém chování upřímnější.
+Jediným člověkem, kterému bezvýhradně důvěřuje, je její starší bratr Sebastian. Nikdy ji nezradil ani neopustil a Sophia ví, že se na něj může vždy spolehnout.
 
-Získat její důvěru je nesmírně obtížné, ale pokud vidí, že je to skutečně potřeba, dokáže být laskavá a starostlivá.
+Přesto není zlým člověkem. Dokáže být laskavá, starostlivá a ochotná pomoci, především pokud jde o zvířata. Věří však, že koně jsou mnohem upřímnější než většina lidí.
 
 ## VI. Cesta za novým životem
 
-Po smrti matky už Sophii doma nic nedrželo. Rodinné hospodářství jí připomínalo vše, co ztratila, a tak se rozhodla opustit svůj domov a vydat se na cestu za novými možnostmi.
+Po smrti matky se Sophia a Sebastian rozhodli opustit rodinné hospodářství v Tennessee, které jim připomínalo bolestné vzpomínky na rodiče.
 
-Na cestách se živila především prací kolem koní, lovem a výpomocí na rančích. Starala se o nemocná zvířata, pomáhala ve stájích a přijímala práci všude tam, kde bylo potřeba dalších rukou. Když neměla možnost pracovat, vyrážela do lesů a hor, kde lovila divokou zvěř.
+Společně se vydali hledat nový domov. Na cestách se živili lovem, prací kolem koní a příležitostnou výpomocí na rančích. Často přespávali v přírodě, daleko od měst a lidského ruchu.
 
-Často trávila dlouhé večery u malého ohně, daleko od měst a lidského ruchu. Nikde se však nezdržovala déle, než bylo nutné. Nechtěla si vytvářet závazky ani se příliš sbližovat s lidmi. Přesto v sobě stále nosila naději, že jednou najde místo, které bude moci nazývat domovem.
+Sophia a Sebastian se nikdy nerozdělili. Od dětství až do současnosti vždy drželi při sobě a společně překonávali všechny překážky.
 
-## VII. Současnost a cíle
+Během svého putování se soustředili především na přežití, obstarávání zásob a hledání nového domova. Na jednotlivých místech se nezdržovali déle, než bylo nutné, a nové známosti příliš nevyhledávali. Sophia o svém bratrovi neměla problém mluvit, ale s cizími lidmi své rodinné záležitosti zbytečně nerozebírala. Přestože sourozenci cestovali stále společně, Sebastian se s lidmi z jejího okolí téměř nesetkával. Kromě samotné Sophia ho z jejích známých osobně zná pouze Daniel, který je zároveň Sebastianovým kamarádem.
 
-Sophie Cherry je dnes samostatná, pracovitá a odolná žena, která se nebojí tvrdé práce ani nástrah divočiny. Její největší láskou zůstávají koně, především plemeno Shire, kterému by se chtěla věnovat po zbytek života.
+## VII. Katie a společné obchody
 
-Jedním z jejích snů je vlastní malá stáj nebo malé hospodářství, kde by mohla chovat koně, pečovat o ně a žít poklidným životem daleko od problémů ostatních lidí.
+Během svých cest Sophia navázala přátelství s Katie. Společně se seznámily s menší skupinou indiánů, se kterými začaly pravidelně obchodovat.
 
-Zároveň se však nechce vzdát své vášně pro lov a přírodu. Ráda by nadále vyrážela do lesů, hor a divočiny, kde se cítí skutečně svobodná. Není člověkem, který by vyhledával konflikty, ale rozhodně se nenechá snadno zastrašit. Nehledá slávu, bohatství ani uznání ostatních.
+Vyměňovaly zeleninu, ovoce, jablka, kůže, kožešiny, lovecké úlovky, nasbírané plodiny, pamlsky pro koně a další zásoby.
 
-Touží pouze po vlastním kousku země, několika věrných koních, klidu a svobodě.
+Postupem času si s touto skupinou vybudovaly dobré vztahy založené na vzájemné důvěře a respektu. Díky častým setkáním se **Sophia a Katie naučily jejich jazyk**, který využívaly při obchodování i běžné komunikaci.
 
-## VIII. Katie a společné cesty
+Sebastian svou sestru při cestách doprovázel, ale během obchodování se držel stranou a z bezpečné vzdálenosti dohlížel na její ochranu. Jejich jazyk neuměl a samotných rozhovorů se neúčastnil.
 
-Katie a Sophie spolu na cestách obchodovaly s domorodými obyvateli, kteří jim důvěřovali. Vyměňovaly maso, zeleninu, krmení pro koně a další produkty. Během těchto cest se obě naučily i jejich jazyk, který někdy používají v rozhovorech mezi sebou.
+Katie se se Sebastianem nikdy osobně nesetkala a znala ho pouze z vyprávění Sophia.
+
+## VIII. Současnost a cíle
+
+Sophia Cherry je dnes osmadvacetiletá samostatná, pracovitá a odvážná žena, která miluje koně, lov a přírodu. Její starší bratr Sebastian, kterému je dvaatřicet let, zůstává jejím nejbližším člověkem a oporou.
+
+Jejich společným snem je vlastnit malé hospodářství s pastvinami a stájemi, kde by Sophia mohla chovat své milované koně plemene **Shire** a Sebastian se věnovat hospodaření, práci a lovu.
+
+Sophia se nechce vzdát ani loveckých výprav a pobytu v divočině, kde nachází skutečný klid a svobodu.
+
+Nevyhledává konflikty, ale dokáže se bránit. Umí zacházet s puškou, stopovat zvěř a přežít v náročných podmínkách. K cizím lidem zůstává zdrženlivá a nedůvěřivá.
+
+Sourozenci netouží po bohatství ani slávě. Chtějí pouze vlastní domov, několik věrných koní, klid a svobodu.
+
+Sophia se během života naučila jednu důležitou věc:
+
+„Kůň člověka nezradí ze zlého úmyslu, ale člověk to dokáže udělat i s úsměvem na tváři.“
+
+Existuje však jeden člověk, který jí dokázal, že ne všichni lidé jsou stejní – její starší bratr Sebastian.
+
+Ať už je život zavede kamkoli, Sophia a Sebastian Cherry budou vždy držet při sobě. Protože dokud mají jeden druhého, stále mají rodinu.
 
 ## Vzhled a charakter
 
-Sophie má tmavé vlasy, výrazné modrošedé oči, jemné pihy a štíhlou, ale pevnou postavu. Obléká se prakticky a přizpůsobuje svůj oděv životu v přírodě. Nosí černý klobouk, tmavé oblečení, koženou výbavu a šátek v hlubokých fialových odstínech.
+Sophia má dlouhé černé vlasy, výrazné modrošedé oči, jemné pihy a štíhlou, ale pevnou postavu. Obléká se prakticky a přizpůsobuje svůj oděv životu v přírodě. Nosí černý klobouk, tmavé oblečení, koženou výbavu a šátek v hlubokých fialových odstínech.
 
 Je klidná, rezervovaná, vnímavá, sarkastická a loajální. Dokáže být nebezpečná, když je to potřeba. Důvěru nerozdává snadno, ale ke zvířatům přistupuje s trpělivostí a respektem.
