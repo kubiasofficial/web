@@ -1,12 +1,14 @@
 # New Horizon RP — sedm příběhů
 
-Čisté HTML/CSS/JavaScript. Otevřete `dist/index.html` v prohlížeči bez instalace a serveru. Funguje i přes file://. Google Fonts mají systémové náhrady pro offline režim.
+HTML/CSS/JavaScript s přihlášením přes Discord a serverovým ověřováním přístupů. Veřejný výběr ukazuje pouze medailony a základní představení. Po přihlášení se otevře osobní prostor; celé lore dostane jen vlastník nebo jím povolený čtenář. Kódy byly odstraněné. Nasazení vyžaduje Cloudflare Worker, D1 a OAuth2; přes samotné `file://` soukromé archivy nefungují. Kompletní nastavení je v `../bot/AUTH_SETUP.md`.
 
-Dostupné jsou všechny postavy: Nathaniel James Raven, Scarlett Sky Raven, Daniel Thomas Raven, Katharine Jane Hunter a Sophia Cherry. Každá má samostatnou adresu pomocí #jméno, kapitoly, portrét a lore ke stažení. Na mobilu se portréty posouvají vodorovně. Escape vrací k výběru.
+Dostupných je všech sedm postav: Nathaniel, Scarlett, Daniel, Katharine, Sophia, Vincent a Elijah. Veřejně není publikovaný Markdown, texty kapitol ani soukromé údaje. Přímé odkazy a stažení lore procházejí stejnou serverovou kontrolou. Sdílení spravuje pouze vlastník přes „Komu důvěřuji“; správce nezískává automatický přístup.
 
-Zdrojové příběhy jsou v `dist/assets/*.md`. Po jejich úpravě spusťte `python build-lore.py`. Poznámky k přepisům a nesjednocené rodinné chronologii jsou v `content/`. Původní obrázky v `../obrazky` zůstávají beze změny. Prompty generovaných portrétů jsou v kořeni projektu.
+Zdrojové příběhy jsou v `../bot/private/lore/*.md`, data v `../bot/private/profiles.json`. Po úpravě Markdownu spusťte z kořene `python web/build-lore.py`, potom `node bot/build-worker.mjs`. Klientský zdroj je `portal-runtime.js`; sestaví se přes `node ../bot/prepare-web.mjs`. Aktuální testy: `node --test ../bot/worker.test.js ../bot/archive.test.js` a `node ../bot/verify-portal.mjs` ze složky web. Staré kontroly kódových zámků se na novou verzi nevztahují.
 
-Sophia: na výslovné přání uživatele přebírá všechny nové údaje: Sophia Cherry, 28 let, 30. prosince 1870, nedaleko Nashvillu v Tennessee. Nesoulad věku s rokem 1897 je vědomě zachován. Podle aktualizace z 1. listopadu 2026 je Sebastian (32 let) dlouholetý přítel bez příbuzenské vazby; s Danielem se neznají. Sophia a Daniel jsou pouze kamarádi. Aktuální příběh je v `dist/assets/sophie-cherry.md`, předchozí verze zůstává v `content/sophie-original.txt`.
+Sophia: věk a datum podle výslovně schválených údajů zůstávají zachované. Sebastian je dlouholetý přítel bez příbuzenské vazby; s Danielem se neznají. Sophia a Daniel jsou pouze kamarádi. Aktuální příběh je v `../bot/private/lore/sophie-cherry.md`, předchozí verze zůstává v `content/sophie-original.txt`.
+
+Níže je historie dřívějšího vizuálního vývoje. Pokyny o veřejných lore souborech a kódových zámcích v historických poznámkách již neplatí; rozhodující je nový postup v `../bot/AUTH_SETUP.md`.
 
 ## Vizuální čtení
 

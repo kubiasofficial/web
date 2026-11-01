@@ -1,78 +1,7 @@
-function escapeHTML(text) { return text.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
-function inline(text) { return escapeHTML(text).replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>').replace(/\*(.+?)\*/g, '<em>$1</em>'); }
-function blocks(text) {
-  return text.trim().split(/\n\s*\n/).map(block => {
-    const lines = block.split('\n');
-    if (lines.every(line => /^- /.test(line))) return '<ul>' + lines.map(line => '<li>' + inline(line.slice(2)) + '</li>').join('') + '</ul>';
-    if (lines.every(line => /^\d+\. /.test(line))) return '<ol>' + lines.map(line => '<li>' + inline(line.replace(/^\d+\. /, '')) + '</li>').join('') + '</ol>';
-    if (/^---/.test(block)) return '';
-    return '<p>' + inline(block).replace(/\n/g,'<br>') + '</p>';
-  }).join('');
-}
-
-
-
-const people = {
- nathaniel: {
-  name:'Nathaniel James Raven',given:'NATHANIEL JAMES',nickname:'Nate',file:'nathaniel-james-raven.md',image:'nathaniel.png',number:'003',birth:'14. XI. 1862',age:'35 let',occupation:'Železničář & mechanik',relatives:'Daniel & Scarlett Raven',
-  kicker:'Ne každý náklad je zapsaný v knihách.',description:'Železničář. Obchodník. Muž, který se<br>naučil znát cenu mlčení.',cta:'POZNAT JEHO MINULOST',sidebar:'JEHO PŘÍBĚH',
-  alt:'Nathaniel Raven v černém klobouku a dlouhém kabátu, s hodinkovým řetízkem na vestě',
-  quote:'Jestli hledáte slušnýho chlapa, zkuste kostel.<br>Jestli hledáte někoho, kdo svou práci odvede,<br>možná se domluvíme.',
-  closing:'Tentokrát chce být tím,<br><em>kdo rozhoduje o směru své cesty.</em>',chapters:window.RAVEN_CHAPTERS||[],
-  family:[{label:'MLADŠÍ BRATR',name:'Daniel Thomas Raven',text:'Chce se věnovat výcviku koní. Temperament a tvrdohlavost si přiváží z Missouri.',href:'#daniel'},{label:'MLADŠÍ SESTRA',name:'Scarlett Sky Raven',text:'Hledá vlastní životní cestu. Nathaniel k ní od dětství cítí silné ochranné pouto.',href:'#scarlett'}]
- },
- scarlett: {
-  name:'Scarlett Sky Raven',given:'SCARLETT SKY',nickname:'Sky',file:'scarlett-sky-raven.md',image:'scarlett.png',number:'001',birth:'12. IV. 1879',age:'18 let',occupation:'Obchodnice · stáje & hostince',relatives:'Nathaniel & Daniel Raven',
-  kicker:'Podceňuj mě dál. Je to tvoje největší chyba.',description:'Vlastní hlava. Ostrý jazyk.<br>Svoboda, o které rozhoduje sama.',cta:'POZNAT JEJÍ MINULOST',sidebar:'JEJÍ PŘÍBĚH',
-  alt:'Scarlett Sky Raven, mladá pihovatá žena v černém klobouku, indigové košili a vysokých jezdeckých botách',
-  quote:'Podceňuj mě dál.<br>Je to tvoje největší chyba.',
-  closing:'Nechce, aby rozhodovali za ni.<br><em>Svou cestu si vybere sama.</em>',chapters:window.SCARLETT_CHAPTERS||[],
-  family:[{label:'NEJSTARŠÍ BRATR',name:'Nathaniel James Raven',text:'Respektuje ho a ví, že se na něj může spolehnout. Jeho ochranitelské poučování jí ale leze na nervy.',href:'#nathaniel'},{label:'STARŠÍ BRATR',name:'Daniel Thomas Raven',text:'Učil ji jezdit na koni. Dokážou se hádat a provokovat, ale spojuje je silné sourozenecké pouto.',href:'#daniel'}]
- }
- ,daniel: {
-  name:'Daniel Thomas Raven',given:'DANIEL THOMAS',nickname:'Dan',file:'daniel-thomas-raven.md',image:'daniel.png',number:'002',birth:'1867',age:'30 let',occupation:'Trenér a cvičitel koní',relatives:'Nathaniel & Scarlett Raven',
-  kicker:'Když to nejde po dobrým, půjde to po mým.',description:'Trpělivost pro koně. Ostrý jazyk pro lidi.<br>Nový začátek s minulostí v sedle.',cta:'POZNAT JEHO MINULOST',sidebar:'JEHO PŘÍBĚH',
-  alt:'Daniel Thomas Raven, muž s rozcuchanými hnědými vlasy, krátkými vousy a tmavým praktickým jezdeckým oblečením',
-  quote:'Koně jsou jednoduchý. Když se tě bojí, poznáš to. Když ti věří, poznáš to taky. Zato člověk se na tebe usměje, potřese ti rukou a druhej den tě klidně prodá za pár dolarů.',
-  closing:'Jeho největší předností není schopnost koně ukrást.<br><em>Je to schopnost ho vycvičit.</em>',chapters:window.DANIEL_CHAPTERS||[],
-  family:[{label:'STARŠÍ BRATR',name:'Nathaniel James Raven',text:'Nathaniel plánuje a promýšlí. Daniel častěji jedná podle situace. Rozdílné povahy ale rodinné pouto nepřetrhly.',href:'#nathaniel'},{label:'MLADŠÍ SESTRA',name:'Scarlett Sky Raven',text:'Učil ji jezdit na koni a dodnes ji rád provokuje. Přes všechny hádky by se jí neváhal zastat.',href:'#scarlett'}]
- }
-
- ,katie: {
-  name:'Katharine Jane Hunter',given:'KATHARINE JANE',surname:'HUNTER',nickname:'Katie',file:'katharine-jane-hunter.md',image:'katie.png',number:'004',birth:'02. II. 1871',origin:'TEXAS',stampTitle:'OSOBNÍ ARCHIV · KATIE HUNTER',age:'26 let',occupation:'Rančerka · farmářka · lovkyně',relatives:'Blackwater',relationLabel:'BYDLIŠTĚ',
-  kicker:'Některé rány nejsou vidět, ale pořád bolí.',description:'Pevná vůle. Důvěra zasloužená činy.<br>Vlastní cesta do Blackwateru.',cta:'POZNAT JEJÍ MINULOST',sidebar:'JEJÍ PŘÍBĚH',storyChapterCount:7,
-  alt:'Katharine Jane Hunter s tmavým copem, jizvou na tváři a praktickým koženým jezdeckým oblečením',
-  quote:'Některé rány nejsou vidět,<br>ale pořád bolí.',closing:'Někdy je nejtěžší cesta ta,<br><em>která vede domů.</em>',chapters:window.KATIE_CHAPTERS||[],
-  familyTitle:'Lidé po jejím boku',familyEyebrow:'DŮVĚRA SE POZNÁ PODLE ČINŮ.',familyDescription:'Nečeká velká gesta. Váží si lidí, kteří drží slovo, přiloží ruku k dílu a nezmizí při prvním problému.',
-  family:[{label:'SPOLEČNÉ CESTY A OBCHODY',name:'Sophia Cherry',text:'Při společných cestách obchodovaly s domorodými obyvateli. Naučily se i jejich jazyk, který občas používají mezi sebou.',href:'#sophie'},{label:'OPORA V NOVÉM KRAJI',name:'Rodina Crowe',text:'S rodinou Crowe přijela do Blackwateru. Je pro ni důležitou oporou, vlastní nezávislosti se však nevzdává.',status:'Opora v Blackwateru'}]
- }
-
- ,sophie: {
-  name:'Sophia Cherry',given:'SOPHIA',surname:'CHERRY',nickname:'Soph',file:'sophie-cherry.md',image:'sophie.png',number:'005',birth:'30. XII. 1870',origin:'NEDALEKO NASHVILLU · TENNESSEE',stampTitle:'OSOBNÍ ARCHIV · SOPHIA CHERRY',age:'28 let',occupation:'Lovkyně · stopařka · práce s koňmi',relatives:'Sebastian · dlouholetý přítel, 32 let',relationLabel:'BLÍZKÝ ČLOVĚK',
-  kicker:'Lepší je držet si odstup, než litovat důvěry.',description:'Ticho lesa. Věrnost koní.<br>Svoboda, kterou si nenechá vzít.',cta:'POZNAT JEJÍ MINULOST',sidebar:'JEJÍ PŘÍBĚH',storyChapterCount:8,
-  alt:'Sophia Cherry v černém klobouku s tmavými vlasy, modrošedýma očima, fialovým šátkem a loveckou výbavou',
-  quote:'Kůň člověka nezradí ze zlého úmyslu,<br>ale člověk to dokáže udělat i s úsměvem na tváři.',closing:'Někdy si člověk najde rodinu i tam,<br><em>kde žádnou pokrevní vazbu nemá.</em>',chapters:window.SOPHIE_CHAPTERS||[],
-  familyTitle:'Lidé, kterým důvěřuje',familyEyebrow:'PŘÁTELSTVÍ, KTERÉ OBSTÁLO V ČASE.',familyDescription:'Sebastian je její dlouholetý známý a dobrý přítel už od dětství. Nejsou příbuzní, ale během cest se naučili spoléhat jeden na druhého a společně hledají nový domov.',
-  family:[{label:'DLOUHOLETÝ PŘÍTEL · 32 LET',name:'Sebastian',text:'V těžkých chvílích jí pomáhal a později se připojil k jejímu putování. Společně sní o hospodářství s pastvinami a stájemi pro koně Shire. Nejsou rodina ani příbuzní.',status:'Dobrý přítel a opora od dětství'},{label:'KAMARÁD ZE STÁJÍ',name:'Daniel Thomas Raven',text:'Spojuje je láska ke koním a čisté přátelství. Nikdy mezi nimi nebylo nic romantického. Daniel a Sebastian se navzájem vůbec neznají.',href:'#daniel'},{label:'SPOLEČNÉ CESTY A OBCHODY',name:'Katharine Jane Hunter',text:'S Katie obchodovaly s domorodými obyvateli a naučily se jejich jazyk. Katie zná Sebastiana pouze ze Sophiina vyprávění; osobně se nikdy nesetkali.',href:'#katie'}]
- }
-
- ,vincent: {
-  name:'Vincent Elias Mercer',given:'VINCENT ELIAS',surname:'MERCER',nickname:'Vince',file:'vincent-elias-mercer.md',image:'vincent.png',number:'006',birth:'17. IV. 1869',origin:'SEDALIA · MISSOURI',stampTitle:'OSOBNÍ ARCHIV · VINCENT MERCER',age:'28 let',occupation:'Obchodník · vyjednavač · přeprava',relatives:'Dakota · Saint Denis',relationLabel:'PŮSOBENÍ',
-  kicker:'Dobrý obchod poznáš podle peněz.',description:'Obchodní instinkt. Úsměv, který otevírá dveře.<br>Druhá šance vybudovat něco trvalého.',cta:'POZNAT JEHO MINULOST',sidebar:'JEHO PŘÍBĚH',storyChapterCount:8,
-  alt:'Vincent Elias Mercer v černém klobouku, elegantním tmavém kabátu a vestě, s kapesními hodinkami a prsteny',
-  quote:'Dobrý obchod poznáš podle peněz.<br>Dobrého člověka podle toho, kdo zůstane,<br>když peníze dojdou.',closing:'Zná hodnotu slova, cenu zrady<br><em>a význam přátelství.</em>',chapters:window.VINCENT_CHAPTERS||[],
-  familyTitle:'Společníci. Přátelé. Druhá šance.',familyEyebrow:'DŮVĚRA MÁ VĚTŠÍ CENU NEŽ ZLATO.',familyDescription:'Nathaniel plánuje, Vincent vyjednává a Daniel dává věci do pohybu. Do Dakoty přijíždějí se společnou vizí Raven Railway Company.',
-  family:[{label:'PŘÍTEL A OBCHODNÍ SPOLEČNÍK',name:'Nathaniel James Raven',text:'Respektuje jeho úsudek a věří jeho plánům. Přesto si nenechá ujít příležitost provokovat jeho vážnou povahu.',href:'#nathaniel'},{label:'BLÍZKÝ PŘÍTEL',name:'Daniel Thomas Raven',text:'Společná dobrodružství, slovní přestřelky a přátelství, které nekončí tam, kde začínají problémy.',href:'#daniel'}]
- }
- ,elijah: {
-  name:'Elijah Cole Walker',given:'ELIJAH COLE',surname:'WALKER',nickname:'Young Walker',file:'elijah-cole-walker.md',image:'elijah.png',number:'007',birth:'12. III. 1872',origin:'FORT SMITH · ARKANSAS',stampTitle:'OSOBNÍ ARCHIV · ELIJAH WALKER',age:'25 let',occupation:'Stopař · honák · bývalý pašerák',relatives:'Služba zákonu',relationLabel:'AMBICE',
-  kicker:'Hvězdu musí člověk nejprve zasloužit.',description:'Minulost psance. Zásady, které neopustí.<br>Do Dakoty přijíždí zasloužit si nový začátek.',cta:'POZNAT JEHO MINULOST',sidebar:'JEHO PŘÍBĚH',storyChapterCount:8,
-  alt:'Elijah Cole Walker, mladý muž s tmavými vlnitými vlasy, v černém klobouku, obnošeném kabátu a světlé košili',
-  quote:'Celý život jsem utíkal před zákonem.<br>Teď chci dokázat, že zákon nemusí být tím,<br>před čím lidé utíkají.',closing:'Spravedlnost musí nejdřív<br><em>přijít od člověka.</em>',chapters:window.ELIJAH_CHAPTERS||[],
-  familyTitle:'Lidé a stopy jeho minulosti',familyEyebrow:'HVĚZDA TI NEDÁ CHARAKTER.',familyDescription:'Do Dakoty přijíždí sám. S bratry Ravenovými ani jejich společností nemá dosavadní vazby. Přiváží si doporučení, vlastní zásady a minulost, před kterou nelze utíkat navždy.',
-  family:[{label:'MUŽ, KTERÝ MU DAL DRUHOU ŠANCI',name:'Benjamin Hayes',text:'Poctivý zástupce šerifa. Ukázal mu, že zákon může chránit nevinné, a před odjezdem mu napsal doporučení.',status:'Respekt · důvěra · doporučující dopis'},{label:'STÍN PAŠERÁCKÉ MINULOSTI',name:'Caleb Hargrove',text:'Bývalý vůdce pašerácké skupiny. Elijah se mu postavil, když odmítl obětovat nevinné cestující dostavníku.',status:'Nevyřešená minulost'},{label:'SPOLEČNÍK NA CESTĚ',name:'Ash',text:'Tmavý hnědák, se kterým přijíždí do Dakoty hledat nový začátek.',status:'Jeho kůň'}]
- }
-};
+function escapeHTML(text){return String(text ?? '').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+function inline(text){return escapeHTML(text).replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>').replace(/\*(.+?)\*/g,'<em>$1</em>');}
+function blocks(text){return text.trim().split(/\n\s*\n/).map(block=>{const lines=block.split('\n');if(lines.every(line=>/^- /.test(line)))return '<ul>'+lines.map(line=>'<li>'+inline(line.slice(2))+'</li>').join('')+'</ul>';return '<p>'+inline(block).replace(/\n/g,'<br>')+'</p>';}).join('');}
+const people={};
 const selection=document.getElementById('selection');
 const profile=document.getElementById('profile');
 let activePerson=null;
@@ -105,7 +34,7 @@ function renderProfile(key){
  profile.querySelector('.chapter-sidebar>.eyebrow').textContent=person.sidebar;
  document.getElementById('story').innerHTML=person.chapters.map((chapter,index)=>`<section class="chapter" id="${chapterID(key,index)}"><h2><span class="chapter-number">${index<(person.storyChapterCount||6)?'KAPITOLA '+String(index+1).padStart(2,'0'):'OSOBNÍ SPIS'}</span>${escapeHTML(chapter.title)}</h2>${blocks(chapter.text)}</section>`).join('');
  document.getElementById('chapter-nav').innerHTML=person.chapters.map((chapter,index)=>`<a href="#${chapterID(key,index)}">${escapeHTML(chapter.title)}</a>`).join('');
- profile.querySelector('.download').href='assets/'+person.file;
+ profile.querySelector('.download').href='/api/ubd/archive/download/'+key;
  profile.querySelector('.family h2').textContent=person.familyTitle||'Rodina Ravenových';
  profile.querySelector('.family>div>.eyebrow').textContent=person.familyEyebrow||'KREV SPOJUJE. MINULOST ROZDĚLUJE.';
  profile.querySelector('.family>div>p').textContent=person.familyDescription||'Po letech cestování dostávají možnost být znovu poblíž sebe. Každý si však přiváží vlastní cíle a tajemství.';
@@ -115,78 +44,143 @@ function renderProfile(key){
  window.VisualReading?.render(key,person,{chapterID,escapeHTML});
 }
 
-const archiveLock=document.createElement('dialog');
-archiveLock.className='archive-lock';
-archiveLock.setAttribute('aria-labelledby','archive-title');
-archiveLock.innerHTML=`<form class="archive-lock-form"><button class="archive-close" type="button" aria-label="Zavřít">×</button><div class="archive-lock-seal"><img src="assets/icon-nathaniel.png" alt="" width="132" height="132"><span aria-hidden="true">⌑</span></div><p class="archive-eyebrow">NEW HORIZON · SOUKROMÝ ARCHIV</p><p class="archive-file">OSOBNÍ SPIS № 003</p><h2 id="archive-title">Některá tajemství<br>zůstávají pod zámkem.</h2><p class="archive-owner">Nathaniel James Raven</p><div class="archive-divider" aria-hidden="true">✦</div><label for="archive-code">Zadej čtyřmístný přístupový kód</label><input id="archive-code" name="code" type="password" inputmode="numeric" pattern="[0-9]{4}" maxlength="4" minlength="4" autocomplete="off" required aria-describedby="archive-status"><p id="archive-status" role="status" aria-live="polite">Pouze pro ty, kterým byla svěřena důvěra.</p><button class="archive-unlock" type="submit">ODEMKNOUT PŘÍBĚH <span aria-hidden="true">↗</span></button><button class="archive-return" type="button">← Zpět k postavám</button><p class="archive-bottom">SEDALIA, MISSOURI <span>1897</span></p></form>`;
-document.body.append(archiveLock);
-const archiveCode=archiveLock.querySelector('input');
-const archiveStatus=archiveLock.querySelector('#archive-status');
-const archiveCodes={nathaniel:'2811',sophie:'3651',daniel:'4536',katie:'4691',scarlett:'5817',vincent:'3362',elijah:'1470'};
-let archiveUnlocked=null,archivePerson=null;
-let archiveOpening=false,archiveAnimation=null;
-const motionAllowed=()=>!matchMedia('(prefers-reduced-motion: reduce)').matches;
-function resetArchiveAnimation(){archiveAnimation?.cancel();archiveAnimation=null;archiveOpening=false;archiveLock.classList.remove('archive-opening');archiveLock.querySelector('.archive-unlock').disabled=false;}
-function closeArchive(){const key=archivePerson;resetArchiveAnimation();archiveLock.close();location.hash='';requestAnimationFrame(()=>document.querySelector('.cast-link.'+key)?.focus());}
-archiveLock.querySelector('.archive-close').addEventListener('click',closeArchive);
-archiveLock.querySelector('.archive-return').addEventListener('click',closeArchive);
-archiveLock.addEventListener('cancel',event=>{event.preventDefault();closeArchive();});
-archiveCode.addEventListener('input',()=>{archiveCode.value=archiveCode.value.replace(/\D/g,'');archiveCode.removeAttribute('aria-invalid');archiveStatus.textContent='Pouze pro ty, kterým byla svěřena důvěra.';archiveLock.classList.remove('archive-error');});
-archiveLock.querySelector('form').addEventListener('submit',async event=>{
- event.preventDefault();
- if(archiveOpening)return;
- if(archiveCode.value!==archiveCodes[archivePerson]){
-  archiveCode.setAttribute('aria-invalid','true');archiveLock.classList.add('archive-error');archiveStatus.textContent='Tento kód archiv neotevře. Zkus to znovu.';archiveCode.select();
-  if(motionAllowed())archiveLock.querySelector('form').animate([{transform:'translateX(0)'},{transform:'translateX(-6px)'},{transform:'translateX(5px)'},{transform:'translateX(-3px)'},{transform:'translateX(0)'}],{duration:320});
-  return;
- }
- const openingPerson=archivePerson;
- archiveOpening=true;archiveLock.querySelector('.archive-unlock').disabled=true;
- archiveStatus.textContent='Pečeť ověřena. Archiv se otevírá…';
- if(motionAllowed()){
-  archiveLock.classList.add('archive-opening');
-  archiveAnimation=archiveLock.animate([{opacity:1,transform:'scale(1)',offset:0},{opacity:1,transform:'scale(1.015)',offset:.4},{opacity:0,transform:'scale(1.05) translateY(-8px)',offset:1}],{duration:620,easing:'ease-in-out'});
-  try{await archiveAnimation.finished;}catch{return;}
- }
- archiveUnlocked=openingPerson;resetArchiveAnimation();archiveLock.close();route();
- if(motionAllowed())profile.animate([{opacity:0,transform:'translateY(16px)'},{opacity:1,transform:'translateY(0)'}],{duration:650,easing:'ease-out'});
-});
-function route(){
- if(archiveOpening)resetArchiveAnimation();
- const hash=location.hash;
- const prefixedKey=Object.keys(people).find(name=>hash==='#'+name||hash.startsWith('#'+name+'-'));
- const key=prefixedKey||((hash==='#pribeh'||/^#kapitola-\d+$/.test(hash))?'nathaniel':null);
- const wasProfile=!profile.hidden;
- const previousPerson=activePerson;
- if(key!==archiveUnlocked)archiveUnlocked=null;
- if(archiveCodes[key]&&archiveUnlocked!==key){
-  if(archivePerson!==key&&archiveLock.open)archiveLock.close();
-  archivePerson=key;
-  const person=people[key];
-  archiveLock.classList.toggle('archive-sophie',key==='sophie');
-  archiveLock.classList.toggle('archive-daniel',key==='daniel'||key==='elijah');
-  archiveLock.classList.toggle('archive-katie',key==='katie');
-  archiveLock.classList.toggle('archive-scarlett',key==='scarlett'||key==='vincent');
-  archiveLock.querySelector('.archive-lock-seal img').src='assets/icon-'+key+'.png';
-  archiveLock.querySelector('.archive-owner').textContent=person.name;
-  archiveLock.querySelector('.archive-file').textContent='OSOBNÍ SPIS № '+person.number;
-  archiveLock.querySelector('.archive-bottom').textContent=(person.origin||'SEDALIA, MISSOURI')+' ';
-  const archiveYear=document.createElement('span');archiveYear.textContent='1897';archiveLock.querySelector('.archive-bottom').append(archiveYear);
-  selection.hidden=false;profile.hidden=true;window.VisualReading?.syncVisibility(null);
-  document.title='Uzamčený archiv · New Horizon RP';
-  if(!archiveLock.open){archiveCode.value='';archiveCode.removeAttribute('aria-invalid');archiveLock.classList.remove('archive-error');archiveStatus.textContent='Pouze pro ty, kterým byla svěřena důvěra.';archiveLock.showModal();archiveCode.focus();}
-  return;
- }
- if(archiveLock.open)archiveLock.close();
- if(key&&activePerson!==key)renderProfile(key);
- selection.hidden=!!key;profile.hidden=!key;
- window.VisualReading?.syncVisibility(key);
- document.title=key?people[key].name+' · New Horizon RP':'New Horizon RP · Sedm osudů, jeden horizont';
- requestAnimationFrame(()=>{
-  if((key&&hash==='#'+key)||!hash)window.scrollTo({top:0,left:0,behavior:'instant'});
-  else document.getElementById(hash.slice(1))?.scrollIntoView({behavior:'instant'});
-  if(!key&&wasProfile)document.querySelector('.cast-link.'+previousPerson)?.focus({preventScroll:true});
- });
+
+const profileTemplate=profile.innerHTML;
+// Browser receives private profile data only after server authorization.
+const catalog = window.PUBLIC_PEOPLE;
+let identity = null, csrf = '', ready = false, routeVersion = 0, refreshVersion = 0, loggingOut = false;
+const apiRoot = '/api/ubd';
+const deniedText = 'Děláš si prdel? Takto se informace nezískávají. Nejsi hoden znát toto info, takže si naser :D';
+const api = async (path, options = {}) => {
+ const response = await fetch(apiRoot + path, { credentials: 'same-origin', cache: 'no-store', signal: AbortSignal.timeout(7000),
+  ...options, headers: { ...(options.body ? { 'Content-Type': 'application/json' } : {}), ...(options.method && options.method !== 'GET' ? { 'X-CSRF-Token': csrf } : {}), ...options.headers } });
+ let data;try{data=await response.json();}catch{throw Object.assign(Error('Archiv je dočasně nedostupný.'),{status:503});}
+ if(!response.ok)throw Object.assign(Error(data.error || 'Archiv není dostupný.'),{status:response.status});
+ return data;
+};
+const escape = escapeHTML;
+const motionAllowed = () => !matchMedia('(prefers-reduced-motion: reduce)').matches;
+const loginHref = apiRoot + '/auth/login';
+const accountControls = document.createElement('div'); accountControls.className='account-controls';
+document.querySelector('.masthead').append(accountControls);
+document.querySelector('.edition').hidden=true;
+const welcome=document.createElement('section');welcome.className='account-welcome';welcome.hidden=true;
+welcome.innerHTML='<div><span class="eyebrow">TVŮJ SOUKROMÝ ARCHIV</span><h2></h2><p></p></div><button type="button" class="trust-open">Komu důvěřuji <span>↗</span></button>';
+selection.before(welcome);
+const rail=document.createElement('nav');rail.className='private-cast';rail.hidden=true;rail.setAttribute('aria-label','Ostatní postavy');welcome.after(rail);
+const portal=document.createElement('main');portal.id='portal';portal.hidden=true;selection.before(portal);
+const notice=document.createElement('p');notice.className='archive-notice';notice.setAttribute('role','status');notice.hidden=true;welcome.before(notice);
+const denial=document.createElement('dialog');denial.className='archive-denial';denial.setAttribute('aria-labelledby','denial-title');
+denial.innerHTML='<button class="dialog-close" type="button" aria-label="Zavřít">×</button><img width="180" height="180" alt=""><p class="eyebrow">SOUKROMÝ ARCHIV</p><h2 id="denial-title"></h2><p class="denial-motto"></p><p class="denial-copy"></p><a class="discord-login" href="'+loginHref+'">Přihlásit přes Discord</a><p class="denial-hint"></p><button class="denial-back" type="button">Zpět k postavám</button>';
+document.body.append(denial);
+function purgeProfile(){
+ profile.hidden=true;profile.innerHTML=profileTemplate;activePerson=null;
+ for(const key of Object.keys(people))delete people[key];
+ window.VisualReading?.syncVisibility(null);
 }
-window.addEventListener('hashchange',route);route();
+function currentKey(){const hash=location.hash;return Object.keys(catalog).find(key=>hash==='#'+key||hash.startsWith('#'+key+'-'))||((hash==='#pribeh'||/^#kapitola-\d+$/.test(hash))?'nathaniel':null);}
+function setNotice(text){notice.textContent=text;notice.hidden=!text;}
+function deny(key,message=deniedText){
+ purgeProfile();selection.hidden=!!identity;portal.hidden=!identity;
+ const person=catalog[key];denial.style.setProperty('--aura',person.color);
+ denial.querySelector('img').src='assets/icon-'+key+'.png';
+ denial.querySelector('h2').textContent=person.name;denial.querySelector('.denial-motto').textContent=person.motto;
+ denial.querySelector('.denial-copy').textContent=message;
+ denial.querySelector('.discord-login').hidden=!!identity;
+ denial.querySelector('.denial-hint').textContent=identity?'O nahlédnutí požádej přímo hráče této postavy. Povolení může udělit ve svém archivu.':'Přihlas se a vstup do svého příběhu. Cizí archiv otevře jen jeho majitel.';
+ if(!denial.open)denial.showModal();document.title='Soukromý archiv · New Horizon RP';
+}
+function closeDenial(){denial.close();location.hash='';}
+denial.querySelector('.dialog-close').onclick=closeDenial;denial.querySelector('.denial-back').onclick=closeDenial;
+denial.addEventListener('cancel',event=>{event.preventDefault();closeDenial();});
+function renderAccount(){
+ document.body.classList.toggle('signed-in',!!identity);welcome.hidden=!identity;rail.hidden=!identity;
+ accountControls.replaceChildren();
+ if(!identity){const login=document.createElement('a');login.href=loginHref;login.className='discord-login';login.textContent='Přihlásit přes Discord';accountControls.append(login);return;}
+ const photo=new Image(34,34);photo.src=identity.user.avatar;photo.alt='';accountControls.append(photo);
+ const name=document.createElement('span');name.textContent=identity.user.name;accountControls.append(name);
+ const logout=document.createElement('button');logout.type='button';logout.textContent='Odhlásit';logout.onclick=async()=>{
+  logout.disabled=true;loggingOut=true;refreshVersion++;try{await api('/auth/logout',{method:'POST'});identity=null;csrf='';purgeProfile();trust.close();renderAccount();location.hash='';await route();}catch(error){setNotice(error.message);logout.disabled=false;}finally{loggingOut=false;}
+ };accountControls.append(logout);
+ const day=new Intl.DateTimeFormat('cs-CZ',{weekday:'long',timeZone:'Europe/Prague'}).format(new Date());
+ const greeting={pondělí:'Krásné pondělí',úterý:'Krásné úterý',středa:'Krásnou středu',čtvrtek:'Krásný čtvrtek',pátek:'Krásný pátek',sobota:'Krásnou sobotu',neděle:'Krásnou neděli'};
+ welcome.querySelector('h2').textContent=(greeting[day]||'Krásný den')+', '+identity.user.name+'.';
+ const own=identity.owned[0],person=catalog[own];
+ document.body.style.setProperty('--account-aura',person?.color||'#c88e4a');
+ welcome.querySelector('p').textContent=person?'Tvůj příběh čeká, '+person.nickname+'.':'Vítej mezi příběhy, do kterých ti jejich hráči dovolí nahlédnout.';
+ welcome.querySelector('.trust-open').hidden=!own;
+ rail.innerHTML='<a class="private-home" href="#" aria-label="Můj prostor">✦</a>'+Object.entries(catalog).filter(([key])=>key!==own).map(([key,p])=>'<a href="#'+key+'" class="private-medallion" style="--aura:'+p.color+'" aria-label="'+escape(p.name)+' — '+(identity.access.includes(key)?'Přístup udělen':'Uzamčeno')+'"><img src="assets/icon-'+key+'.png" alt="" width="64" height="64"><span>'+escape(p.nickname)+'<small>'+(identity.access.includes(key)?'PŘÍSTUP UDĚLEN':'UZAMČENO')+'</small></span></a>').join('');
+ portal.innerHTML='<section class="personal-scene" style="--aura:'+(person?.color||'#c88e4a')+'">'+(person?'<img class="personal-portrait" src="assets/'+person.image+'" alt="'+escape(person.name)+'" width="1024" height="1536">':'<img class="personal-emblem" src="assets/NH.png" alt="New Horizon RP">')+'<div class="personal-copy"><span class="eyebrow">'+(person?'PŘÍBĚH, O KTERÉM ROZHODUJEŠ TY':'KAŽDÁ DŮVĚRA MÁ SVŮJ PŘÍBĚH')+'</span><h1>'+(person?escape(person.given)+'<strong>'+escape(person.surname)+'</strong>':'Vítej v archivu')+'</h1>'+(person?'<p class="personal-signature">'+escape(person.nickname)+'</p><p>'+escape(person.motto)+'</p><a class="story-button" href="#'+own+'">Otevřít můj příběh <span>↗</span></a>':'<p>Po straně najdeš všechny postavy. Jejich příběhy si přečteš, pokud ti je hráči zpřístupní.</p>')+'<p class="personal-privacy">'+(person?'Tvůj archiv je soukromý. Ostatní do něj vstoupí pouze s tvým svolením.':'Přihlášení samo o sobě cizí příběhy neodemyká.')+'</p></div></section>';
+}
+async function refreshSession(initial=false){
+ if(loggingOut)return;const version=++refreshVersion;
+ try{
+  const data=await api('/auth/session');if(version!==refreshVersion)return;const next=data.authenticated?data:null,changed=identity?.user.id!==next?.user.id;
+  if(changed){purgeProfile();trust.close();trustGeneration++;}
+  identity=next;csrf=data.csrf||'';ready=true;renderAccount();
+  if(!identity||activePerson&&!identity.access.includes(activePerson)){purgeProfile();await route();}
+  else if(initial||changed||currentKey()&&activePerson!==currentKey()&&identity.access.includes(currentKey()))await route();
+ }catch(error){if(version!==refreshVersion)return;ready=true;purgeProfile();if(initial){identity=null;renderAccount();selection.hidden=false;}setNotice(error.message);}
+}
+async function route(){
+ const version=++routeVersion,key=currentKey(),previous=activePerson;
+ if(!ready)return;
+ if(denial.open)denial.close();
+ if(!key){purgeProfile();selection.hidden=!!identity;portal.hidden=!identity;document.title='New Horizon RP · Sedm osudů, jeden horizont';window.scrollTo({top:0,behavior:'instant'});return;}
+ if(!identity){deny(key);return;}
+ if(!identity.access.includes(key)){deny(key);return;}
+ if(activePerson!==key){
+  purgeProfile();setNotice('Ověřuji přístup k příběhu…');
+  try{
+   const data=await api('/archive/lore/'+key);if(version!==routeVersion||document.hidden)return;
+   people[key]=data.person;renderProfile(key);setNotice('');
+  }catch(error){if(version!==routeVersion)return;if([401,403].includes(error.status))deny(key);else{setNotice(error.message);portal.hidden=false;}return;}
+ }
+ selection.hidden=true;portal.hidden=true;profile.hidden=false;window.VisualReading?.syncVisibility(key);document.title=catalog[key].name+' · New Horizon RP';
+ if(previous!==key&&motionAllowed())profile.animate([{opacity:0,transform:'translateY(16px)'},{opacity:1,transform:'translateY(0)'}],{duration:420,easing:'ease-out'});
+ requestAnimationFrame(()=>{if(location.hash==='#'+key)window.scrollTo({top:0,behavior:'instant'});else document.getElementById(location.hash.slice(1))?.scrollIntoView({behavior:'instant'});});
+}
+const trust=document.createElement('dialog');trust.className='trust-dialog';trust.setAttribute('aria-labelledby','trust-title');
+trust.innerHTML='<button type="button" class="dialog-close" aria-label="Zavřít">×</button><span class="eyebrow">TVŮJ PŘÍBĚH. TVÁ DŮVĚRA.</span><h2 id="trust-title">Komu důvěřuji</h2><p>Povolení platí pouze pro čtení tvého lore. Můžeš ho kdykoliv odebrat.</p><form class="trust-form"><label>Vyber hráče<select name="known"><option value="">Jiný člen Discordu — zadat ID</option></select></label><label>Discord ID<input name="userId" inputmode="numeric" pattern="[0-9]{17,20}" maxlength="20" required placeholder="ID hráče z vašeho serveru"></label><button type="submit">Najít hráče</button></form><div class="trust-candidate" hidden></div><p class="trust-status" role="status" aria-live="polite"></p><div class="trust-list"></div>';
+document.body.append(trust);trust.querySelector('.dialog-close').onclick=()=>trust.close();
+let trustKey=null,trustGeneration=0;
+function trustStatus(text){trust.querySelector('.trust-status').textContent=text;}
+async function loadGrants(){
+ const data=await api('/archive/grants/'+trustKey);const list=trust.querySelector('.trust-list');list.replaceChildren();
+ if(!data.grants.length){const empty=document.createElement('p');empty.textContent='Zatím do tvého archivu nikdo další nesmí.';list.append(empty);}
+ for(const grant of data.grants){
+  const row=document.createElement('div');row.className='trust-person';const img=new Image(40,40);img.src=grant.avatar;img.alt='';
+  const label=document.createElement('span');label.textContent=grant.display_name;const button=document.createElement('button');button.type='button';button.textContent='Odebrat přístup';
+  button.onclick=async()=>{button.disabled=true;try{await api('/archive/grants/'+trustKey+'/'+grant.grantee_id,{method:'DELETE'});trustStatus('Přístup byl odebrán.');await loadGrants();}catch(error){trustStatus(error.message);button.disabled=false;}};
+  row.append(img,label,button);list.append(row);
+ }
+}
+welcome.querySelector('.trust-open').onclick=async()=>{
+ trustKey=identity?.owned[0];if(!trustKey)return;trustGeneration++;trustStatus('Načítám přístupy…');trust.querySelector('.trust-candidate').hidden=true;
+ trust.showModal();try{
+  const data=await api('/archive/candidates');const select=trust.querySelector('select');select.replaceChildren(new Option('Jiný člen Discordu — zadat ID',''));
+  for(const user of data.users)select.append(new Option(user.name,user.id));
+  await loadGrants();trustStatus('');
+ }catch(error){trustStatus(error.message);}
+};
+trust.querySelector('select').onchange=event=>{trust.querySelector('input').value=event.target.value;trustGeneration++;trust.querySelector('.trust-candidate').hidden=true;};
+trust.querySelector('input').oninput=()=>{trustGeneration++;trust.querySelector('.trust-candidate').hidden=true;};
+trust.querySelector('form').onsubmit=async event=>{
+ event.preventDefault();const generation=++trustGeneration,id=trust.querySelector('input').value;trustStatus('Hledám hráče na Discordu…');
+ try{
+  const data=await api('/archive/member/'+id);if(generation!==trustGeneration)return;
+  const box=trust.querySelector('.trust-candidate');box.replaceChildren();const img=new Image(48,48);img.src=data.user.avatar;img.alt='';
+  const name=document.createElement('span');name.textContent=data.user.name;const button=document.createElement('button');button.type='button';button.textContent='Povolit nahlížení';
+  button.onclick=async()=>{button.disabled=true;try{await api('/archive/grants/'+trustKey,{method:'POST',body:JSON.stringify({userId:data.user.id})});box.hidden=true;trustStatus('Nahlížení bylo povoleno.');await loadGrants();}catch(error){trustStatus(error.message);button.disabled=false;}};
+  box.append(img,name,button);box.hidden=false;trustStatus('Je to správný člověk? Potvrď povolení.');
+ }catch(error){trustStatus(error.message);}
+};
+window.addEventListener('hashchange',route);
 window.addEventListener('keydown',event=>{if(event.key==='Escape'&&!profile.hidden)location.hash='';});
+document.addEventListener('visibilitychange',()=>{if(document.hidden){routeVersion++;purgeProfile();}else refreshSession(true);});
+window.addEventListener('pageshow',event=>{if(event.persisted){routeVersion++;purgeProfile();refreshSession(true);}});
+setInterval(()=>{if(!document.hidden&&identity)refreshSession();},15000);
+renderAccount();
+const loginResult=new URLSearchParams(location.search).get('login');
+if(loginResult){setNotice(loginResult==='failed'?'Přihlášení se nepodařilo. Ověř, že jsi členem vašeho Discord serveru, a zkus to znovu.':'Přihlášení bylo zrušeno.');history.replaceState(null,'',location.pathname+location.hash);}
+refreshSession(true);

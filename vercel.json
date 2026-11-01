@@ -3,5 +3,7 @@
   "framework": null,
   "buildCommand": "",
   "installCommand": "",
-  "outputDirectory": "dist"
+  "outputDirectory": "dist",
+  "rewrites": [{ "source": "/api/ubd/:path*", "destination": "https://ubd-bot.suslik-kuba.workers.dev/:path*" }],
+  "headers": [{ "source": "/api/ubd/:path*", "headers": [{ "key": "Cache-Control", "value": "private, no-store, max-age=0" }] }]
 }
