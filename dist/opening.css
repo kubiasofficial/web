@@ -15,7 +15,7 @@
 #selection .medallion-card{clip-path:none;display:flex;flex-direction:column;align-items:center;padding:0;text-align:center;gap:0;min-width:0;background:none;position:relative;transition:transform .4s ease}
 #selection .medallion-card:after{display:none}
 .medallion-art{position:relative;width:100%;max-width:248px;aspect-ratio:1;display:block;isolation:isolate;margin-bottom:22px}
-.medallion-art img{display:block;width:100%;height:100%;object-fit:contain;border-radius:50%;position:relative;z-index:1;transition:filter .45s,transform .45s;filter:brightness(.85);}
+.medallion-art>img{display:block;width:100%;height:100%;object-fit:contain;border-radius:50%;position:relative;z-index:1;transition:filter .45s,transform .45s;filter:brightness(.85);}
 .aura-ring{position:absolute;inset:5%;border-radius:50%;border:1px solid color-mix(in srgb,var(--aura),transparent 65%);box-shadow:0 0 20px color-mix(in srgb,var(--aura),transparent 85%);transition:box-shadow .45s,opacity .45s,transform .45s;opacity:.4}
 .player-badge{position:absolute;z-index:0;top:8px;left:50%;display:flex;flex-direction:column;align-items:center;gap:4px;width:max-content;max-width:calc(100% + 20px);padding:9px 15px 11px;border:1px solid color-mix(in srgb,var(--aura),transparent 45%);border-radius:5px 5px 2px 2px;background:linear-gradient(135deg,color-mix(in srgb,var(--aura) 12%,#111116),#111116f5);box-shadow:0 0 18px color-mix(in srgb,var(--aura),transparent 85%);opacity:0;transform:translate(-50%,14px);transition:transform .28s cubic-bezier(.2,.7,.25,1),opacity .2s ease;pointer-events:none}
 .player-label{font:8px/1 'Barlow Condensed',Arial,sans-serif;letter-spacing:2px;color:var(--aura)}
@@ -28,7 +28,7 @@
 .medallion-nickname{font:38px/1 'Mrs Saint Delafield',cursive;color:var(--aura);margin-top:9px}.medallion-role{font:11px 'Barlow Condensed',sans-serif;letter-spacing:1px;color:#9b9182;margin-top:10px}
 .medallion-action{font:10px 'Barlow Condensed',sans-serif;letter-spacing:2px;color:var(--aura);margin-top:20px;opacity:0;transform:translateY(5px);transition:opacity .3s,transform .3s}
 #selection .medallion-card:hover,#selection .medallion-card:focus-visible{transform:translateY(-7px);outline:none;box-shadow:none}
-.medallion-card:is(:hover,:focus-visible) .medallion-art img{filter:brightness(1.1);transform:scale(1.035)}
+.medallion-card:is(:hover,:focus-visible) .medallion-art>img{filter:brightness(1.1);transform:scale(1.035)}
 .medallion-card:is(:hover,:focus-visible) .aura-ring{opacity:1;transform:scale(1.04);box-shadow:0 0 22px var(--aura),0 0 65px color-mix(in srgb,var(--aura),transparent 55%),inset 0 0 25px color-mix(in srgb,var(--aura),transparent 65%)}
 .medallion-card:is(:hover,:focus-visible) .aura-ring:before,.medallion-card:is(:hover,:focus-visible) .aura-ring:after{opacity:1}
 .medallion-card:is(:hover,:focus-visible) .medallion-action{opacity:1;transform:translateY(0)}
@@ -70,3 +70,11 @@
 @media(max-width:1279px){
  .medallion-cast{padding:96px 80px 48px;margin-block:-68px -36px;scroll-padding-inline:80px}
 }
+/* Discord player card slides from behind the character medallion. */
+.player-badge{flex-direction:row;gap:10px;padding:10px 13px;max-width:calc(100% + 12px);min-height:62px;text-align:left;border-radius:9px;background:linear-gradient(125deg,color-mix(in srgb,var(--aura) 14%,#111116),#111116fa);box-shadow:0 6px 24px #0008,0 0 22px color-mix(in srgb,var(--aura),transparent 82%)}
+.player-details{display:flex;flex-direction:column;gap:6px;min-width:0}
+.player-label{font-size:8px;letter-spacing:1.5px;white-space:nowrap}
+.player-handle{font-size:15px;line-height:1.2;max-height:3.6em;overflow:hidden}
+.player-avatar{display:grid;place-items:center;flex:0 0 40px;width:40px;height:40px;overflow:hidden;border-radius:50%;border:1px solid var(--aura);background:color-mix(in srgb,var(--aura) 18%,#161419);box-shadow:0 0 12px color-mix(in srgb,var(--aura),transparent 76%);font:600 13px Arial,sans-serif;color:#f1e5d5}
+.player-avatar img{display:block;width:100%;height:100%;object-fit:cover;border-radius:50%;filter:none;transform:none;transition:none}
+@media(max-width:1279px){.medallion-cast{padding-top:128px;margin-top:-100px}}

@@ -16,11 +16,23 @@ try {
  if(!tabs) throw Error('Browser debugging endpoint unavailable');
  ws = new WebSocket(tabs.find(t=>t.type==='page').webSocketDebuggerUrl);
  await new Promise((resolve,reject)=>{ws.onopen=resolve;ws.onerror=reject;});
- ws.onmessage = event => {const msg=JSON.parse(event.data);if(msg.id){const task=pending.get(msg.id);pending.delete(msg.id);msg.error?task.reject(Error(JSON.stringify(msg.error))):task.resolve(msg.result);}};
+ const profileCalls=[];
+ ws.onmessage = event => {const msg=JSON.parse(event.data);if(msg.id){const task=pending.get(msg.id);pending.delete(msg.id);msg.error?task.reject(Error(JSON.stringify(msg.error))):task.resolve(msg.result);}else if(msg.method==='Fetch.requestPaused'){
+ const {requestId,request}=msg.params;
+ if(request.url.includes('/players/')){
+ const key=request.url.split('/').at(-1);profileCalls.push(key);
+ const names={daniel:'Eidík',nathaniel:'kubiasofficial · Discord',katie:'Safík Alex',scarlett:'Graciie04',sophie:'🐭Myška🐭',elijah:'mata20_official',vincent:'<img src=x onerror=alert(1)>'};
+ send('Fetch.fulfillRequest',{requestId,responseCode:200,responseHeaders:[{name:'Content-Type',value:'application/json'},{name:'Access-Control-Allow-Origin',value:'*'}],body:Buffer.from(JSON.stringify({character:key,name:names[key],avatar:'https://cdn.discordapp.com/embed/avatars/0.png',synced:true})).toString('base64')}).catch(()=>{});
+ }else{
+ const svg='<svg xmlns="http://www.w3.org/2000/svg" width="40" height="40"><rect width="40" height="40" fill="#5865f2"/><text x="20" y="27" text-anchor="middle" font-size="24" fill="white">D</text></svg>';
+ send('Fetch.fulfillRequest',{requestId,responseCode:200,responseHeaders:[{name:'Content-Type',value:'image/svg+xml'}],body:Buffer.from(svg).toString('base64')}).catch(()=>{});
+ }
+ }};
  const send=(method,params={})=>new Promise((resolve,reject)=>{const id=++nextId;const timer=setTimeout(()=>{pending.delete(id);reject(Error('CDP timed out: '+method));},10000);pending.set(id,{resolve:value=>{clearTimeout(timer);resolve(value);},reject:error=>{clearTimeout(timer);reject(error);}});ws.send(JSON.stringify({id,method,params}));});
  const evaluate=async expression=>(await send('Runtime.evaluate',{expression,returnByValue:true,awaitPromise:true})).result.value;
  const assert=(condition,message)=>{if(!condition)throw Error(message);console.log('PASS '+message);};
  await send('Page.enable');
+ await send('Fetch.enable',{patterns:[{urlPattern:'*workers.dev/players/*'},{urlPattern:'*cdn.discordapp.com/*'}]});
  await send('Emulation.setDeviceMetricsOverride',{width:1440,height:1000,deviceScaleFactor:1,mobile:false});
  await send('Page.navigate',{url:new URL('file:///'+root.replaceAll('\\','/')+'/dist/index.html').href});
  await sleep(1800);
@@ -29,6 +41,7 @@ try {
  await evaluate('Promise.all([...document.querySelectorAll(".medallion-art img")].map(i=>i.decode()))');
  const players={daniel:'Eid\u00edk',nathaniel:'kubiasofficial',katie:'Saf\u00edk Alex',scarlett:'Graciie04',sophie:'\ud83d\udc2dMy\u0161ka\ud83d\udc2d',elijah:'mata20_official',vincent:'BuFu'};
  assert(await evaluate('document.querySelectorAll(".player-badge").length===7'),'Seven player badges');
+ assert(profileCalls.length===0,'No profile calls before interaction');
  for(const [key,name] of Object.entries(players)){
  assert(await evaluate('document.querySelector("#player-'+key+' .player-handle").textContent')===name,'Correct player '+key);
  }
@@ -38,10 +51,12 @@ try {
  await send('Input.dispatchMouseEvent',{type:'mouseMoved',x:1,y:1});await sleep(350);
  assert(await evaluate('getComputedStyle(document.querySelector("#player-'+key+'")).opacity==="0"'),'Badge tucked away '+key);
  await evaluate('document.querySelector(".cast-link.'+key+'").scrollIntoView({block:"nearest",inline:"center",behavior:"instant"})');await sleep(120);
- const point=await evaluate('(()=>{const r=document.querySelector(".cast-link.'+key+' img").getBoundingClientRect();return {x:r.x+r.width/2,y:r.y+r.height/2}})()');
+ const point=await evaluate('(()=>{const r=document.querySelector(".cast-link.'+key+' .medallion-art>img").getBoundingClientRect();return {x:r.x+r.width/2,y:r.y+r.height/2}})()');
  await send('Input.dispatchMouseEvent',{type:'mouseMoved',...point});await sleep(400);
  assert(await evaluate('getComputedStyle(document.querySelector("#player-'+key+'")).opacity==="1"'),'Hover reveals '+key+' '+width);
- assert(await evaluate('(()=>{const b=document.querySelector("#player-'+key+'").getBoundingClientRect(),i=document.querySelector(".cast-link.'+key+' img").getBoundingClientRect();return b.bottom<i.top})()'),'Badge above portrait');
+ assert(await evaluate('!!document.querySelector("#player-'+key+' .player-avatar img")'),'Discord avatar loaded '+key);
+ assert(profileCalls.filter(k=>k===key).length===1,'Profile cached across repeated hovers '+key);
+ assert(await evaluate('(()=>{const b=document.querySelector("#player-'+key+'").getBoundingClientRect(),i=document.querySelector(".cast-link.'+key+' .medallion-art>img").getBoundingClientRect();return b.bottom<i.top})()'),'Badge above portrait');
  if(width<1280)assert(await evaluate('(()=>{const b=document.querySelector("#player-'+key+'").getBoundingClientRect(),n=document.querySelector(".medallion-cast").getBoundingClientRect();return b.top>=n.top && b.left>=n.left && b.right<=n.right})()'),'No clipping');
  if(width===1920&&key==='nathaniel')await screenshot('player-nick-desktop');
  if(width===390&&key==='sophie')await screenshot('player-nick-mobile');
@@ -53,6 +68,8 @@ try {
  await evaluate('document.querySelector(".cast-link.vincent").focus()');
  assert(await evaluate('document.querySelector(".cast-link.vincent").matches(":focus-visible") && getComputedStyle(document.querySelector("#player-vincent")).opacity==="1"'),'Keyboard reveals badge');
  assert(await evaluate('getComputedStyle(document.querySelector("#player-vincent")).transitionDuration==="0s"'),'Reduced motion immediate');
+ await sleep(250);
+ assert(await evaluate('document.querySelector("#player-vincent .player-handle").textContent==="<img src=x onerror=alert(1)>" && !document.querySelector("#player-vincent .player-handle img")'),'Discord names remain plain text');
  await evaluate('document.querySelector(".cast-link.vincent").click()');await sleep(100);
  assert(await evaluate('document.querySelector(".archive-lock").open'),'Click still opens archive');
  await send('Browser.close');
