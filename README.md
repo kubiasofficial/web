@@ -6,7 +6,7 @@ Dostupné jsou všechny postavy: Nathaniel James Raven, Scarlett Sky Raven, Dani
 
 Zdrojové příběhy jsou v `dist/assets/*.md`. Po jejich úpravě spusťte `python build-lore.py`. Poznámky k přepisům a nesjednocené rodinné chronologii jsou v `content/`. Původní obrázky v `../obrazky` zůstávají beze změny. Prompty generovaných portrétů jsou v kořeni projektu.
 
-Sophia: na výslovné přání uživatele přebírá všechny nové údaje: Sophia Cherry, 28 let, 30. prosince 1870, nedaleko Nashvillu v Tennessee. Nesoulad věku s rokem 1897 je vědomě zachován. Bratr Sebastian Cherry má 32 let. Originál je v `content/sophie-original.txt`.
+Sophia: na výslovné přání uživatele přebírá všechny nové údaje: Sophia Cherry, 28 let, 30. prosince 1870, nedaleko Nashvillu v Tennessee. Nesoulad věku s rokem 1897 je vědomě zachován. Podle aktualizace z 1. listopadu 2026 je Sebastian (32 let) dlouholetý přítel bez příbuzenské vazby; s Danielem se neznají. Sophia a Daniel jsou pouze kamarádi. Aktuální příběh je v `dist/assets/sophie-cherry.md`, předchozí verze zůstává v `content/sophie-original.txt`.
 
 ## Vizuální čtení
 

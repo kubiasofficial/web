@@ -48,12 +48,12 @@ const people = {
  }
 
  ,sophie: {
-  name:'Sophia Cherry',given:'SOPHIA',surname:'CHERRY',nickname:'Soph',file:'sophie-cherry.md',image:'sophie.png',number:'005',birth:'30. XII. 1870',origin:'NEDALEKO NASHVILLU · TENNESSEE',stampTitle:'OSOBNÍ ARCHIV · SOPHIA CHERRY',age:'28 let',occupation:'Lovkyně · stopařka · práce s koňmi',relatives:'Sebastian Cherry · starší bratr, 32 let',relationLabel:'RODINA',
+  name:'Sophia Cherry',given:'SOPHIA',surname:'CHERRY',nickname:'Soph',file:'sophie-cherry.md',image:'sophie.png',number:'005',birth:'30. XII. 1870',origin:'NEDALEKO NASHVILLU · TENNESSEE',stampTitle:'OSOBNÍ ARCHIV · SOPHIA CHERRY',age:'28 let',occupation:'Lovkyně · stopařka · práce s koňmi',relatives:'Sebastian · dlouholetý přítel, 32 let',relationLabel:'BLÍZKÝ ČLOVĚK',
   kicker:'Lepší je držet si odstup, než litovat důvěry.',description:'Ticho lesa. Věrnost koní.<br>Svoboda, kterou si nenechá vzít.',cta:'POZNAT JEJÍ MINULOST',sidebar:'JEJÍ PŘÍBĚH',storyChapterCount:8,
   alt:'Sophia Cherry v černém klobouku s tmavými vlasy, modrošedýma očima, fialovým šátkem a loveckou výbavou',
-  quote:'Kůň člověka nezradí ze zlého úmyslu,<br>ale člověk to dokáže udělat i s úsměvem na tváři.',closing:'Dokud mají jeden druhého,<br><em>stále mají rodinu.</em>',chapters:window.SOPHIE_CHAPTERS||[],
-  familyTitle:'Rodina a blízcí',familyEyebrow:'RODINA MUSÍ DRŽET POHROMADĚ.',familyDescription:'Sebastian je jediný člověk, kterému bezvýhradně důvěřuje. Od dětství se nikdy nerozdělili a společně hledají nový domov. Své soukromí si před ostatními chrání.',
-  family:[{label:'STARŠÍ BRATR · 32 LET',name:'Sebastian Cherry',text:'Nikdy ji nezradil ani neopustil. Společně pečovali o matku, pracují, loví a cestují. Jejich snem je vlastní hospodářství s pastvinami a stájemi pro koně Shire.',status:'Její nejbližší člověk a opora'},{label:'ZNÁMÝ ZE STÁJÍ',name:'Daniel Thomas Raven',text:'Spojuje je láska ke koním. Daniel je Sebastianovým kamarádem a jako jediný ze Sophiiných známých jejího bratra osobně zná.',href:'#daniel'},{label:'SPOLEČNÉ CESTY A OBCHODY',name:'Katharine Jane Hunter',text:'S Katie obchodovaly s domorodými obyvateli a naučily se jejich jazyk. Katie zná Sebastiana pouze z vyprávění Sophia; osobně se nikdy nesetkali.',href:'#katie'}]
+  quote:'Kůň člověka nezradí ze zlého úmyslu,<br>ale člověk to dokáže udělat i s úsměvem na tváři.',closing:'Někdy si člověk najde rodinu i tam,<br><em>kde žádnou pokrevní vazbu nemá.</em>',chapters:window.SOPHIE_CHAPTERS||[],
+  familyTitle:'Lidé, kterým důvěřuje',familyEyebrow:'PŘÁTELSTVÍ, KTERÉ OBSTÁLO V ČASE.',familyDescription:'Sebastian je její dlouholetý známý a dobrý přítel už od dětství. Nejsou příbuzní, ale během cest se naučili spoléhat jeden na druhého a společně hledají nový domov.',
+  family:[{label:'DLOUHOLETÝ PŘÍTEL · 32 LET',name:'Sebastian',text:'V těžkých chvílích jí pomáhal a později se připojil k jejímu putování. Společně sní o hospodářství s pastvinami a stájemi pro koně Shire. Nejsou rodina ani příbuzní.',status:'Dobrý přítel a opora od dětství'},{label:'KAMARÁD ZE STÁJÍ',name:'Daniel Thomas Raven',text:'Spojuje je láska ke koním a čisté přátelství. Nikdy mezi nimi nebylo nic romantického. Daniel a Sebastian se navzájem vůbec neznají.',href:'#daniel'},{label:'SPOLEČNÉ CESTY A OBCHODY',name:'Katharine Jane Hunter',text:'S Katie obchodovaly s domorodými obyvateli a naučily se jejich jazyk. Katie zná Sebastiana pouze ze Sophiina vyprávění; osobně se nikdy nesetkali.',href:'#katie'}]
  }
 
  ,vincent: {
@@ -122,7 +122,7 @@ archiveLock.innerHTML=`<form class="archive-lock-form"><button class="archive-cl
 document.body.append(archiveLock);
 const archiveCode=archiveLock.querySelector('input');
 const archiveStatus=archiveLock.querySelector('#archive-status');
-const archiveCodes={nathaniel:'2811',sophie:'6984',daniel:'4536',katie:'4691',scarlett:'5817',vincent:'3362',elijah:'1470'};
+const archiveCodes={nathaniel:'2811',sophie:'3651',daniel:'4536',katie:'4691',scarlett:'5817',vincent:'3362',elijah:'1470'};
 let archiveUnlocked=null,archivePerson=null;
 let archiveOpening=false,archiveAnimation=null;
 const motionAllowed=()=>!matchMedia('(prefers-reduced-motion: reduce)').matches;

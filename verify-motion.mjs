@@ -38,7 +38,7 @@ try {
  assert(await evaluate('document.querySelector(".archive-lock").classList.contains("archive-opening") && document.querySelector(".archive-unlock").disabled'),'Unlock animation starts');
  await evaluate('document.querySelector(".archive-close").click()');await sleep(750);
  assert(await evaluate('!document.querySelector(".archive-lock").open && !document.querySelector("#selection").hidden && document.querySelector("#profile").hidden'),'Cancel during animation stays home');
- for(const [key,code] of Object.entries({nathaniel:'2811',daniel:'4536',katie:'4691',scarlett:'5817',sophie:'6984',vincent:'3362'})){
+ for(const [key,code] of Object.entries({nathaniel:'2811',daniel:'4536',katie:'4691',scarlett:'5817',sophie:'3651',vincent:'3362'})){
  await evaluate('location.hash="#'+key+'"');await sleep(70);
  await evaluate('document.querySelector("#archive-code").value="'+code+'";document.querySelector(".archive-lock-form").requestSubmit()');await sleep(750);
  assert(await evaluate('!document.querySelector("#profile").hidden && !document.querySelector(".archive-lock").open'),'Animated unlock '+key);

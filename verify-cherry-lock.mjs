@@ -31,7 +31,7 @@ try {
  await screenshot('archive-cherry-desktop');
  await evaluate('document.querySelector("#archive-code").value="2811";document.querySelector(".archive-lock-form").requestSubmit()');
  assert(await evaluate('document.querySelector(".archive-lock").open && document.querySelector("#profile").hidden && document.querySelector("#archive-code").getAttribute("aria-invalid")==="true"'),'Wrong code rejected');
- await evaluate('document.querySelector("#archive-code").value="6984";document.querySelector(".archive-lock-form").requestSubmit()');await sleep(150);
+ await evaluate('document.querySelector("#archive-code").value="3651";document.querySelector(".archive-lock-form").requestSubmit()');await sleep(150);
  assert(await evaluate('!document.querySelector(".archive-lock").open && !document.querySelector("#profile").hidden && document.querySelectorAll(".chapter").length===9'),'Correct code opens lore');
  await evaluate('document.querySelector("#chapter-nav a:nth-child(4)").click()');await sleep(100);
  assert(await evaluate('!document.querySelector(".archive-lock").open && location.hash==="#sophie-kapitola-4"'),'Chapters remain unlocked');

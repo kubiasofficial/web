@@ -26,7 +26,7 @@ try {
  await sleep(1800);
  const {writeFileSync}=await import('node:fs');
  const screenshot=async name=>{if(await evaluate('!!document.querySelector(".poster-transition")'))await sleep(700);const shot=await send('Page.captureScreenshot',{format:'png'});writeFileSync(path.join(qa,name+'.png'),Buffer.from(shot.data,'base64'));};
- const codes={nathaniel:'2811',sophie:'6984',daniel:'4536',katie:'4691',scarlett:'5817',vincent:'3362',elijah:'1470'};
+ const codes={nathaniel:'2811',sophie:'3651',daniel:'4536',katie:'4691',scarlett:'5817',vincent:'3362',elijah:'1470'};
  for(const [key,code] of Object.entries(codes)){
  await evaluate('location.hash=""');await sleep(60);
  await evaluate('document.querySelector(".cast-link.'+key+'").click()');await sleep(80);
@@ -34,8 +34,18 @@ try {
  assert(await evaluate('document.querySelector(".archive-lock-seal img").src.endsWith("icon-'+key+'.png")'),'Correct identity '+key);
  await evaluate('document.querySelector("#archive-code").value="0000";document.querySelector(".archive-lock-form").requestSubmit()');
  assert(await evaluate('document.querySelector(".archive-lock").open && document.querySelector("#profile").hidden'),'Wrong code rejected '+key);
+ if(key==='sophie'){
+ await evaluate('document.querySelector("#archive-code").value="6984";document.querySelector(".archive-lock-form").requestSubmit()');
+ assert(await evaluate('document.querySelector(".archive-lock").open && document.querySelector("#profile").hidden && document.querySelector("#archive-code").getAttribute("aria-invalid")==="true"'),'Old Cherry code rejected');
+ }
  await evaluate('document.querySelector("#archive-code").value="'+code+'";document.querySelector(".archive-lock-form").requestSubmit()');await sleep(750);
  assert(await evaluate('!document.querySelector(".archive-lock").open && !document.querySelector("#profile").hidden'),'Correct code '+key);
+ if(key==='sophie'){
+ assert(await evaluate('document.querySelectorAll("#profile .chapter").length===9'),'Cherry has eight story chapters and appearance');
+ assert(await evaluate('document.querySelector("#profile").textContent.includes("Daniel Sebastiana vůbec nezná a Sebastian Daniela také nezná.")'),'Cherry preserves corrected Daniel and Sebastian relationship');
+ assert(await evaluate('document.querySelector("#profile").textContent.includes("Mezi nimi nikdy nebylo nic romantického.")'),'Cherry and Daniel remain platonic');
+ assert(await evaluate('document.querySelector("#profile").textContent.includes("Sebastian · dlouholetý přítel, 32 let") && !document.querySelector("#profile").textContent.includes("Sebastian Cherry")'),'Profile facts no longer describe Sebastian as her brother');
+ }
  await evaluate('document.querySelector("#chapter-nav a:nth-child(4)").click()');await sleep(60);
  assert(await evaluate('!document.querySelector(".archive-lock").open'),'Chapters unlocked '+key);
  await send('Page.reload');await sleep(300);
