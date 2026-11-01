@@ -47,9 +47,21 @@ function renderProfile(key){
 
 const profileTemplate=profile.innerHTML;
 const PortalPolish = (() => {
- let loader, confirmation, resolveConfirmation=null;
+ let loader, confirmation, resolveConfirmation=null, flyout, castToggle, openTrigger=null, closeTimer;
  const playerNames={daniel:'Eidík',nathaniel:'kubiasofficial',vincent:'BuFu',elijah:'mata20_official',katie:'Safík Alex',scarlett:'Graciie04',sophie:'🐭Myška🐭'};
  const names=new Map(), pendingNames=new Map();
+ const avatars=new Map();
+ function closeCast(){clearTimeout(closeTimer);if(openTrigger)openTrigger.setAttribute('aria-expanded','false');openTrigger=null;if(flyout)flyout.hidden=true;}
+ function positionCard(){if(!openTrigger)return;const rect=openTrigger.getBoundingClientRect();flyout.style.left=(Math.max(rect.right,rail.getBoundingClientRect().right)+10)+'px';flyout.style.top=Math.max(85,Math.min(innerHeight-flyout.offsetHeight-16,rect.top-12))+'px';}
+ function openCast(anchor){
+  if(!anchor)return;clearTimeout(closeTimer);if(openTrigger!==anchor)closeCast();openTrigger=anchor;const key=anchor.dataset.playerKey,p=catalog[key];
+  anchor.setAttribute('aria-expanded','true');flyout.style.setProperty('--aura',p.color);flyout.querySelector('strong').textContent=p.name;
+  flyout.querySelector('.rail-player').textContent=names.get(key)||playerNames[key];const avatar=flyout.querySelector('.rail-avatar');avatar.hidden=!avatars.has(key);if(avatars.has(key))avatar.src=avatars.get(key);
+  const links=flyout.querySelectorAll('a');links[0].href='#'+key;links[1].href='#journal-'+key;
+  links[0].querySelector('small').textContent=identity.access.includes(key)?'Přístup udělen':'Uzamčeno';links[1].querySelector('small').textContent=identity.journalAccess?.includes(key)?'Přístup udělen':'Uzamčeno';
+  flyout.hidden=false;positionCard();loadName(key);
+ }
+ function scheduleClose(){clearTimeout(closeTimer);closeTimer=setTimeout(()=>{if(!flyout.matches(':hover')&&!rail.matches(':hover')&&!flyout.contains(document.activeElement)&&!rail.contains(document.activeElement))closeCast();},180);}
  const lock='<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="6" y="10" width="12" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3M12 14v3"/></svg>';
  const seal='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 2 3 3 4 1 1 4 2 3-3 3-1 4-4-1-3 2-3-3-4-1 1-4-2-3 3-3 1-4 4 1zM8 12l3 3 5-6"/></svg>';
  let bookId=0;
@@ -67,14 +79,25 @@ const PortalPolish = (() => {
   loader=document.createElement('div');loader.className='archive-loader';loader.hidden=true;loader.setAttribute('role','status');loader.setAttribute('aria-live','polite');loader.innerHTML='<span class="loader-orbit"><img width="110" height="110" alt=""></span><span>Otevírám soukromý archiv…</span>';document.body.append(loader);
   confirmation=document.createElement('dialog');confirmation.className='confirm-dialog';confirmation.setAttribute('aria-labelledby','confirm-title');confirmation.innerHTML='<span class="eyebrow">JEŠTĚ JEDNO ROZHODNUTÍ</span><h2 id="confirm-title"></h2><p></p><div><button class="confirm-cancel" type="button">Zpět</button><button class="confirm-accept" type="button"></button></div>';document.body.append(confirmation);
   confirmation.querySelector('.confirm-accept').onclick=()=>settle(true);confirmation.querySelector('.confirm-cancel').onclick=()=>settle(false);confirmation.addEventListener('cancel',event=>{event.preventDefault();settle(false);});
-  const hover=event=>{const anchor=event.target.closest('[data-player-key]');if(anchor){anchor.style.setProperty('--tooltip-top',Math.max(85,Math.min(innerHeight-110,anchor.getBoundingClientRect().top+12))+'px');loadName(anchor.dataset.playerKey);}};
+  flyout=document.createElement('section');flyout.id='cast-card';flyout.className='cast-card';flyout.hidden=true;flyout.setAttribute('aria-label','Postava a její archiv');flyout.innerHTML='<span class="eyebrow">OSOBNÍ SPIS</span><strong></strong><div class="rail-player-row"><img class="rail-avatar" width="34" height="34" alt="" hidden><span class="rail-player"></span></div><div class="cast-card-actions"><a><span>Příběh ↗</span><small></small></a><a class="rail-journal"><span>Deník ↗</span><small></small></a></div>';document.body.append(flyout);
+  castToggle=document.createElement('button');castToggle.type='button';castToggle.className='cast-toggle';castToggle.textContent='✦ Postavy';castToggle.setAttribute('aria-expanded','false');rail.id='private-cast';castToggle.setAttribute('aria-controls',rail.id);document.body.append(castToggle);castToggle.onclick=()=>{const on=document.body.classList.toggle('cast-open');castToggle.setAttribute('aria-expanded',String(on));if(!on)closeCast();};
+  const hover=event=>{const anchor=event.target.closest('[data-player-key]');if(anchor)openCast(anchor);};
   rail.addEventListener('pointerover',hover);rail.addEventListener('focusin',hover);
+  rail.addEventListener('click',event=>{const anchor=event.target.closest('[data-player-key]');if(anchor){event.preventDefault();openCast(anchor);}else if(event.target.closest('.private-home')){closeCast();document.body.classList.remove('cast-open');castToggle.setAttribute('aria-expanded','false');}});
+  rail.addEventListener('pointerleave',scheduleClose);rail.addEventListener('focusout',scheduleClose);flyout.addEventListener('pointerleave',scheduleClose);flyout.addEventListener('focusout',scheduleClose);flyout.addEventListener('pointerenter',()=>clearTimeout(closeTimer));
+  flyout.addEventListener('click',event=>{if(event.target.closest('a')){closeCast();document.body.classList.remove('cast-open');castToggle.setAttribute('aria-expanded','false');}});
+  document.addEventListener('pointerdown',event=>{if(!rail.contains(event.target)&&!flyout.contains(event.target)&&event.target!==castToggle){closeCast();document.body.classList.remove('cast-open');castToggle.setAttribute('aria-expanded','false');}});
+  document.addEventListener('keydown',event=>{if(event.key==='Escape'&&openTrigger){const trigger=openTrigger;closeCast();trigger.focus();closeCast();}});
+  rail.addEventListener('keydown',event=>{if((event.key==='ArrowRight'||event.key==='Tab'&&!event.shiftKey)&&openTrigger&&event.target===openTrigger){event.preventDefault();flyout.querySelector('a').focus();}});
+  flyout.addEventListener('keydown',event=>{if(event.key==='Tab'&&openTrigger){const links=flyout.querySelectorAll('a');if(event.shiftKey&&event.target===links[0]){event.preventDefault();openTrigger.focus();}else if(!event.shiftKey&&event.target===links[1]){event.preventDefault();const triggers=[...rail.querySelectorAll('[data-player-key]')],next=triggers[triggers.indexOf(openTrigger)+1];closeCast();(next||castToggle.offsetParent&&castToggle||document.querySelector('.trust-open')).focus();}}});
+  window.addEventListener('resize',positionCard);rail.addEventListener('scroll',positionCard);window.addEventListener('hashchange',closeCast);
  }
  async function loadName(key){
   if(!key||names.has(key)||pendingNames.has(key))return;
-  const promise=api('/players/'+key).then(data=>{if(typeof data.name==='string'){names.set(key,data.name);const target=rail.querySelector('[data-player-key="'+key+'"] .rail-player');if(target)target.textContent=data.name;}}).catch(()=>{}).finally(()=>pendingNames.delete(key));pendingNames.set(key,promise);
+  const promise=api('/players/'+key).then(data=>{if(typeof data.name==='string')names.set(key,data.name);if(typeof data.avatar==='string'&&data.avatar.startsWith('https://cdn.discordapp.com/'))avatars.set(key,data.avatar);if(openTrigger?.dataset.playerKey===key){flyout.querySelector('.rail-player').textContent=names.get(key)||playerNames[key];const avatar=flyout.querySelector('.rail-avatar');avatar.hidden=!avatars.has(key);if(avatars.has(key))avatar.src=avatars.get(key);}}).catch(()=>{}).finally(()=>pendingNames.delete(key));pendingNames.set(key,promise);
  }
  function account(person,own){
+  closeCast();
   welcome.classList.add('welcome-reveal');
   let avatar=welcome.querySelector('.welcome-avatar');if(!avatar){avatar=new Image(58,58);avatar.className='welcome-avatar';avatar.alt='';welcome.prepend(avatar);}avatar.src=identity.user.avatar;
   let label=welcome.querySelector('.welcome-identity');if(!label){label=document.createElement('span');label.className='welcome-identity';welcome.querySelector('h2').after(label);}label.textContent=person?person.name+' · Tvůj soukromý archiv':'Tvůj prostor mezi příběhy';
@@ -86,12 +109,13 @@ const PortalPolish = (() => {
    const key=anchor.hash.slice(1),p=catalog[key],allowed=identity.access.includes(key),journal=identity.journalAccess?.includes(key);
    anchor.dataset.playerKey=key;anchor.classList.toggle('is-unlocked',allowed);anchor.classList.toggle('is-locked',!allowed);
    const status=document.createElement('span');status.className='medallion-status';status.innerHTML=allowed?seal:lock;anchor.append(status);
-   const tooltip=document.createElement('span');tooltip.className='rail-tooltip';tooltip.innerHTML='<strong>'+escapeHTML(p.name)+'</strong><span class="rail-player"></span>';tooltip.querySelector('.rail-player').textContent=names.get(key)||playerNames[key];anchor.append(tooltip);
-   const journalLink=document.createElement('a');journalLink.className='rail-journal'+(journal?' journal-available':'');journalLink.href='#journal-'+key;journalLink.setAttribute('aria-label','Deník: '+p.name+(journal?' — přístup udělen':' — uzamčeno'));journalLink.innerHTML='<span aria-hidden="true">▤</span> DENÍK';const wrapper=document.createElement('div');wrapper.className='private-member';anchor.replaceWith(wrapper);wrapper.append(anchor,journalLink);
+   anchor.querySelector('span:not(.medallion-status)')?.remove();anchor.setAttribute('role','button');anchor.setAttribute('aria-expanded','false');anchor.setAttribute('aria-controls','cast-card');anchor.setAttribute('aria-label',p.name+' — otevřít nabídku');anchor.addEventListener('keydown',event=>{if(event.key===' '){event.preventDefault();openCast(anchor);}});
+   const wrapper=document.createElement('div');wrapper.className='private-member';wrapper.style.setProperty('--aura',p.color);anchor.replaceWith(wrapper);wrapper.append(anchor);
   }
  }
  function loading(key,on=true){loader.hidden=!on;if(on){loader.style.setProperty('--aura',catalog[key]?.color||'#bd965b');loader.querySelector('img').src='assets/icon-'+key+'.png';}}
  function active(key,kind='lore'){
+  closeCast();rail.querySelectorAll('.private-member').forEach(member=>member.classList.toggle('member-current',member.querySelector('[data-player-key]')?.dataset.playerKey===key));
   rail.querySelectorAll('.private-medallion,.rail-journal').forEach(link=>{const match=kind==='journal'?link.hash==='#journal-'+key:link.hash==='#'+key;link.classList.toggle('is-current',match);if(match)link.setAttribute('aria-current','page');else link.removeAttribute('aria-current');});
  }
  function revealProfile(key){
@@ -208,6 +232,40 @@ const catalog = window.PUBLIC_PEOPLE;
 let identity = null, csrf = '', ready = false, routeVersion = 0, refreshVersion = 0, loggingOut = false, accountFingerprint='';
 const apiRoot = '/api/ubd';
 const deniedText = 'Děláš si prdel? Takto se informace nezískávají. Nejsi hoden znát toto info, takže si naser :D';
+const denialLines = [deniedText,
+ 'Zvědavost ti nechybí. Povolení ale jo. Takže zase hezky zpátky, kovboji.',
+ 'Tady nejsi ve vlastním deníčku. Nejdřív si vyžádej důvěru, pak strkej nos do cizích příběhů.',
+ 'Ani páčidlo, ani hezkej úsměv. Bez svolení majitele se dovnitř nedostaneš.',
+ 'Tenhle spis není veřejnej saloon. Dneska tě dovnitř nepustíme.',
+ 'Hezkej pokus, šerife. Ale odznak na cizí tajemství nestačí.',
+ 'Klika cvakla, dveře drží. Někdo ti očividně ještě nevěří.',
+ 'Cizí minulost není samoobsluha. Zkus nejdřív poprosit majitele.',
+ 'Čumět můžeš. Číst nemůžeš. Tak si ten rozdíl laskavě zapamatuj.',
+ 'Tady máš prd co slídit. Nejdřív povolení, potom tajemství.',
+ 'No jasně, rovnou do cizího spisu. A klíče od baráku bys taky nechtěl?',
+ 'Zamčeno. To znamená zamčeno. Ne „zkusím do toho ještě pětkrát kopnout“.',
+ 'Tenhle příběh má majitele. A ten tě zatím neposlal dál než do prdele.',
+ 'Drzej jsi dost. Důvěryhodnej zatím míň. Vrať se s povolením.',
+ 'Kdyby se důvěra získávala klikáním, byl bys dávno šerif. Smůla.',
+ 'Pracky pryč od cizích tajemství. Tohle není výprodej drbů.',
+ 'Vypadá to jako kniha. Ale pro tebe je to zatím jen drahá dekorace.',
+ 'Tudy cesta nevede, do prdele. Zkus tu přes souhlas majitele.',
+ 'Přišel, kliknul, dostal hovno. Bez povolení to dneska líp nedopadne.',
+ 'Dveře jsou zavřený. Tvoje sebevědomí bohužel není univerzální klíč.',
+ 'Tvoje zvědavost právě narazila čumákem do zamčených dveří.',
+ 'Tady se špinavý prádlo cizím lidem neukazuje. Najdi si vlastní skandál.',
+ 'Pěknej medailon, co? Tak si ho prohlídni. Dál tě nikdo nezval.',
+ 'Tohle není hospodskej drb za jedno pivo. Nejdřív si zasluž důvěru.',
+ 'Kovboji, otoč koně. Na tuhle cestu nemáš povolení.',
+ 'Můžeš klikat až do Vánoc. Zámek má tvoje nadšení úplně na háku.',
+ 'Cizí životopis ti nepatří. Dej tomu majiteli aspoň šanci říct ne.',
+ 'Tak určitě. Ještě ti k tomu uvaříme kafe a přečteme to nahlas. Nejdřív povolení.'
+];
+let denialBag=[],lastDenial='';
+function nextDenial(){
+ if(!denialBag.length){denialBag=[...denialLines];for(let i=denialBag.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[denialBag[i],denialBag[j]]=[denialBag[j],denialBag[i]];}if(denialBag.at(-1)===lastDenial)[denialBag[0],denialBag[denialBag.length-1]]=[denialBag.at(-1),denialBag[0]];}
+ return lastDenial=denialBag.pop();
+}
 const api = async (path, options = {}) => {
  const response = await fetch(apiRoot + path, { credentials: 'same-origin', cache: 'no-store', signal: AbortSignal.timeout(7000),
   ...options, headers: { ...(options.body ? { 'Content-Type': 'application/json' } : {}), ...(options.method && options.method !== 'GET' ? { 'X-CSRF-Token': csrf } : {}), ...options.headers } });
@@ -242,7 +300,7 @@ function deny(key,message=deniedText,scope='lore'){
  const person=catalog[key];denial.style.setProperty('--aura',person.color);
  denial.querySelector('img').src='assets/icon-'+key+'.png';
  denial.querySelector('h2').textContent=person.name;denial.querySelector('.denial-motto').textContent=person.motto;
- denial.querySelector('.denial-copy').textContent=message;
+ denial.querySelector('.denial-copy').textContent=message===deniedText?nextDenial():message;
  denial.querySelector('.discord-login').hidden=!!identity;
  denial.querySelector('.denial-hint').textContent=identity?'O nahlédnutí '+(scope==='journal'?'do deníku ':'')+'požádej přímo hráče této postavy. Povolení může udělit ve svém archivu.':'Přihlas se a vstup do svého příběhu. Cizí archiv otevře jen jeho majitel.';
  const diaryLink=denial.querySelector('.denial-journal');diaryLink.hidden=scope==='journal'||!identity?.journalAccess?.includes(key);diaryLink.href='#journal-'+key;diaryLink.textContent='Máš přístup k deníku této postavy ↗';

@@ -1,0 +1,37 @@
+/* Compact archive rail; the card lives outside the scrolling rail to preserve its aura. */
+.private-cast{box-sizing:border-box;width:142px;padding:15px 12px;gap:clamp(5px,1.4vh,15px);scrollbar-width:none;overscroll-behavior:contain}
+.private-cast::-webkit-scrollbar{display:none}
+.private-home{display:grid;place-items:center;min-height:35px;padding:0;flex-shrink:0}
+.private-member{padding:5px 0;flex-shrink:0;border-radius:0;background:none;box-shadow:none}
+.private-member:has(.is-current){background:none;box-shadow:none}
+.private-member.member-current{background:linear-gradient(90deg,color-mix(in srgb,var(--aura),transparent 90%),transparent);box-shadow:inset 2px 0 var(--aura)}
+.private-medallion{box-sizing:border-box;padding:5px;position:relative;cursor:pointer}
+.private-medallion img{width:clamp(54px,7.8vh,76px);height:clamp(54px,7.8vh,76px);transition:filter .3s,transform .3s,box-shadow .3s}
+.private-medallion.is-locked img{filter:brightness(.76) saturate(.8)}
+.private-medallion:hover img,.private-medallion[aria-expanded=true] img,.private-medallion:focus-visible img{transform:scale(1.07);filter:brightness(1.12) drop-shadow(0 0 11px var(--aura))}
+.private-medallion .medallion-status{top:auto;bottom:4px;right:2px;width:18px;height:18px;box-shadow:0 2px 8px #000a}
+.member-current .private-medallion img{animation:cast-breathe 3.5s ease-in-out infinite}
+@keyframes cast-breathe{50%{box-shadow:0 0 18px color-mix(in srgb,var(--aura),transparent 65%)}}
+.cast-card{position:fixed;z-index:80;box-sizing:border-box;width:285px;max-width:calc(100vw - 122px);padding:23px;border:1px solid color-mix(in srgb,var(--aura),#a88a5e 55%);border-radius:4px;color:#e7d6b7;background:radial-gradient(ellipse at top left,color-mix(in srgb,var(--aura) 10%,#181317),#100f12 80%);box-shadow:0 16px 45px #000a,0 0 24px color-mix(in srgb,var(--aura),transparent 94%);animation:cast-slide .25s ease-out}
+.cast-card:before{content:'';position:absolute;inset:5px;border:1px solid #cba56815;pointer-events:none}
+.cast-card .eyebrow{font:8px 'Barlow Condensed',sans-serif;letter-spacing:2.5px;color:var(--aura)}
+.cast-card>strong{display:block;font:normal 23px/1.25 'IM Fell English',Georgia,serif;margin:11px 0 17px}
+.rail-player-row{display:flex;align-items:center;gap:10px;min-height:34px}
+.rail-avatar{border-radius:50%;border:1px solid #c49c5b66;object-fit:cover;flex-shrink:0}
+.rail-player{font:15px 'Barlow Condensed',sans-serif;color:#cbb795;overflow-wrap:anywhere}
+.cast-card-actions{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:19px}
+.cast-card-actions a{display:flex;flex-direction:column;gap:7px;border:1px solid #b68c4f47;border-radius:2px;padding:12px 9px;text-decoration:none;color:#ead5b0;background:#c39b5e08;letter-spacing:.5px;font:15px 'Barlow Condensed',sans-serif}
+.cast-card-actions small{font:8px 'Barlow Condensed',sans-serif;letter-spacing:1px;color:#aa9679}
+.cast-card-actions a:hover,.cast-card-actions a:focus-visible{border-color:var(--aura);background:color-mix(in srgb,var(--aura),transparent 90%);outline:0}
+.cast-card-actions a span{margin:0;font-size:15px}.cast-toggle{display:none}
+@keyframes cast-slide{from{opacity:0;transform:translateX(-12px)}to{opacity:1;transform:translateX(0)}}
+@media(min-width:601px) and (max-height:650px){.private-cast{gap:2px;padding-block:6px}.private-member{padding:2px 0}.private-home{min-height:25px}.private-medallion img{width:48px;height:48px}}
+@media(min-width:601px) and (max-width:900px){.private-cast{width:104px}}
+@media(max-width:600px){
+ .signed-in .cast-toggle{display:block;position:fixed;bottom:20px;right:18px;z-index:81;padding:13px 19px;border:1px solid #b68c4f80;border-radius:4px;background:#191317f5;color:#ecd6b0;box-shadow:0 5px 25px #0009;font:16px 'Barlow Condensed',sans-serif}
+ .private-cast{display:none;position:fixed;inset:72px auto 0 0;width:96px;flex-direction:column;align-items:center;gap:4px;padding:12px 6px;border-right:1px solid #b68c4f40;border-bottom:0;overflow-x:hidden;overflow-y:auto;z-index:79;background:#100e12f7}
+ .cast-open .private-cast:not([hidden]){display:flex}
+ .private-member{width:100%;flex:0 0 auto;padding:3px 0}.private-medallion{width:auto;flex:0 0 auto}.private-medallion img{width:clamp(42px,7.4svh,62px);height:clamp(42px,7.4svh,62px)}
+ .private-home{margin:0;flex:0 0 auto;align-self:center;min-height:28px}.cast-card{padding:18px;width:260px;max-width:calc(100vw - 114px)}.cast-card>strong{font-size:21px}.cast-card-actions{grid-template-columns:1fr}.cast-card-actions a{padding:10px;flex-direction:row;align-items:center;justify-content:space-between}.cast-card-actions small{font-size:8px}.cast-card .rail-player{font-size:14px}
+}
+@media(prefers-reduced-motion:reduce){.cast-card,.member-current .private-medallion img{animation:none}.private-medallion img{transition:none}}

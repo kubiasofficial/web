@@ -3,6 +3,40 @@ const catalog = window.PUBLIC_PEOPLE;
 let identity = null, csrf = '', ready = false, routeVersion = 0, refreshVersion = 0, loggingOut = false, accountFingerprint='';
 const apiRoot = '/api/ubd';
 const deniedText = 'Děláš si prdel? Takto se informace nezískávají. Nejsi hoden znát toto info, takže si naser :D';
+const denialLines = [deniedText,
+ 'Zvědavost ti nechybí. Povolení ale jo. Takže zase hezky zpátky, kovboji.',
+ 'Tady nejsi ve vlastním deníčku. Nejdřív si vyžádej důvěru, pak strkej nos do cizích příběhů.',
+ 'Ani páčidlo, ani hezkej úsměv. Bez svolení majitele se dovnitř nedostaneš.',
+ 'Tenhle spis není veřejnej saloon. Dneska tě dovnitř nepustíme.',
+ 'Hezkej pokus, šerife. Ale odznak na cizí tajemství nestačí.',
+ 'Klika cvakla, dveře drží. Někdo ti očividně ještě nevěří.',
+ 'Cizí minulost není samoobsluha. Zkus nejdřív poprosit majitele.',
+ 'Čumět můžeš. Číst nemůžeš. Tak si ten rozdíl laskavě zapamatuj.',
+ 'Tady máš prd co slídit. Nejdřív povolení, potom tajemství.',
+ 'No jasně, rovnou do cizího spisu. A klíče od baráku bys taky nechtěl?',
+ 'Zamčeno. To znamená zamčeno. Ne „zkusím do toho ještě pětkrát kopnout“.',
+ 'Tenhle příběh má majitele. A ten tě zatím neposlal dál než do prdele.',
+ 'Drzej jsi dost. Důvěryhodnej zatím míň. Vrať se s povolením.',
+ 'Kdyby se důvěra získávala klikáním, byl bys dávno šerif. Smůla.',
+ 'Pracky pryč od cizích tajemství. Tohle není výprodej drbů.',
+ 'Vypadá to jako kniha. Ale pro tebe je to zatím jen drahá dekorace.',
+ 'Tudy cesta nevede, do prdele. Zkus tu přes souhlas majitele.',
+ 'Přišel, kliknul, dostal hovno. Bez povolení to dneska líp nedopadne.',
+ 'Dveře jsou zavřený. Tvoje sebevědomí bohužel není univerzální klíč.',
+ 'Tvoje zvědavost právě narazila čumákem do zamčených dveří.',
+ 'Tady se špinavý prádlo cizím lidem neukazuje. Najdi si vlastní skandál.',
+ 'Pěknej medailon, co? Tak si ho prohlídni. Dál tě nikdo nezval.',
+ 'Tohle není hospodskej drb za jedno pivo. Nejdřív si zasluž důvěru.',
+ 'Kovboji, otoč koně. Na tuhle cestu nemáš povolení.',
+ 'Můžeš klikat až do Vánoc. Zámek má tvoje nadšení úplně na háku.',
+ 'Cizí životopis ti nepatří. Dej tomu majiteli aspoň šanci říct ne.',
+ 'Tak určitě. Ještě ti k tomu uvaříme kafe a přečteme to nahlas. Nejdřív povolení.'
+];
+let denialBag=[],lastDenial='';
+function nextDenial(){
+ if(!denialBag.length){denialBag=[...denialLines];for(let i=denialBag.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[denialBag[i],denialBag[j]]=[denialBag[j],denialBag[i]];}if(denialBag.at(-1)===lastDenial)[denialBag[0],denialBag[denialBag.length-1]]=[denialBag.at(-1),denialBag[0]];}
+ return lastDenial=denialBag.pop();
+}
 const api = async (path, options = {}) => {
  const response = await fetch(apiRoot + path, { credentials: 'same-origin', cache: 'no-store', signal: AbortSignal.timeout(7000),
   ...options, headers: { ...(options.body ? { 'Content-Type': 'application/json' } : {}), ...(options.method && options.method !== 'GET' ? { 'X-CSRF-Token': csrf } : {}), ...options.headers } });
@@ -37,7 +71,7 @@ function deny(key,message=deniedText,scope='lore'){
  const person=catalog[key];denial.style.setProperty('--aura',person.color);
  denial.querySelector('img').src='assets/icon-'+key+'.png';
  denial.querySelector('h2').textContent=person.name;denial.querySelector('.denial-motto').textContent=person.motto;
- denial.querySelector('.denial-copy').textContent=message;
+ denial.querySelector('.denial-copy').textContent=message===deniedText?nextDenial():message;
  denial.querySelector('.discord-login').hidden=!!identity;
  denial.querySelector('.denial-hint').textContent=identity?'O nahlédnutí '+(scope==='journal'?'do deníku ':'')+'požádej přímo hráče této postavy. Povolení může udělit ve svém archivu.':'Přihlas se a vstup do svého příběhu. Cizí archiv otevře jen jeho majitel.';
  const diaryLink=denial.querySelector('.denial-journal');diaryLink.hidden=scope==='journal'||!identity?.journalAccess?.includes(key);diaryLink.href='#journal-'+key;diaryLink.textContent='Máš přístup k deníku této postavy ↗';
