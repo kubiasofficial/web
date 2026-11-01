@@ -46,9 +46,166 @@ function renderProfile(key){
 
 
 const profileTemplate=profile.innerHTML;
+const PortalPolish = (() => {
+ let loader, confirmation, resolveConfirmation=null;
+ const playerNames={daniel:'Eidík',nathaniel:'kubiasofficial',vincent:'BuFu',elijah:'mata20_official',katie:'Safík Alex',scarlett:'Graciie04',sophie:'🐭Myška🐭'};
+ const names=new Map(), pendingNames=new Map();
+ const lock='<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="6" y="10" width="12" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3M12 14v3"/></svg>';
+ const seal='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 2 3 3 4 1 1 4 2 3-3 3-1 4-4-1-3 2-3-3-4-1 1-4-2-3 3-3 1-4 4 1zM8 12l3 3 5-6"/></svg>';
+ let bookId=0;
+ function book(key,small=false){
+  const id='journal-cover-'+(++bookId),p=catalog[key];
+  return '<svg class="journal-icon'+(small?' journal-icon-small':'')+'" viewBox="0 0 120 140" aria-hidden="true"><defs><linearGradient id="'+id+'" x1="0" x2="1" y2="1"><stop stop-color="#63402a"/><stop offset=".45" stop-color="#291d19"/><stop offset="1" stop-color="#150f11"/></linearGradient><linearGradient id="'+id+'-metal"><stop stop-color="#755130"/><stop offset=".5" stop-color="#e6c58b"/><stop offset="1" stop-color="#937045"/></linearGradient></defs><g class="journal-pages"><path d="M20 18h82v111H20z" fill="#cbb890"/><path d="M24 23h75M24 27h75M24 121h75M24 125h75" stroke="#746447" stroke-width="1"/></g><g class="journal-cover"><path d="M19 10h82v116H19Q10 126 10 117V20q0-10 9-10Z" fill="url(#'+id+')" stroke="#a98150" stroke-width="1.5"/><path d="M24 11v114M29 19h63v97H29z" fill="none" stroke="#9b744653"/><path d="M28 17h17l-17 17Zm65 0H76l17 17Zm0 101H76l17-17Zm-65 0h17l-17-17Z" fill="url(#'+id+'-metal)"/><path d="M15 26h12M15 42h12M15 98h12M15 113h12" stroke="#b7915f" stroke-width="3"/><circle cx="61" cy="62" r="23" fill="#100d0c" stroke="currentColor" stroke-width="1.5"/><image href="assets/icon-'+key+'.png" x="38" y="39" width="46" height="46"/><path d="M43 95h35M50 100h21" stroke="#b68a52"/><path d="M98 62h10v16H98q-6-8 0-16Z" fill="#38281c" stroke="#bb965e"/><circle cx="101" cy="70" r="2" fill="#d8b87c"/></g></svg>';
+ }
+ function confirmAction(title,text,label='Potvrdit'){
+  if(resolveConfirmation)return Promise.resolve(false);
+  confirmation.querySelector('h2').textContent=title;confirmation.querySelector('p').textContent=text;confirmation.querySelector('.confirm-accept').textContent=label;
+  confirmation.showModal();confirmation.querySelector('.confirm-cancel').focus();return new Promise(resolve=>resolveConfirmation=resolve);
+ }
+ function settle(value){confirmation.close();const resolve=resolveConfirmation;resolveConfirmation=null;resolve?.(value);}
+ function init(){
+  loader=document.createElement('div');loader.className='archive-loader';loader.hidden=true;loader.setAttribute('role','status');loader.setAttribute('aria-live','polite');loader.innerHTML='<span class="loader-orbit"><img width="110" height="110" alt=""></span><span>Otevírám soukromý archiv…</span>';document.body.append(loader);
+  confirmation=document.createElement('dialog');confirmation.className='confirm-dialog';confirmation.setAttribute('aria-labelledby','confirm-title');confirmation.innerHTML='<span class="eyebrow">JEŠTĚ JEDNO ROZHODNUTÍ</span><h2 id="confirm-title"></h2><p></p><div><button class="confirm-cancel" type="button">Zpět</button><button class="confirm-accept" type="button"></button></div>';document.body.append(confirmation);
+  confirmation.querySelector('.confirm-accept').onclick=()=>settle(true);confirmation.querySelector('.confirm-cancel').onclick=()=>settle(false);confirmation.addEventListener('cancel',event=>{event.preventDefault();settle(false);});
+  const hover=event=>{const anchor=event.target.closest('[data-player-key]');if(anchor){anchor.style.setProperty('--tooltip-top',Math.max(85,Math.min(innerHeight-110,anchor.getBoundingClientRect().top+12))+'px');loadName(anchor.dataset.playerKey);}};
+  rail.addEventListener('pointerover',hover);rail.addEventListener('focusin',hover);
+ }
+ async function loadName(key){
+  if(!key||names.has(key)||pendingNames.has(key))return;
+  const promise=api('/players/'+key).then(data=>{if(typeof data.name==='string'){names.set(key,data.name);const target=rail.querySelector('[data-player-key="'+key+'"] .rail-player');if(target)target.textContent=data.name;}}).catch(()=>{}).finally(()=>pendingNames.delete(key));pendingNames.set(key,promise);
+ }
+ function account(person,own){
+  welcome.classList.add('welcome-reveal');
+  let avatar=welcome.querySelector('.welcome-avatar');if(!avatar){avatar=new Image(58,58);avatar.className='welcome-avatar';avatar.alt='';welcome.prepend(avatar);}avatar.src=identity.user.avatar;
+  let label=welcome.querySelector('.welcome-identity');if(!label){label=document.createElement('span');label.className='welcome-identity';welcome.querySelector('h2').after(label);}label.textContent=person?person.name+' · Tvůj soukromý archiv':'Tvůj prostor mezi příběhy';
+  const scene=portal.querySelector('.personal-scene');scene.dataset.character=own||'guest';
+  if(own)scene.style.setProperty('--personal-world','url("assets/'+own+'-scenes.png")');
+  const atmosphere=document.createElement('div');atmosphere.className='personal-atmosphere';atmosphere.setAttribute('aria-hidden','true');atmosphere.innerHTML='<span class="personal-fog"></span>'+Array.from({length:7},(_,i)=>'<i style="--i:'+i+'"></i>').join('');scene.prepend(atmosphere);
+  if(own){const link=document.createElement('a');link.className='journal-open';link.href='#journal-'+own;link.innerHTML=book(own)+'<span><strong>Otevřít můj deník</strong><small>Myšlenky, které stojí za uchování.</small></span><span aria-hidden="true">↗</span>';portal.querySelector('.personal-copy .story-button').after(link);}
+  for(const anchor of rail.querySelectorAll('.private-medallion')){
+   const key=anchor.hash.slice(1),p=catalog[key],allowed=identity.access.includes(key),journal=identity.journalAccess?.includes(key);
+   anchor.dataset.playerKey=key;anchor.classList.toggle('is-unlocked',allowed);anchor.classList.toggle('is-locked',!allowed);
+   const status=document.createElement('span');status.className='medallion-status';status.innerHTML=allowed?seal:lock;anchor.append(status);
+   const tooltip=document.createElement('span');tooltip.className='rail-tooltip';tooltip.innerHTML='<strong>'+escapeHTML(p.name)+'</strong><span class="rail-player"></span>';tooltip.querySelector('.rail-player').textContent=names.get(key)||playerNames[key];anchor.append(tooltip);
+   const journalLink=document.createElement('a');journalLink.className='rail-journal'+(journal?' journal-available':'');journalLink.href='#journal-'+key;journalLink.setAttribute('aria-label','Deník: '+p.name+(journal?' — přístup udělen':' — uzamčeno'));journalLink.innerHTML='<span aria-hidden="true">▤</span> DENÍK';const wrapper=document.createElement('div');wrapper.className='private-member';anchor.replaceWith(wrapper);wrapper.append(anchor,journalLink);
+  }
+ }
+ function loading(key,on=true){loader.hidden=!on;if(on){loader.style.setProperty('--aura',catalog[key]?.color||'#bd965b');loader.querySelector('img').src='assets/icon-'+key+'.png';}}
+ function active(key,kind='lore'){
+  rail.querySelectorAll('.private-medallion,.rail-journal').forEach(link=>{const match=kind==='journal'?link.hash==='#journal-'+key:link.hash==='#'+key;link.classList.toggle('is-current',match);if(match)link.setAttribute('aria-current','page');else link.removeAttribute('aria-current');});
+ }
+ function revealProfile(key){
+  let journalLink=profile.querySelector('.profile-journal-link');if(!journalLink){journalLink=document.createElement('a');journalLink.className='profile-journal-link';profile.querySelector('.profile-heading .story-button').after(journalLink);}journalLink.href='#journal-'+key;journalLink.innerHTML=book(key,true)+'<span>Osobní deník ↗</span>';
+  if(motionAllowed()){profile.querySelector('.hero-character').animate([{opacity:0,transform:'translateX(35px) scale(1.015)'},{opacity:1,transform:'translateX(0) scale(1)'}],{duration:650,easing:'cubic-bezier(.2,.65,.25,1)'});profile.querySelector('.profile-heading').animate([{opacity:0,transform:'translateY(16px)'},{opacity:1,transform:'translateY(0)'}],{duration:550,easing:'ease-out'});}
+ }
+ return {init,account,loading,active,book,confirm:confirmAction,cancelConfirmation:()=>{if(resolveConfirmation)settle(false);},revealProfile};
+})();
+
+window.Journal = (() => {
+ let page,editor,key=null,canEdit=false,selected=null,nextCursor=null,requestVersion=0;
+ let entries=new Map(),draft=null,baseline='',suspendedDraft=null,saving=false;
+ const fields=()=>editor.querySelector('form').elements;
+ const routeKey=()=>/^#journal-([a-z]+)(?:\/([a-f0-9-]{36}))?$/.exec(location.hash);
+ const fonts={book:'Knižní',hand:'Rukopis',typewriter:'Strojopis'};
+ function date(entry){return entry.date?new Intl.DateTimeFormat('cs-CZ',{dateStyle:'long',timeZone:'UTC'}).format(new Date(entry.date)):new Intl.DateTimeFormat('cs-CZ',{dateStyle:'long',timeZone:'Europe/Prague'}).format(new Date(entry.createdAt*1000));}
+ function markup(text){
+  const inline=value=>escapeHTML(value).replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>').replace(/\*(.+?)\*/g,'<em>$1</em>');
+  return String(text).trim().split(/\n\s*\n/).map(block=>{const lines=block.split('\n');if(lines.every(line=>/^[-*] /.test(line)))return '<ul>'+lines.map(line=>'<li>'+inline(line.slice(2))+'</li>').join('')+'</ul>';if(lines.every(line=>/^\d+\. /.test(line)))return '<ol>'+lines.map(line=>'<li>'+inline(line.replace(/^\d+\. /,''))+'</li>').join('')+'</ol>';return '<p>'+lines.map(inline).join('<br>')+'</p>';}).join('');
+ }
+ function paintText(node,entry){node.className='journal-prose journal-font-'+(Object.hasOwn(fonts,entry.font)?entry.font:'book');node.style.fontSize=Math.max(16,Math.min(26,Number(entry.size)||19))+'px';node.innerHTML=markup(entry.text);}
+ function status(text){if(page)page.querySelector('.journal-status').textContent=text;}
+ function editorValues(){const f=fields();return{title:f.title.value,text:f.text.value,date:f.date.value,font:f.font.value,size:Number(f.size.value)};}
+ function dirty(){return !!draft&&JSON.stringify(editorValues())!==baseline;}
+ function resetEditor(){editor.close();editor.querySelector('form').reset();editor.querySelector('.journal-live-preview').replaceChildren();editor.querySelector('.editor-status').textContent='';editor.querySelector('.dialog-close').disabled=false;saving=false;draft=null;baseline='';}
+ async function closeEditor(){if(saving)return;if(dirty()&&!await PortalPolish.confirm('Zahodit rozepsané změny?','Neuložený text se zahodí. Uložený zápis zůstane beze změny.','Zahodit změny'))return;resetEditor();}
+ function purge({preserveDraft=false}={}){
+  requestVersion++;
+  if(preserveDraft&&draft&&canEdit)suspendedDraft={...draft,...editorValues(),baseline};else if(!preserveDraft)suspendedDraft=null;
+  PortalPolish.cancelConfirmation();if(editor)resetEditor();if(page){page.hidden=true;page.querySelector('.journal-index').replaceChildren();page.querySelector('.journal-paper-content').replaceChildren();page.querySelector('.journal-entry-actions').replaceChildren();status('');}
+  entries.clear();key=null;selected=null;canEdit=false;nextCursor=null;
+ }
+ function renderIndex(){
+  const index=page.querySelector('.journal-index');index.replaceChildren();
+  const ordered=[...entries.values()].sort((a,b)=>b.createdAt-a.createdAt||b.id.localeCompare(a.id));
+  for(const entry of ordered){const link=document.createElement('a');link.href='#journal-'+key+'/'+entry.id;link.className='journal-index-entry';if(selected===entry.id)link.setAttribute('aria-current','page');const heading=document.createElement('strong');heading.textContent=entry.title;const time=document.createElement('span');time.textContent=date(entry);link.append(time,heading);index.append(link);}
+  page.querySelector('.journal-more').hidden=!nextCursor;
+ }
+ function renderEntry(id){
+  selected=id;const content=page.querySelector('.journal-paper-content'),actions=page.querySelector('.journal-entry-actions');content.replaceChildren();actions.replaceChildren();
+  const entry=entries.get(id);
+  if(!entry){content.innerHTML='<div class="journal-empty"><span aria-hidden="true">✦</span><h2>První stránka ještě čeká.</h2><p></p></div>';content.querySelector('p').textContent=canEdit?'Zachyť dnešní události. Na webu nebo příkazem /deník na Discordu.':'Majitel do tohoto deníku zatím nic nenapsal.';renderIndex();return;}
+  const time=document.createElement('p');time.className='journal-entry-date';time.textContent=date(entry);
+  const title=document.createElement('h2');title.className='journal-entry-title';title.textContent=entry.title;
+  const body=document.createElement('div');paintText(body,entry);
+  const footer=document.createElement('p');footer.className='journal-entry-footnote';footer.textContent='Z osobního deníku '+catalog[key].name+' · '+fonts[entry.font];content.append(time,title,body,footer);
+  if(canEdit){const edit=document.createElement('button');edit.type='button';edit.textContent='Upravit zápis';edit.onclick=()=>showEditor(entry);const remove=document.createElement('button');remove.type='button';remove.className='journal-delete';remove.textContent='Smazat';remove.onclick=()=>deleteEntry(entry);actions.append(edit,remove);}
+  renderIndex();
+ }
+ async function deleteEntry(entry){
+  const journalKey=key,version=requestVersion;
+  if(!await PortalPolish.confirm('Smazat tento zápis?',entry.title+' bude odstraněn z deníku. Tuto změnu nepůjde vrátit.','Smazat zápis'))return;
+  if(version!==requestVersion||!canEdit)return;
+  status('Mažu zápis…');
+  try{await api('/journal/entries/'+journalKey+'/'+entry.id,{method:'DELETE',body:JSON.stringify({revision:entry.revision})});if(version!==requestVersion)return;entries.delete(entry.id);const first=entries.values().next().value;selected=first?.id||null;history.replaceState(null,'','#journal-'+journalKey+(selected?'/'+selected:''));renderEntry(selected);status('Zápis byl smazán.');}catch(error){if(version===requestVersion)status(error.message);}
+ }
+ async function open(journalKey,entryId,force=false){
+  const same=key===journalKey&&!page.hidden,version=++requestVersion,user=identity?.user.id;
+  if(!same){entries.clear();nextCursor=null;selected=null;}
+  key=journalKey;page.hidden=true;PortalPolish.loading(journalKey);
+  try{
+   let result,entry;
+   if(same&&entryId&&!force){result=await api('/journal/entries/'+key+'/'+entryId);entry=result.entry;}
+   else{result=await api('/journal/entries/'+key);}
+   if(version!==requestVersion||user!==identity?.user.id||document.hidden)return;
+   canEdit=result.canEdit;
+   if(result.entries){entries=new Map(result.entries.map(item=>[item.id,item]));nextCursor=result.nextCursor;if(entryId&&!entries.has(entryId)){const detail=await api('/journal/entries/'+key+'/'+entryId);if(version!==requestVersion||user!==identity?.user.id||document.hidden)return;entries.set(detail.entry.id,detail.entry);}}
+   else if(entry)entries.set(entry.id,entry);
+   const person=catalog[key];page.style.setProperty('--aura',person.color);page.dataset.character=key;
+   page.querySelector('.journal-book-emblem').innerHTML=PortalPolish.book(key);page.querySelector('.journal-owner').textContent=person.name;
+   page.querySelector('.journal-owner-signature').textContent=person.nickname;page.querySelector('.journal-back').href='#'+key;
+   page.querySelector('.journal-new').hidden=!canEdit;page.querySelector('.journal-permission').textContent=canEdit?'TVŮJ SOUKROMÝ ZÁPISNÍK':'SDÍLENÝ DENÍK · JEN PRO ČTENÍ';
+   selected=entryId||selected||entries.values().next().value?.id||null;renderEntry(selected);page.hidden=false;status('');document.title='Deník · '+person.name+' · New Horizon RP';PortalPolish.active(key,'journal');
+   if(!same&&motionAllowed())page.animate([{opacity:0,transform:'translateY(15px)'},{opacity:1,transform:'translateY(0)'}],{duration:450,easing:'ease-out'});
+   if(suspendedDraft){const saved=suspendedDraft;suspendedDraft=null;if(saved.key===key&&canEdit)showEditor(saved,true);}
+  }catch(error){if(version!==requestVersion)return;purge();if([401,403].includes(error.status))deny(journalKey,deniedText,'journal');else{portal.hidden=false;setNotice(error.message);}}
+  finally{if(version===requestVersion||!key)PortalPolish.loading(journalKey,false);}
+ }
+ function showEditor(entry=null,restore=false){
+  if(!canEdit)return;const f=fields();
+  draft={key,id:entry?.id||null,revision:entry?.revision,requestId:entry?.requestId||crypto.randomUUID()};
+  f.title.value=entry?.title||'';f.text.value=entry?.text||'';f.date.value=entry?.date||'';f.font.value=entry?.font||'book';f.size.value=entry?.size||19;
+  baseline=restore?entry.baseline:JSON.stringify(editorValues());editor.querySelector('fieldset').disabled=false;editor.querySelector('.editor-status').textContent='';editor.querySelector('.journal-editor-title').textContent=entry?.id?'Upravit zápis':'Nový zápis';updatePreview();editor.showModal();f.title.focus();
+ }
+ function updatePreview(){const values=editorValues(),preview=editor.querySelector('.journal-live-preview');preview.replaceChildren();const title=document.createElement('h3');title.textContent=values.title||'Nadpis tvého zápisu';const body=document.createElement('div');paintText(body,{...values,text:values.text||'Tady se objeví tvůj příběh…'});preview.append(title,body);editor.querySelector('.journal-character-count').textContent=values.text.length.toLocaleString('cs-CZ')+' / 10 000 znaků';}
+ function format(kind){const textarea=fields().text,start=textarea.selectionStart,end=textarea.selectionEnd,value=textarea.value.slice(start,end);let replacement;
+  if(kind==='list')replacement=(value||'Položka seznamu').split('\n').map(line=>'- '+line).join('\n');else replacement=(kind==='bold'?'**':'*')+(value||'text')+(kind==='bold'?'**':'*');
+  if(textarea.value.length-(end-start)+replacement.length>10000)return;textarea.setRangeText(replacement,start,end,'select');textarea.focus();updatePreview();}
+ async function save(event){
+  event.preventDefault();if(!draft||!canEdit||saving)return;const pending={...draft,...editorValues()},version=requestVersion;
+  saving=true;editor.querySelector('.dialog-close').disabled=true;editor.querySelector('fieldset').disabled=true;editor.querySelector('.editor-status').textContent='Ukládám zápis…';
+  try{const result=await api('/journal/entries/'+pending.key+(pending.id?'/'+pending.id:''),{method:pending.id?'PUT':'POST',body:JSON.stringify(pending)});if(version!==requestVersion)return;
+   entries.set(result.entry.id,result.entry);selected=result.entry.id;resetEditor();history.replaceState(null,'','#journal-'+key+'/'+selected);renderEntry(selected);status('Zápis byl uložen.');
+  }catch(error){if(version!==requestVersion)return;if([401,403].includes(error.status)){purge();deny(pending.key,deniedText,'journal');return;}saving=false;editor.querySelector('.dialog-close').disabled=false;editor.querySelector('fieldset').disabled=false;editor.querySelector('.editor-status').textContent=error.message;}
+ }
+ async function more(){const version=requestVersion,cursor=nextCursor,journalKey=key,button=page.querySelector('.journal-more');if(!cursor)return;button.disabled=true;
+  try{const result=await api('/journal/entries/'+journalKey+'?cursor='+encodeURIComponent(cursor));if(version!==requestVersion)return;for(const entry of result.entries)entries.set(entry.id,entry);nextCursor=result.nextCursor;renderIndex();}
+  catch(error){if(version===requestVersion){if([401,403].includes(error.status)){purge();deny(journalKey,deniedText,'journal');}else status(error.message);}}finally{button.disabled=false;}
+ }
+ function init(){
+  page=document.createElement('main');page.id='journal-page';page.hidden=true;
+  page.innerHTML='<header class="journal-banner"><a class="journal-back" href="#">← Příběh postavy</a><div class="journal-book-emblem"></div><div><span class="journal-permission eyebrow"></span><h1>Osobní deník</h1><p class="journal-owner"></p><p class="journal-owner-signature"></p></div><div class="journal-banner-actions"><button class="journal-refresh" type="button">Obnovit</button><button class="journal-new" type="button">+ Nový zápis</button></div></header><p class="journal-status" role="status" aria-live="polite"></p><div class="journal-layout"><aside class="journal-navigation"><span class="eyebrow">STRÁNKY TVÉHO PŘÍBĚHU</span><nav class="journal-index" aria-label="Zápisky deníku"></nav><button class="journal-more" type="button" hidden>Starší zápisy ↓</button></aside><article class="journal-paper"><div class="journal-entry-actions"></div><div class="journal-paper-content"></div></article></div>';
+  selection.before(page);page.querySelector('.journal-new').onclick=()=>showEditor();page.querySelector('.journal-more').onclick=more;page.querySelector('.journal-refresh').onclick=()=>open(key,selected,true);
+  editor=document.createElement('dialog');editor.className='journal-editor';editor.setAttribute('aria-labelledby','journal-editor-title');
+  editor.innerHTML='<button class="dialog-close" type="button" aria-label="Zavřít editor">×</button><span class="eyebrow">SLOVA, KTERÁ ZŮSTANOU</span><h2 class="journal-editor-title" id="journal-editor-title"></h2><form><fieldset><div class="journal-editor-layout"><div class="journal-fields"><label>Nadpis<input name="title" maxlength="120" required placeholder="Jak pojmenuješ tento den?"></label><div class="journal-style-row"><label>Datum události<input name="date" type="date"><small>Nepovinné; můžeš zadat datum z RP.</small></label><label>Písmo<select name="font"><option value="book">Knižní</option><option value="hand">Rukopis</option><option value="typewriter">Strojopis</option></select></label><label>Velikost<select name="size">'+Array.from({length:11},(_,i)=>'<option value="'+(i+16)+'"'+(i+16===19?' selected':'')+'>'+(i+16)+' px</option>').join('')+'</select></label></div><div class="journal-formatting" role="group" aria-label="Formátování zápisu"><button type="button" data-format="bold" aria-label="Tučné písmo"><b>B</b></button><button type="button" data-format="italic" aria-label="Kurzíva"><i>I</i></button><button type="button" data-format="list">• Seznam</button><span>Odstavce odděl prázdným řádkem.</span></div><label>Text zápisu<textarea name="text" maxlength="10000" rows="13" required placeholder="Začni psát svůj příběh…"></textarea></label><span class="journal-character-count"></span></div><aside class="journal-preview"><span class="eyebrow">TAKTO SE ZÁPIS ZOBRAZÍ</span><div class="journal-live-preview"></div></aside></div><p class="editor-status" role="status" aria-live="polite"></p><div class="journal-save-actions"><button class="journal-editor-cancel" type="button">Zrušit</button><button type="submit">Uložit zápis</button></div></fieldset></form>';
+  document.body.append(editor);editor.querySelector('form').onsubmit=save;editor.querySelector('.dialog-close').onclick=closeEditor;editor.querySelector('.journal-editor-cancel').onclick=closeEditor;editor.addEventListener('cancel',event=>{event.preventDefault();closeEditor();});editor.querySelector('form').addEventListener('input',updatePreview);for(const button of editor.querySelectorAll('[data-format]'))button.onclick=()=>format(button.dataset.format);
+  addEventListener('beforeunload',event=>{if(draft&&dirty()){event.preventDefault();event.returnValue='';}});
+ }
+ return{init,open,purge,get key(){return key;},get route(){return routeKey();},markup};
+})();
+
 // Browser receives private profile data only after server authorization.
 const catalog = window.PUBLIC_PEOPLE;
-let identity = null, csrf = '', ready = false, routeVersion = 0, refreshVersion = 0, loggingOut = false;
+let identity = null, csrf = '', ready = false, routeVersion = 0, refreshVersion = 0, loggingOut = false, accountFingerprint='';
 const apiRoot = '/api/ubd';
 const deniedText = 'Děláš si prdel? Takto se informace nezískávají. Nejsi hoden znát toto info, takže si naser :D';
 const api = async (path, options = {}) => {
@@ -71,7 +228,7 @@ const rail=document.createElement('nav');rail.className='private-cast';rail.hidd
 const portal=document.createElement('main');portal.id='portal';portal.hidden=true;selection.before(portal);
 const notice=document.createElement('p');notice.className='archive-notice';notice.setAttribute('role','status');notice.hidden=true;welcome.before(notice);
 const denial=document.createElement('dialog');denial.className='archive-denial';denial.setAttribute('aria-labelledby','denial-title');
-denial.innerHTML='<button class="dialog-close" type="button" aria-label="Zavřít">×</button><img width="180" height="180" alt=""><p class="eyebrow">SOUKROMÝ ARCHIV</p><h2 id="denial-title"></h2><p class="denial-motto"></p><p class="denial-copy"></p><a class="discord-login" href="'+loginHref+'">Přihlásit přes Discord</a><p class="denial-hint"></p><button class="denial-back" type="button">Zpět k postavám</button>';
+denial.innerHTML='<button class="dialog-close" type="button" aria-label="Zavřít">×</button><img width="180" height="180" alt=""><p class="eyebrow">SOUKROMÝ ARCHIV</p><h2 id="denial-title"></h2><p class="denial-motto"></p><p class="denial-copy"></p><a class="discord-login" href="'+loginHref+'">Přihlásit přes Discord</a><a class="denial-journal" hidden></a><p class="denial-hint"></p><button class="denial-back" type="button">Zpět k postavám</button>';
 document.body.append(denial);
 function purgeProfile(){
  profile.hidden=true;profile.innerHTML=profileTemplate;activePerson=null;
@@ -80,27 +237,30 @@ function purgeProfile(){
 }
 function currentKey(){const hash=location.hash;return Object.keys(catalog).find(key=>hash==='#'+key||hash.startsWith('#'+key+'-'))||((hash==='#pribeh'||/^#kapitola-\d+$/.test(hash))?'nathaniel':null);}
 function setNotice(text){notice.textContent=text;notice.hidden=!text;}
-function deny(key,message=deniedText){
- purgeProfile();selection.hidden=!!identity;portal.hidden=!identity;
+function deny(key,message=deniedText,scope='lore'){
+ purgeProfile();Journal.purge();PortalPolish.loading(key,false);selection.hidden=!!identity;portal.hidden=!identity;
  const person=catalog[key];denial.style.setProperty('--aura',person.color);
  denial.querySelector('img').src='assets/icon-'+key+'.png';
  denial.querySelector('h2').textContent=person.name;denial.querySelector('.denial-motto').textContent=person.motto;
  denial.querySelector('.denial-copy').textContent=message;
  denial.querySelector('.discord-login').hidden=!!identity;
- denial.querySelector('.denial-hint').textContent=identity?'O nahlédnutí požádej přímo hráče této postavy. Povolení může udělit ve svém archivu.':'Přihlas se a vstup do svého příběhu. Cizí archiv otevře jen jeho majitel.';
+ denial.querySelector('.denial-hint').textContent=identity?'O nahlédnutí '+(scope==='journal'?'do deníku ':'')+'požádej přímo hráče této postavy. Povolení může udělit ve svém archivu.':'Přihlas se a vstup do svého příběhu. Cizí archiv otevře jen jeho majitel.';
+ const diaryLink=denial.querySelector('.denial-journal');diaryLink.hidden=scope==='journal'||!identity?.journalAccess?.includes(key);diaryLink.href='#journal-'+key;diaryLink.textContent='Máš přístup k deníku této postavy ↗';
  if(!denial.open)denial.showModal();document.title='Soukromý archiv · New Horizon RP';
 }
 function closeDenial(){denial.close();location.hash='';}
 denial.querySelector('.dialog-close').onclick=closeDenial;denial.querySelector('.denial-back').onclick=closeDenial;
 denial.addEventListener('cancel',event=>{event.preventDefault();closeDenial();});
 function renderAccount(){
+ const fingerprint=identity?JSON.stringify([identity.user,identity.owned,identity.access,identity.journalAccess,new Intl.DateTimeFormat('cs-CZ',{timeZone:'Europe/Prague'}).format(new Date())]):'guest';
+ if(fingerprint===accountFingerprint)return;accountFingerprint=fingerprint;
  document.body.classList.toggle('signed-in',!!identity);welcome.hidden=!identity;rail.hidden=!identity;
  accountControls.replaceChildren();
- if(!identity){const login=document.createElement('a');login.href=loginHref;login.className='discord-login';login.textContent='Přihlásit přes Discord';accountControls.append(login);return;}
+ if(!identity){rail.replaceChildren();portal.replaceChildren();const login=document.createElement('a');login.href=loginHref;login.className='discord-login';login.textContent='Přihlásit přes Discord';accountControls.append(login);return;}
  const photo=new Image(34,34);photo.src=identity.user.avatar;photo.alt='';accountControls.append(photo);
  const name=document.createElement('span');name.textContent=identity.user.name;accountControls.append(name);
  const logout=document.createElement('button');logout.type='button';logout.textContent='Odhlásit';logout.onclick=async()=>{
-  logout.disabled=true;loggingOut=true;refreshVersion++;try{await api('/auth/logout',{method:'POST'});identity=null;csrf='';purgeProfile();trust.close();renderAccount();location.hash='';await route();}catch(error){setNotice(error.message);logout.disabled=false;}finally{loggingOut=false;}
+  logout.disabled=true;loggingOut=true;refreshVersion++;try{await api('/auth/logout',{method:'POST'});identity=null;csrf='';purgeProfile();Journal.purge();resetTrust();renderAccount();location.hash='';await route();}catch(error){setNotice(error.message);logout.disabled=false;}finally{loggingOut=false;}
  };accountControls.append(logout);
  const day=new Intl.DateTimeFormat('cs-CZ',{weekday:'long',timeZone:'Europe/Prague'}).format(new Date());
  const greeting={pondělí:'Krásné pondělí',úterý:'Krásné úterý',středa:'Krásnou středu',čtvrtek:'Krásný čtvrtek',pátek:'Krásný pátek',sobota:'Krásnou sobotu',neděle:'Krásnou neděli'};
@@ -111,52 +271,68 @@ function renderAccount(){
  welcome.querySelector('.trust-open').hidden=!own;
  rail.innerHTML='<a class="private-home" href="#" aria-label="Můj prostor">✦</a>'+Object.entries(catalog).filter(([key])=>key!==own).map(([key,p])=>'<a href="#'+key+'" class="private-medallion" style="--aura:'+p.color+'" aria-label="'+escape(p.name)+' — '+(identity.access.includes(key)?'Přístup udělen':'Uzamčeno')+'"><img src="assets/icon-'+key+'.png" alt="" width="64" height="64"><span>'+escape(p.nickname)+'<small>'+(identity.access.includes(key)?'PŘÍSTUP UDĚLEN':'UZAMČENO')+'</small></span></a>').join('');
  portal.innerHTML='<section class="personal-scene" style="--aura:'+(person?.color||'#c88e4a')+'">'+(person?'<img class="personal-portrait" src="assets/'+person.image+'" alt="'+escape(person.name)+'" width="1024" height="1536">':'<img class="personal-emblem" src="assets/NH.png" alt="New Horizon RP">')+'<div class="personal-copy"><span class="eyebrow">'+(person?'PŘÍBĚH, O KTERÉM ROZHODUJEŠ TY':'KAŽDÁ DŮVĚRA MÁ SVŮJ PŘÍBĚH')+'</span><h1>'+(person?escape(person.given)+'<strong>'+escape(person.surname)+'</strong>':'Vítej v archivu')+'</h1>'+(person?'<p class="personal-signature">'+escape(person.nickname)+'</p><p>'+escape(person.motto)+'</p><a class="story-button" href="#'+own+'">Otevřít můj příběh <span>↗</span></a>':'<p>Po straně najdeš všechny postavy. Jejich příběhy si přečteš, pokud ti je hráči zpřístupní.</p>')+'<p class="personal-privacy">'+(person?'Tvůj archiv je soukromý. Ostatní do něj vstoupí pouze s tvým svolením.':'Přihlášení samo o sobě cizí příběhy neodemyká.')+'</p></div></section>';
+ PortalPolish.account(person,own);PortalPolish.active(Journal.key||activePerson,Journal.key?'journal':'lore');
 }
 async function refreshSession(initial=false){
  if(loggingOut)return;const version=++refreshVersion;
  try{
   const data=await api('/auth/session');if(version!==refreshVersion)return;const next=data.authenticated?data:null,changed=identity?.user.id!==next?.user.id;
-  if(changed){purgeProfile();trust.close();trustGeneration++;}
+  if(changed){purgeProfile();Journal.purge();resetTrust();}
   identity=next;csrf=data.csrf||'';ready=true;renderAccount();
-  if(!identity||activePerson&&!identity.access.includes(activePerson)){purgeProfile();await route();}
-  else if(initial||changed||currentKey()&&activePerson!==currentKey()&&identity.access.includes(currentKey()))await route();
- }catch(error){if(version!==refreshVersion)return;ready=true;purgeProfile();if(initial){identity=null;renderAccount();selection.hidden=false;}setNotice(error.message);}
+  if(!identity||activePerson&&!identity.access.includes(activePerson)||Journal.key&&!identity.journalAccess?.includes(Journal.key)){purgeProfile();Journal.purge();await route();}
+  else if(initial||changed||currentKey()&&activePerson!==currentKey()&&identity.access.includes(currentKey())||Journal.route&&!Journal.key)await route();
+ }catch(error){if(version!==refreshVersion)return;ready=true;purgeProfile();Journal.purge({preserveDraft:true});if(initial){identity=null;renderAccount();selection.hidden=false;}setNotice(error.message);}
 }
 async function route(){
- const version=++routeVersion,key=currentKey(),previous=activePerson;
+ const version=++routeVersion,journalMatch=Journal.route,key=journalMatch?.[1]||currentKey(),previous=activePerson;
  if(!ready)return;
  if(denial.open)denial.close();
- if(!key){purgeProfile();selection.hidden=!!identity;portal.hidden=!identity;document.title='New Horizon RP · Sedm osudů, jeden horizont';window.scrollTo({top:0,behavior:'instant'});return;}
+ if(!key){purgeProfile();Journal.purge();PortalPolish.loading('',false);PortalPolish.active(null);selection.hidden=!!identity;portal.hidden=!identity;document.title='New Horizon RP · Sedm osudů, jeden horizont';window.scrollTo({top:0,behavior:'instant'});return;}
+ if(!Object.hasOwn(catalog,key)){location.hash='';return;}
  if(!identity){deny(key);return;}
+ if(journalMatch){if(!identity.journalAccess?.includes(key)){deny(key,deniedText,'journal');return;}purgeProfile();selection.hidden=true;portal.hidden=true;await Journal.open(key,journalMatch[2]);return;}
+ Journal.purge();PortalPolish.active(key);
  if(!identity.access.includes(key)){deny(key);return;}
  if(activePerson!==key){
-  purgeProfile();setNotice('Ověřuji přístup k příběhu…');
+  purgeProfile();setNotice('');PortalPolish.loading(key);
   try{
    const data=await api('/archive/lore/'+key);if(version!==routeVersion||document.hidden)return;
    people[key]=data.person;renderProfile(key);setNotice('');
   }catch(error){if(version!==routeVersion)return;if([401,403].includes(error.status))deny(key);else{setNotice(error.message);portal.hidden=false;}return;}
+  finally{if(version===routeVersion)PortalPolish.loading(key,false);}
  }
  selection.hidden=true;portal.hidden=true;profile.hidden=false;window.VisualReading?.syncVisibility(key);document.title=catalog[key].name+' · New Horizon RP';
  if(previous!==key&&motionAllowed())profile.animate([{opacity:0,transform:'translateY(16px)'},{opacity:1,transform:'translateY(0)'}],{duration:420,easing:'ease-out'});
+ if(previous!==key)PortalPolish.revealProfile(key);
  requestAnimationFrame(()=>{if(location.hash==='#'+key)window.scrollTo({top:0,behavior:'instant'});else document.getElementById(location.hash.slice(1))?.scrollIntoView({behavior:'instant'});});
 }
 const trust=document.createElement('dialog');trust.className='trust-dialog';trust.setAttribute('aria-labelledby','trust-title');
-trust.innerHTML='<button type="button" class="dialog-close" aria-label="Zavřít">×</button><span class="eyebrow">TVŮJ PŘÍBĚH. TVÁ DŮVĚRA.</span><h2 id="trust-title">Komu důvěřuji</h2><p>Povolení platí pouze pro čtení tvého lore. Můžeš ho kdykoliv odebrat.</p><form class="trust-form"><label>Vyber hráče<select name="known"><option value="">Jiný člen Discordu — zadat ID</option></select></label><label>Discord ID<input name="userId" inputmode="numeric" pattern="[0-9]{17,20}" maxlength="20" required placeholder="ID hráče z vašeho serveru"></label><button type="submit">Najít hráče</button></form><div class="trust-candidate" hidden></div><p class="trust-status" role="status" aria-live="polite"></p><div class="trust-list"></div>';
+trust.innerHTML='<button type="button" class="dialog-close" aria-label="Zavřít">×</button><div class="trust-identity"><img width="76" height="76" alt=""><div><span class="eyebrow">TVŮJ PŘÍBĚH. TVÁ DŮVĚRA.</span><h2 id="trust-title">Komu důvěřuji</h2><span class="trust-owner-name"></span></div></div><p>Vyber, komu otevřeš svůj příběh nebo deník. Každé povolení platí jen pro čtení a můžeš ho kdykoliv odebrat.</p><form class="trust-form"><label>Vyber hráče<select name="known"><option value="">Jiný člen Discordu — zadat ID</option></select></label><label>Discord ID<input name="userId" inputmode="numeric" pattern="[0-9]{17,20}" maxlength="20" required placeholder="ID hráče z vašeho serveru"></label><button type="submit">Najít hráče</button></form><div class="trust-candidate" hidden></div><p class="trust-status" role="status" aria-live="polite"></p><div class="trust-list"></div>';
 document.body.append(trust);trust.querySelector('.dialog-close').onclick=()=>trust.close();
 let trustKey=null,trustGeneration=0;
+function resetTrust(){trustGeneration++;trust.close();trust.querySelector('.trust-list').replaceChildren();trust.querySelector('.trust-candidate').replaceChildren();trust.querySelector('form').reset();}
 function trustStatus(text){trust.querySelector('.trust-status').textContent=text;}
 async function loadGrants(){
- const data=await api('/archive/grants/'+trustKey);const list=trust.querySelector('.trust-list');list.replaceChildren();
- if(!data.grants.length){const empty=document.createElement('p');empty.textContent='Zatím do tvého archivu nikdo další nesmí.';list.append(empty);}
- for(const grant of data.grants){
-  const row=document.createElement('div');row.className='trust-person';const img=new Image(40,40);img.src=grant.avatar;img.alt='';
-  const label=document.createElement('span');label.textContent=grant.display_name;const button=document.createElement('button');button.type='button';button.textContent='Odebrat přístup';
-  button.onclick=async()=>{button.disabled=true;try{await api('/archive/grants/'+trustKey+'/'+grant.grantee_id,{method:'DELETE'});trustStatus('Přístup byl odebrán.');await loadGrants();}catch(error){trustStatus(error.message);button.disabled=false;}};
-  row.append(img,label,button);list.append(row);
+ const journalKey=trustKey,generation=trustGeneration;
+ const [lore,diary]=await Promise.all([api('/archive/grants/'+journalKey),api('/journal/grants/'+journalKey)]);if(generation!==trustGeneration||journalKey!==trustKey)return;
+ const combined=new Map();for(const[scope,data]of[['archive',lore],['journal',diary]])for(const grant of data.grants){const person=combined.get(grant.grantee_id)||{...grant,archive:false,journal:false};person[scope]=true;combined.set(grant.grantee_id,person);}
+ const list=trust.querySelector('.trust-list');list.replaceChildren();if(!combined.size){const empty=document.createElement('p');empty.className='trust-empty';empty.textContent='Důvěra začíná u tebe. Zatím nemá přístup nikdo další.';list.append(empty);}
+ for(const grant of combined.values()){
+  const row=document.createElement('article');row.className='trust-person';const heading=document.createElement('div');heading.className='trust-person-heading';const img=new Image(44,44);img.src=grant.avatar;img.alt='';
+  const label=document.createElement('span');label.textContent=grant.display_name;const button=document.createElement('button');button.type='button';button.className='trust-remove';button.textContent='Odebrat přístup';
+  button.onclick=async()=>{if(!await PortalPolish.confirm('Ukončit sdílení?',grant.display_name+' už nebude moct číst tvé lore ani deník.','Odebrat přístup'))return;button.disabled=true;try{await Promise.all(['archive','journal'].map(scope=>api('/'+scope+'/grants/'+journalKey+'/'+grant.grantee_id,{method:'DELETE'})));trustStatus('Přístup byl odebrán.');await loadGrants();}catch(error){trustStatus(error.message);await loadGrants().catch(()=>{});button.disabled=false;}};
+  heading.append(img,label,button);const permissions=document.createElement('div');permissions.className='trust-permissions';
+  for(const[scope,text]of[['archive','Čtení lore'],['journal','Čtení deníku']]){
+   const wrapper=document.createElement('label'),checkbox=document.createElement('input');checkbox.type='checkbox';checkbox.checked=grant[scope];checkbox.dataset.scope=scope;
+   checkbox.onchange=async()=>{const enabled=checkbox.checked;if(!enabled&&!await PortalPolish.confirm('Odebrat '+text.toLowerCase()+'?',grant.display_name+' ztratí toto oprávnění. Druhé povolení zůstane podle tvého nastavení.','Odebrat povolení')){checkbox.checked=true;return;}checkbox.disabled=true;try{await api('/'+scope+'/grants/'+journalKey+(enabled?'':'/'+grant.grantee_id),{method:enabled?'POST':'DELETE',...(enabled?{body:JSON.stringify({userId:grant.grantee_id})}:{})});trustStatus(enabled?'Povolení bylo přidáno.':'Povolení bylo odebráno.');await loadGrants();}catch(error){checkbox.checked=!enabled;checkbox.disabled=false;trustStatus(error.message);}};
+   wrapper.append(checkbox,document.createTextNode(text));permissions.append(wrapper);
+  }
+  row.append(heading,permissions);list.append(row);
  }
 }
 welcome.querySelector('.trust-open').onclick=async()=>{
  trustKey=identity?.owned[0];if(!trustKey)return;trustGeneration++;trustStatus('Načítám přístupy…');trust.querySelector('.trust-candidate').hidden=true;
+ trust.querySelector('.trust-identity img').src='assets/icon-'+trustKey+'.png';trust.querySelector('.trust-owner-name').textContent='Přístupy k postavě '+catalog[trustKey].name;
  trust.showModal();try{
   const data=await api('/archive/candidates');const select=trust.querySelector('select');select.replaceChildren(new Option('Jiný člen Discordu — zadat ID',''));
   for(const user of data.users)select.append(new Option(user.name,user.id));
@@ -171,16 +347,17 @@ trust.querySelector('form').onsubmit=async event=>{
   const data=await api('/archive/member/'+id);if(generation!==trustGeneration)return;
   const box=trust.querySelector('.trust-candidate');box.replaceChildren();const img=new Image(48,48);img.src=data.user.avatar;img.alt='';
   const name=document.createElement('span');name.textContent=data.user.name;const button=document.createElement('button');button.type='button';button.textContent='Povolit nahlížení';
-  button.onclick=async()=>{button.disabled=true;try{await api('/archive/grants/'+trustKey,{method:'POST',body:JSON.stringify({userId:data.user.id})});box.hidden=true;trustStatus('Nahlížení bylo povoleno.');await loadGrants();}catch(error){trustStatus(error.message);button.disabled=false;}};
-  box.append(img,name,button);box.hidden=false;trustStatus('Je to správný člověk? Potvrď povolení.');
+  const permissions=document.createElement('div');permissions.className='trust-candidate-permissions';permissions.innerHTML='<label><input class="candidate-lore" type="checkbox" checked> Čtení lore</label><label><input class="candidate-journal" type="checkbox"> Čtení deníku</label>';
+  button.onclick=async()=>{const scopes=[];if(permissions.querySelector('.candidate-lore').checked)scopes.push('archive');if(permissions.querySelector('.candidate-journal').checked)scopes.push('journal');if(!scopes.length){trustStatus('Vyber alespoň jedno povolení.');return;}button.disabled=true;const results=await Promise.allSettled(scopes.map(scope=>api('/'+scope+'/grants/'+trustKey,{method:'POST',body:JSON.stringify({userId:data.user.id})})));const failure=results.find(result=>result.status==='rejected');trustStatus(failure?'Některé povolení se nepodařilo změnit. Zkontroluj aktuální seznam níže.':'Vybrané nahlížení bylo povoleno.');if(!failure)box.hidden=true;button.disabled=false;await loadGrants().catch(error=>trustStatus(error.message));};
+  const summary=document.createElement('div');summary.className='trust-candidate-summary';summary.append(img,name,button);box.append(summary,permissions);box.hidden=false;trustStatus('Je to správný člověk? Vyber, co smí číst, a potvrď povolení.');
  }catch(error){trustStatus(error.message);}
 };
 window.addEventListener('hashchange',route);
 window.addEventListener('keydown',event=>{if(event.key==='Escape'&&!profile.hidden)location.hash='';});
-document.addEventListener('visibilitychange',()=>{if(document.hidden){routeVersion++;purgeProfile();}else refreshSession(true);});
-window.addEventListener('pageshow',event=>{if(event.persisted){routeVersion++;purgeProfile();refreshSession(true);}});
+document.addEventListener('visibilitychange',()=>{if(document.hidden){routeVersion++;purgeProfile();Journal.purge({preserveDraft:true});PortalPolish.loading('',false);}else refreshSession(true);});
+window.addEventListener('pageshow',event=>{if(event.persisted){routeVersion++;purgeProfile();Journal.purge();refreshSession(true);}});
 setInterval(()=>{if(!document.hidden&&identity)refreshSession();},15000);
-renderAccount();
+PortalPolish.init();Journal.init();renderAccount();
 const loginResult=new URLSearchParams(location.search).get('login');
 if(loginResult){setNotice(loginResult==='failed'?'Přihlášení se nepodařilo. Ověř, že jsi členem vašeho Discord serveru, a zkus to znovu.':'Přihlášení bylo zrušeno.');history.replaceState(null,'',location.pathname+location.hash);}
 refreshSession(true);

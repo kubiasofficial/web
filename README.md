@@ -1,5 +1,7 @@
 # New Horizon RP — sedm příběhů
 
+Osobní deníky: vstup přes ikonu koženého zápisníku, vlastní stránka pro každý deník, editor a samostatné sdílení přístupu. Klientské zdroje jsou `journal-runtime.js` a `polish-runtime.js`, styl `dist/journal.css`. Sestavení: `node ../bot/prepare-web.mjs`. Nasazení vyžaduje databázové doplnění a nový Worker podle `../bot/JOURNAL_SETUP.md`. Texty o aktualizaci jsou v `../bot/UPDATE-JOURNAL.md`.
+
 HTML/CSS/JavaScript s přihlášením přes Discord a serverovým ověřováním přístupů. Veřejný výběr ukazuje pouze medailony a základní představení. Po přihlášení se otevře osobní prostor; celé lore dostane jen vlastník nebo jím povolený čtenář. Kódy byly odstraněné. Nasazení vyžaduje Cloudflare Worker, D1 a OAuth2; přes samotné `file://` soukromé archivy nefungují. Kompletní nastavení je v `../bot/AUTH_SETUP.md`.
 
 Dostupných je všech sedm postav: Nathaniel, Scarlett, Daniel, Katharine, Sophia, Vincent a Elijah. Veřejně není publikovaný Markdown, texty kapitol ani soukromé údaje. Přímé odkazy a stažení lore procházejí stejnou serverovou kontrolou. Sdílení spravuje pouze vlastník přes „Komu důvěřuji“; správce nezískává automatický přístup.
