@@ -1,6 +1,6 @@
 // Browser receives private profile data only after server authorization.
 const catalog = window.PUBLIC_PEOPLE;
-let identity = null, csrf = '', ready = false, routeVersion = 0, refreshVersion = 0, loggingOut = false, accountFingerprint='';
+let identity = null, csrf = '', ready = false, routeVersion = 0, refreshVersion = 0, loggingOut = false, accountFingerprint='',directoryFingerprint='';
 const apiRoot = '/api/ubd';
 const deniedText = 'Děláš si prdel? Takto se informace nezískávají. Nejsi hoden znát toto info, takže si naser :D';
 const denialLines = [deniedText,
@@ -81,11 +81,12 @@ function closeDenial(){denial.close();location.hash='';}
 denial.querySelector('.dialog-close').onclick=closeDenial;denial.querySelector('.denial-back').onclick=closeDenial;
 denial.addEventListener('cancel',event=>{event.preventDefault();closeDenial();});
 function renderAccount(){
- const fingerprint=identity?JSON.stringify([identity.user,identity.owned,identity.access,identity.journalAccess,new Intl.DateTimeFormat('cs-CZ',{timeZone:'Europe/Prague'}).format(new Date())]):'guest';
+ Community.sync();
+ const fingerprint=identity?JSON.stringify([identity.user,identity.owned,identity.access,identity.journalAccess,identity.directory,new Intl.DateTimeFormat('cs-CZ',{timeZone:'Europe/Prague'}).format(new Date())]):'guest';
  if(fingerprint===accountFingerprint)return;accountFingerprint=fingerprint;
  document.body.classList.toggle('signed-in',!!identity);welcome.hidden=!identity;rail.hidden=!identity;
  accountControls.replaceChildren();
- if(!identity){PortalPolish.closeCast();rail.replaceChildren();portal.replaceChildren();const login=document.createElement('a');login.href=loginHref;login.className='discord-login';login.textContent='Přihlásit přes Discord';accountControls.append(login);return;}
+ if(!identity){Community.purge();PortalPolish.closeCast();rail.replaceChildren();portal.replaceChildren();const login=document.createElement('a');login.href=loginHref;login.className='discord-login';login.textContent='Přihlásit přes Discord';accountControls.append(login);return;}
  const photo=new Image(34,34);photo.src=identity.user.avatar;photo.alt='';accountControls.append(photo);
  const name=document.createElement('span');name.textContent=identity.user.name;accountControls.append(name);
  const logout=document.createElement('button');logout.type='button';logout.textContent='Odhlásit';logout.onclick=async()=>{
@@ -106,16 +107,22 @@ async function refreshSession(initial=false){
  if(loggingOut)return;const version=++refreshVersion;
  try{
   const data=await api('/auth/session');if(version!==refreshVersion)return;const next=data.authenticated?data:null,changed=identity?.user.id!==next?.user.id;
-  if(changed){purgeProfile();Journal.purge();resetTrust();}
+  if(changed){purgeProfile();Journal.purge();Community.purge();resetTrust();}
+  const freshDirectory=JSON.stringify(data.directory||{}),directoryChanged=directoryFingerprint!==freshDirectory;directoryFingerprint=freshDirectory;
+  for(const [key,patch]of Object.entries(data.directory||{}))if(catalog[key])Object.assign(catalog[key],patch);
+  if(directoryChanged&&activePerson)purgeProfile();
   identity=next;csrf=data.csrf||'';ready=true;renderAccount();
   if(!identity||activePerson&&!identity.access.includes(activePerson)||Journal.key&&!identity.journalAccess?.includes(Journal.key)){purgeProfile();Journal.purge();await route();}
-  else if(initial||changed||currentKey()&&activePerson!==currentKey()&&identity.access.includes(currentKey())||Journal.route&&!Journal.key)await route();
- }catch(error){if(version!==refreshVersion)return;ready=true;purgeProfile();Journal.purge({preserveDraft:true});if(initial){identity=null;renderAccount();selection.hidden=false;}setNotice(error.message);}
+  else if(initial||changed||Community.matches&&!Community.active||Community.active==='manage'&&!Community.allowed()||directoryChanged&&currentKey()||currentKey()&&activePerson!==currentKey()&&identity.access.includes(currentKey())||Journal.route&&!Journal.key)await route();
+ }catch(error){if(version!==refreshVersion)return;ready=true;purgeProfile();Journal.purge({preserveDraft:true});Community.purge({preserveDraft:true});if(initial){identity=null;renderAccount();selection.hidden=false;}setNotice(error.message);}
 }
 async function route(){
  const version=++routeVersion,journalMatch=Journal.route,key=journalMatch?.[1]||currentKey(),previous=activePerson;
  if(!ready)return;
+ if(!await Community.beforeRoute())return;
  if(denial.open)denial.close();
+ if(Community.matches){purgeProfile();Journal.purge();PortalPolish.closeCast();selection.hidden=true;portal.hidden=true;await Community.open();return;}
+ Community.purge();
  if(!key){purgeProfile();Journal.purge();PortalPolish.loading('',false);PortalPolish.active(null);selection.hidden=!!identity;portal.hidden=!identity;document.title='New Horizon RP · Sedm osudů, jeden horizont';window.scrollTo({top:0,behavior:'instant'});return;}
  if(!Object.hasOwn(catalog,key)){location.hash='';return;}
  if(!identity){deny(key);return;}
@@ -183,10 +190,11 @@ trust.querySelector('form').onsubmit=async event=>{
 };
 window.addEventListener('hashchange',route);
 window.addEventListener('keydown',event=>{if(event.key==='Escape'&&!event.defaultPrevented&&!document.querySelector('dialog[open]')&&!profile.hidden)location.hash='';});
-document.addEventListener('visibilitychange',()=>{if(document.hidden){routeVersion++;purgeProfile();Journal.purge({preserveDraft:true});PortalPolish.loading('',false);}else refreshSession(true);});
+document.addEventListener('visibilitychange',()=>{if(document.hidden){routeVersion++;purgeProfile();Journal.purge({preserveDraft:true});Community.purge({preserveDraft:true});PortalPolish.loading('',false);}else refreshSession(true);});
 window.addEventListener('pageshow',event=>{if(event.persisted){routeVersion++;purgeProfile();Journal.purge();refreshSession(true);}});
 setInterval(()=>{if(!document.hidden&&identity)refreshSession();},15000);
-PortalPolish.init();Journal.init();renderAccount();
+PortalPolish.init();Journal.init();Community.init();renderAccount();
 const loginResult=new URLSearchParams(location.search).get('login');
 if(loginResult){setNotice(loginResult==='failed'?'Přihlášení se nepodařilo. Ověř, že jsi členem vašeho Discord serveru, a zkus to znovu.':'Přihlášení bylo zrušeno.');history.replaceState(null,'',location.pathname+location.hash);}
 refreshSession(true);
+api('/directory').then(data=>{for(const [key,patch]of Object.entries(data.people||{})){if(!catalog[key])continue;Object.assign(catalog[key],patch);const card=selection.querySelector('.cast-link[href="#'+key+'"]');if(card){card.querySelector('.medallion-name').innerHTML=escapeHTML(catalog[key].given)+'<strong>'+escapeHTML(catalog[key].surname)+'</strong>';card.querySelector('.medallion-nickname').textContent=catalog[key].nickname;card.setAttribute('aria-label','Otevřít příběh: '+catalog[key].name);}}}).catch(()=>{});
