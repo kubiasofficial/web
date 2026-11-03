@@ -25,3 +25,11 @@ Stav: dokončeno a ověřeno lokálně, čeká na ruční nasazení. Do produkč
 - [ ] Po ověření publikovat připravené oznámení `bot/update-profile-notifications.txt`.
 
 Návod: `../bot/NOTIFICATIONS_SETUP.md`.
+
+## Hotfix: klikání v rozbalené nabídce
+
+- Nahlášeno po nasazení: viditelná tlačítka nereagovala na běžné kliknutí.
+- Příčina: obsluha focusout zavírala nabídku v krátkém okamžiku, kdy prohlížeč přesouval fokus z profilovky na tlačítko. Tlačítko se stalo inertním ještě před dokončením kliknutí.
+- Oprava: kontrola cílového prvku přes relatedTarget; při neznámém cíli odložená kontrola po dokončení přesunu fokusu. Přechod uvnitř nabídky ji nezavírá.
+- Regresní ověření používá skutečné vstupní události myši a Tab, nikoli pouze programové element.click(). Ověřeny vstupy do telegramů, editoru, správy, archivu, galerie a nastavení upozornění.
+- Nasazení hotfixu: pouze push webu na Vercel a Ctrl+F5. Worker ani D1 se kvůli této opravě nemění.

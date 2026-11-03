@@ -13,7 +13,12 @@ const UserChrome=(()=>{
   nav.addEventListener('click',event=>{if(event.target.closest('a,button'))closeMenu(true);});
   host.addEventListener('keydown',event=>{if(event.key==='Escape'&&host.classList.contains('user-menu-open')){event.preventDefault();event.stopPropagation();closeMenu(true);}else if(event.target===trigger&&event.key==='ArrowDown'){event.preventDefault();openMenu(true);}});
   document.addEventListener('pointerdown',event=>{if(!host.contains(event.target))closeMenu();});
-  host.addEventListener('focusout',()=>queueMicrotask(()=>{if(!host.contains(document.activeElement))closeMenu();}));
+  host.addEventListener('focusout',event=>{
+   // During native mouse focus changes activeElement is briefly the body.
+   // Keep the menu interactive until its destination receives focus/click.
+   if(event.relatedTarget){if(!host.contains(event.relatedTarget))closeMenu();}
+   else setTimeout(()=>{if(!host.contains(document.activeElement))closeMenu();},0);
+  });
   window.addEventListener('hashchange',()=>{closeMenu();closeBirthday();refresh();});
   birthday=document.createElement('dialog');birthday.className='birthday-dialog';birthday.setAttribute('aria-labelledby','birthday-title');birthday.innerHTML='<button type="button" class="dialog-close" aria-label="Zavřít narozeniny">×</button><div class="birthday-content"></div>';document.body.append(birthday);birthday.querySelector('button').onclick=closeBirthday;
   birthday.addEventListener('cancel',event=>{event.preventDefault();closeBirthday();});birthday.addEventListener('keydown',event=>{if(event.key==='Escape'){event.preventDefault();event.stopPropagation();closeBirthday();}});
