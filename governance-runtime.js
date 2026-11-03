@@ -1,5 +1,5 @@
 const Community=(()=>{
- let page,nav,generation=0,loadedHash='',view='',editorState=null,suspended=null,mailRequest=null;
+ let page,nav,generation=0,loadedHash='',view='',editorState=null,suspended=null,mailRequest=null,mailDraft=null;
  const labels={given:'Jméno',surname:'Příjmení',nickname:'Přezdívka',age:'Věk v lore',birth:'Datum narození',occupation:'Povolání',relatives:'Rodina a blízcí',kicker:'Motto',description:'Úvodní charakteristika',quote:'Osobní citát',closing:'Závěrečná slova',origin:'Původ',familyTitle:'Nadpis vztahů',familyDescription:'Úvod ke vztahům',chapters:'Kapitoly lore',family:'Vztahy'};
  const permissionLabels={review:'Schvalování změn',activity:'Přehled přihlášení',official:'Telegramy za správu'};
  const icons={edit:'M5 19l4-1L20 7l-3-3L6 15zM14 7l3 3',mail:'M3 6h18v13H3zM3 6l9 7 9-7',admin:'M12 2l8 4v6c0 5-8 10-8 10S4 17 4 12V6zM8 12l3 3 5-6',home:'M3 11l9-8 9 8M6 9v12h12V9',users:'M15 21v-3c0-5-12-5-12 0v3M9 4a4 4 0 1 0 0 8 4 4 0 0 0 0-8M17 5c5 0 5 7 0 7M18 15c3 0 3 3 3 6',clock:'M12 8v5l3 2M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18',check:'M4 12l5 5L20 6'};
@@ -33,11 +33,14 @@ const Community=(()=>{
   data.family=[...form.querySelectorAll('.edit-relation')].map(row=>Object.fromEntries(['label','name','text','status'].map(key=>[key,row.querySelector('[data-relation='+key+']').value])));
   return data;
  }
- function dirty(){return view==='edit'&&editorState&&JSON.stringify(values())!==editorState.baseline;}
+ function mailValues(){const f=page.querySelector('.telegram-compose');return f?{recipient:f.elements.recipient.value,subject:f.elements.subject.value,body:f.elements.body.value}:null;}
+ function dirty(){if(view==='mail'){const v=mailValues();return !!v&&(!!v.subject||!!v.body);}return view==='edit'&&editorState&&JSON.stringify(values())!==editorState.baseline;}
+ async function beforeLogout(){return !dirty()||await PortalPolish.confirm('Odhlásit a zahodit rozepsané změny?',view==='mail'?'Rozepsaný telegram nebyl odeslán.':'Neuložené změny postavy se zahodí. Uložený koncept zůstane zachovaný.','Odhlásit');}
  async function beforeRoute(){
-  if(loadedHash!==location.hash&&dirty()&&!await PortalPolish.confirm('Opustit rozepsanou postavu?','Neuložené změny se zahodí. Koncept uložený na serveru zůstane zachovaný.','Opustit editor')){history.replaceState(null,'',loadedHash);return false;}return true;
+  if(loadedHash!==location.hash&&dirty()&&!await PortalPolish.confirm(view==='mail'?'Zahodit rozepsaný telegram?':'Opustit rozepsanou postavu?',view==='mail'?'Neodeslaný text telegramu se zahodí.':'Neuložené změny se zahodí. Koncept uložený na serveru zůstane zachovaný.',view==='mail'?'Zahodit telegram':'Opustit editor')){history.replaceState(null,'',loadedHash);return false;}return true;
  }
  function purge({preserveDraft=false}={}){
+  if(preserveDraft&&view==='mail'&&mailValues())mailDraft={user:identity?.user.id,hash:loadedHash,data:mailValues(),requestId:mailRequest};else if(!preserveDraft)mailDraft=null;
   if(preserveDraft&&view==='edit'&&editorState)suspended={user:identity?.user.id,data:values(),state:editorState};else if(!preserveDraft)suspended=null;
   generation++;page.hidden=true;page.replaceChildren();document.body.classList.remove('community-view');view='';editorState=null;loadedHash='';mailRequest=null;
  }
@@ -48,7 +51,7 @@ const Community=(()=>{
  function content(){return page.querySelector('.community-content');}
  function menu(items){page.querySelector('.community-menu').innerHTML=items.map(([hash,label,kind])=>'<a href="'+hash+'"'+(location.hash===hash?' aria-current="page"':'')+'>'+icon(kind)+'<span>'+text(label)+'</span></a>').join('');}
  async function open(){
-  purge({preserveDraft:!!suspended});const version=++generation,user=identity?.user.id;loadedHash=location.hash;
+  purge({preserveDraft:!!suspended||!!mailDraft});const version=++generation,user=identity?.user.id;loadedHash=location.hash;
   if(!identity){shell('Vstup do svého archivu','Pro správu postavy a telegramy se přihlas přes Discord.');content().innerHTML='<a class="web-button" href="'+loginHref+'">Přihlásit přes Discord</a>';return;}
   try{
    if(loadedHash.startsWith('#edit')){view='edit';shell('Tvůj příběh. Tvými slovy.','Uprav svou postavu. Zveřejní se až po schválení správou.','editor');menu([['#','Můj archiv','home'],['#edit','Upravit postavu','edit'],['#telegrams','Telegramy','mail']]);await editor(version,user);}
@@ -81,7 +84,7 @@ const Community=(()=>{
  }
  function paintPreview(){
   const data=values();if(!data)return;const preview=page.querySelector('.character-preview>div');
-  preview.innerHTML='<img src="assets/icon-'+editorState.key+'.png" alt="" width="90" height="90"><h2>'+text(data.given)+'<strong>'+text(data.surname)+'</strong></h2><p class="preview-nickname">'+text(data.nickname)+'</p><p>'+text(data.age)+' · '+text(data.occupation)+'</p><blockquote>'+text(data.kicker)+'</blockquote><p>'+text(data.description).replace(/\n/g,'<br>')+'</p>'+data.chapters.map(c=>'<h3>'+text(c.title)+'</h3>'+blocks(c.text||' ')).join('');
+  preview.innerHTML='<img src="'+mediaURL('icon-'+editorState.key+'.png',320)+'" alt="" width="90" height="90"><h2>'+text(data.given)+'<strong>'+text(data.surname)+'</strong></h2><p class="preview-nickname">'+text(data.nickname)+'</p><p>'+text(data.age)+' · '+text(data.occupation)+'</p><blockquote>'+text(data.kicker)+'</blockquote><p>'+text(data.description).replace(/\n/g,'<br>')+'</p>'+data.chapters.map(c=>'<h3>'+text(c.title)+'</h3>'+blocks(c.text||' ')).join('');
  }
  async function saveCharacter(submit){
   if(!editorState||editorState.pending)return;const form=page.querySelector('.character-form');if(!form.reportValidity())return;
@@ -101,7 +104,7 @@ const Community=(()=>{
   if(path[1]==='requests'){
    if(path[2]){await review(path[2],version,user);return;}
    const result=await api('/manage/requests?status='+(path[2]||'pending'));if(!valid(version,user))return;
-   content().innerHTML='<div class="section-heading"><h2>Změny ke schválení</h2><span class="status-pill pending">'+result.requests.length+' čeká</span></div><p class="web-muted">Před rozhodnutím porovnej návrh se schválenou verzí.</p><div class="request-list">'+(result.requests.length?result.requests.map(r=>'<a class="request-card" href="#manage/requests/'+r.id+'"><img src="assets/icon-'+r.character_key+'.png" width="64" height="64" alt=""><div><h3>'+text(catalog[r.character_key].name)+'</h3><p>'+date(r.created_at)+'</p></div><span>Porovnat změny ↗</span></a>').join(''):'<div class="web-empty">'+icon('check')+'<h3>Všechny spisy jsou vyřízené.</h3><p>Nové žádosti se objeví tady.</p></div>')+'</div>';
+   content().innerHTML='<div class="section-heading"><h2>Změny ke schválení</h2><span class="status-pill pending">'+result.requests.length+' čeká</span></div><p class="web-muted">Před rozhodnutím porovnej návrh se schválenou verzí.</p><div class="request-list">'+(result.requests.length?result.requests.map(r=>'<a class="request-card" href="#manage/requests/'+r.id+'"><img src="'+mediaURL('icon-'+r.character_key+'.png',320)+'" width="64" height="64" alt=""><div><h3>'+text(catalog[r.character_key].name)+'</h3><p>'+date(r.created_at)+'</p></div><span>Porovnat změny ↗</span></a>').join(''):'<div class="web-empty">'+icon('check')+'<h3>Všechny spisy jsou vyřízené.</h3><p>Nové žádosti se objeví tady.</p></div>')+'</div>';
   }else if(path[1]==='users'){
    const result=await api('/manage/users');if(!valid(version,user))return;
    content().innerHTML='<h2>Uživatelé a poslední přihlášení</h2><p class="web-muted">Čas posledního úspěšného přihlášení přes Discord. Obnovení stránky jej nemění.</p><div class="user-list">'+result.users.map(r=>'<article class="web-list-row">'+(r.avatar?'<img src="'+text(r.avatar)+'" width="44" height="44" alt="">':'')+'<div><strong>'+text(r.display_name)+'</strong><p>'+text(r.characters.map(k=>catalog[k].name).join(', ')||'Bez přiřazené postavy')+'</p></div><time>'+date(r.last_login)+'</time></article>').join('')+'</div>';
@@ -144,17 +147,28 @@ const Community=(()=>{
    if(official&&!has('official'))throw Error('Nemáš oprávnění odesílat za správu.');mailRequest=crypto.randomUUID();
    content().innerHTML='<h2>'+(official?'Telegram s pečetí správy':'Napsat soukromý telegram')+'</h2><form class="telegram-compose"><label>Adresát<select name="recipient" required><option value="">Vyber hráče</option>'+result.users.map(r=>'<option value="'+r.id+'">'+text(r.name)+'</option>').join('')+'</select></label><label>Předmět<input name="subject" maxlength="120" required></label><label>Zpráva<textarea name="body" maxlength="5000" rows="12" required></textarea></label><p class="field-help">Telegram uvidíš pouze ty a příjemce. Po odeslání jej nelze upravit.</p><button class="web-button primary">Odeslat telegram ↗</button></form>';
    if(path[2])page.querySelector('[name=recipient]').value=path[2];
-   page.querySelector('form').onsubmit=async event=>{event.preventDefault();const f=event.target;f.querySelector('button').disabled=true;try{const r=await api('/telegrams',{method:'POST',body:JSON.stringify({recipient:f.elements.recipient.value,subject:f.elements.subject.value,text:f.elements.body.value,official,requestId:mailRequest})});if(valid(version,user)){await refreshSession();location.hash='#telegrams/message/'+r.id;}}catch(e){if(valid(version,user)){setStatus(e.message);f.querySelector('button').disabled=false;}}};
+   if(mailDraft?.user===user&&mailDraft.hash===loadedHash){const f=page.querySelector('form');for(const [name,value]of Object.entries(mailDraft.data))f.elements[name].value=value;mailRequest=mailDraft.requestId;}else mailDraft=null;
+   page.querySelector('form').onsubmit=async event=>{event.preventDefault();const f=event.target;f.querySelector('button').disabled=true;try{const r=await api('/telegrams',{method:'POST',body:JSON.stringify({recipient:f.elements.recipient.value,subject:f.elements.subject.value,text:f.elements.body.value,official,requestId:mailRequest})});if(valid(version,user)){mailDraft=null;f.reset();await refreshSession();location.hash='#telegrams/message/'+r.id;}}catch(e){if(valid(version,user)){setStatus(e.message);f.querySelector('button').disabled=false;}}};
   }else if(path[1]==='message'){
    const {message:r}=await api('/telegrams/'+path[2]);if(!valid(version,user))return;
    content().innerHTML='<a class="web-back" href="#telegrams">← Do schránky</a><article class="telegram-paper">'+(r.official?'<span class="official-seal">'+icon('admin')+' OVĚŘENÁ SPRÁVA KRONIKY</span>':'<span class="eyebrow">SOUKROMÝ TELEGRAM</span>')+'<h2>'+text(r.subject)+'</h2><div class="telegram-address"><p>Od: <strong>'+text(r.sender_name)+'</strong></p><p>Komu: '+text(r.recipient_name)+'</p><time>'+date(r.created_at)+'</time></div><div class="telegram-text">'+text(r.body).replace(/\n/g,'<br>')+'</div></article>';
    if(r.sender_id!==user)content().append(button('Odpovědět',()=>location.hash='#telegrams/compose/'+r.sender_id));
+   if(r.recipient_id===user)content().append(button('Smazat z mé schránky',()=>removeTelegrams([r.id]),'subtle telegram-delete'));
    if(r.recipient_id===user&&!r.read_at){await api('/telegrams/'+r.id,{method:'POST',body:'{}'});if(valid(version,user))await refreshSession();}
   }else{
    const sent=path[1]==='sent',n=Number(path[sent?2:1]||0),result=await api('/telegrams?box='+(sent?'sent':'inbox')+'&page='+n);if(!valid(version,user))return;
    content().innerHTML='<div class="section-heading"><h2>'+(sent?'Odeslané telegramy':'Doručené telegramy')+'</h2><a class="web-button" href="#telegrams/compose">Napsat telegram ↗</a></div><div class="telegram-list">'+(result.messages.length?result.messages.map(r=>'<a href="#telegrams/message/'+r.id+'" class="telegram-row '+(!r.read_at&&!sent?'is-unread':'')+'">'+icon(r.official?'admin':'mail')+'<div><span>'+text(sent?r.recipient_name:r.sender_name)+(r.official?' · SPRÁVA':'')+'</span><h3>'+text(r.subject)+'</h3></div><time>'+date(r.created_at)+'</time></a>').join(''):'<div class="web-empty">'+icon('mail')+'<h3>Ve schránce je zatím klid.</h3><p>Až ti někdo napíše, telegram najdeš tady.</p></div>')+'</div><div class="web-actions">'+(n>0?'<a class="web-button" href="#telegrams/'+(sent?'sent/':'')+(n-1)+'">← Novější</a>':'')+(result.hasMore?'<a class="web-button" href="#telegrams/'+(sent?'sent/':'')+(n+1)+'">Starší →</a>':'')+'</div>';
+   if(!sent&&result.messages.length){
+    const controls=document.createElement('div');controls.className='telegram-cleanup';const select=document.createElement('label');select.innerHTML='<input type="checkbox"> Vybrat celou stránku';const remove=button('Smazat vybrané',()=>removeTelegrams([...page.querySelectorAll('.telegram-select:checked')].map(c=>c.value)),'subtle');remove.disabled=true;const update=()=>{const boxes=[...page.querySelectorAll('.telegram-select')],checked=boxes.filter(c=>c.checked).length;remove.disabled=!checked;remove.textContent=checked?'Smazat vybrané ('+checked+')':'Smazat vybrané';select.querySelector('input').checked=checked===boxes.length;select.querySelector('input').indeterminate=checked>0&&checked<boxes.length;};
+    for(const row of page.querySelectorAll('.telegram-row')){const wrap=document.createElement('div');wrap.className='telegram-select-row';const check=document.createElement('input');check.type='checkbox';check.className='telegram-select';check.value=row.hash.split('/').at(-1);check.setAttribute('aria-label','Vybrat telegram: '+row.querySelector('h3').textContent);check.onchange=update;row.replaceWith(wrap);wrap.append(check,row);}
+    select.querySelector('input').onchange=event=>{page.querySelectorAll('.telegram-select').forEach(c=>c.checked=event.target.checked);update();};controls.append(select,remove);page.querySelector('.telegram-list').before(controls);
+   }
   }
  }
+ async function removeTelegrams(ids){
+  if(!ids.length||!await PortalPolish.confirm(ids.length===1?'Smazat tento telegram?':'Smazat vybrané telegramy?','Zmizí pouze z tvé příchozí schránky. Odesílateli zůstane jeho kopie. Smazání nelze vrátit.','Smazat'))return;
+  const user=identity?.user.id,version=generation;try{await api('/telegrams',{method:'DELETE',body:JSON.stringify({ids})});if(!valid(version,user))return;await refreshSession();if(location.hash==='#telegrams')await open();else location.hash='#telegrams';}catch(error){if(valid(version,user))setStatus(error.message);}
+ }
  function allowed(){const path=location.hash.split('/')[1];if(path==='admins')return !!identity?.admin?.owner;const permission={requests:'review',audit:'review',users:'activity',mail:'official'}[path];return permission?has(permission):!!identity?.admin?.owner||!!identity?.admin?.permissions.length;}
- return {init,sync,open,purge,beforeRoute,get matches(){return routeMatch();},get active(){return view;},allowed};
+ return {init,sync,open,purge,beforeRoute,beforeLogout,get matches(){return routeMatch();},get active(){return view;},allowed};
 })();

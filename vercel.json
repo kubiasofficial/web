@@ -4,6 +4,93 @@
   "buildCommand": "",
   "installCommand": "",
   "outputDirectory": "dist",
-  "rewrites": [{ "source": "/api/ubd/:path*", "destination": "https://ubd-bot.suslik-kuba.workers.dev/:path*" }],
-  "headers": [{ "source": "/api/ubd/:path*", "headers": [{ "key": "Cache-Control", "value": "private, no-store, max-age=0" }] }]
+  "rewrites": [
+    {
+      "source": "/api/ubd/:path*",
+      "destination": "https://ubd-bot.suslik-kuba.workers.dev/:path*"
+    }
+  ],
+  "headers": [
+    {
+      "source": "/api/ubd/:path*",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "private, no-store, max-age=0"
+        }
+      ]
+    },
+    {
+      "source": "/site.fca6913da768.css",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
+    },
+    {
+      "source": "/assets/optimized/:path*",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
+    },
+    {
+      "source": "/media.22e22443410b.js",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
+    },
+    {
+      "source": "/reader.a6a9821fc125.js",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
+    },
+    {
+      "source": "/public-people.9da5f01e1f26.js",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
+    },
+    {
+      "source": "/app.4a73cc7b995b.js",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
+    },
+    {
+      "source": "/motion.66e067f7442b.js",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
+    },
+    {
+      "source": "/players.c49db5cdd069.js",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
+    }
+  ]
 }

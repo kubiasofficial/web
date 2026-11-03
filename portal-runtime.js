@@ -69,7 +69,7 @@ function setNotice(text){notice.textContent=text;notice.hidden=!text;}
 function deny(key,message=deniedText,scope='lore'){
  purgeProfile();Journal.purge();PortalPolish.loading(key,false);selection.hidden=!!identity;portal.hidden=!identity;
  const person=catalog[key];denial.style.setProperty('--aura',person.color);
- denial.querySelector('img').src='assets/icon-'+key+'.png';
+ mediaImage(denial.querySelector('img'),'icon-'+key+'.png','180px',320);
  denial.querySelector('h2').textContent=person.name;denial.querySelector('.denial-motto').textContent=person.motto;
  denial.querySelector('.denial-copy').textContent=message===deniedText?nextDenial():message;
  denial.querySelector('.discord-login').hidden=!!identity;
@@ -91,6 +91,7 @@ function renderAccount(){
  const photo=new Image(34,34);photo.src=identity.user.avatar;photo.alt='';accountControls.append(photo);
  const name=document.createElement('span');name.textContent=identity.user.name;accountControls.append(name);
  const logout=document.createElement('button');logout.type='button';logout.textContent='Odhlásit';logout.onclick=async()=>{
+  if(!await Community.beforeLogout())return;
   logout.disabled=true;loggingOut=true;refreshVersion++;try{await api('/auth/logout',{method:'POST'});identity=null;csrf='';purgeProfile();Journal.purge();resetTrust();renderAccount();location.hash='';await route();}catch(error){setNotice(error.message);logout.disabled=false;}finally{loggingOut=false;}
  };accountControls.append(logout);
  const day=new Intl.DateTimeFormat('cs-CZ',{weekday:'long',timeZone:'Europe/Prague'}).format(new Date());
@@ -100,8 +101,8 @@ function renderAccount(){
  document.body.style.setProperty('--account-aura',person?.color||'#c88e4a');
  welcome.querySelector('p').textContent=person?'Tvůj příběh čeká, '+person.nickname+'.':'Vítej mezi příběhy, do kterých ti jejich hráči dovolí nahlédnout.';
  welcome.querySelector('.trust-open').hidden=!own;
- rail.innerHTML='<header class="cast-heading"><div><span class="eyebrow">SEDM OSUDŮ. JEDEN HORIZONT.</span><h2>Příběhy kolem tebe<span aria-hidden="true">✦</span></h2><p>Známé tváře. Vlastní tajemství. Každý příběh otevírá důvěra.</p></div><span class="cast-count">'+String(Object.keys(catalog).length-(own?1:0)).padStart(2,'0')+'<small>DALŠÍCH PŘÍBĚHŮ</small></span></header><div class="cast-grid">'+Object.entries(catalog).filter(([key])=>key!==own).map(([key,p])=>'<a href="#'+key+'" class="private-medallion" style="--aura:'+p.color+'"><img src="assets/icon-'+key+'.png" alt="" width="180" height="180"><span>'+escape(p.nickname)+'</span></a>').join('')+'</div><p class="cast-footnote">Příběh a deník mají vlastní povolení. O přístup můžeš požádat přímo hráče.</p>';
- portal.innerHTML='<section class="personal-scene" style="--aura:'+(person?.color||'#c88e4a')+'">'+(person?'<img class="personal-portrait" src="assets/'+person.image+'" alt="'+escape(person.name)+'" width="1024" height="1536">':'<img class="personal-emblem" src="assets/NH.png" alt="New Horizon RP">')+'<div class="personal-copy"><span class="eyebrow">'+(person?'PŘÍBĚH, O KTERÉM ROZHODUJEŠ TY':'KAŽDÁ DŮVĚRA MÁ SVŮJ PŘÍBĚH')+'</span><h1>'+(person?escape(person.given)+'<strong>'+escape(person.surname)+'</strong>':'Vítej v archivu')+'</h1>'+(person?'<p class="personal-signature">'+escape(person.nickname)+'</p><p>'+escape(person.motto)+'</p><a class="story-button" href="#'+own+'">Otevřít můj příběh <span>↗</span></a>':'<p>Po straně najdeš všechny postavy. Jejich příběhy si přečteš, pokud ti je hráči zpřístupní.</p>')+'<p class="personal-privacy">'+(person?'Tvůj archiv je soukromý. Ostatní do něj vstoupí pouze s tvým svolením.':'Přihlášení samo o sobě cizí příběhy neodemyká.')+'</p></div></section>';
+ rail.innerHTML='<header class="cast-heading"><div><span class="eyebrow">SEDM OSUDŮ. JEDEN HORIZONT.</span><h2>Příběhy kolem tebe<span aria-hidden="true">✦</span></h2><p>Známé tváře. Vlastní tajemství. Každý příběh otevírá důvěra.</p></div><span class="cast-count">'+String(Object.keys(catalog).length-(own?1:0)).padStart(2,'0')+'<small>DALŠÍCH PŘÍBĚHŮ</small></span></header><div class="cast-grid">'+Object.entries(catalog).filter(([key])=>key!==own).map(([key,p])=>'<a href="#'+key+'" class="private-medallion" style="--aura:'+p.color+'"><img src="'+mediaURL('icon-'+key+'.png',320)+'" alt="" width="180" height="180" loading="lazy" decoding="async"><span>'+escape(p.nickname)+'</span></a>').join('')+'</div><p class="cast-footnote">Příběh a deník mají vlastní povolení. O přístup můžeš požádat přímo hráče.</p>';
+ portal.innerHTML='<section class="personal-scene" style="--aura:'+(person?.color||'#c88e4a')+'">'+(person?'<img class="personal-portrait" src="'+mediaURL(person.image,960)+'" sizes="(max-width:700px) 90vw, 52vw" srcset="'+mediaSrcset(person.image)+'" alt="'+escape(person.name)+'" width="1024" height="1536">':'<img class="personal-emblem" src="'+mediaURL('NH.png',320)+'" alt="New Horizon RP">')+'<div class="personal-copy"><span class="eyebrow">'+(person?'PŘÍBĚH, O KTERÉM ROZHODUJEŠ TY':'KAŽDÁ DŮVĚRA MÁ SVŮJ PŘÍBĚH')+'</span><h1>'+(person?escape(person.given)+'<strong>'+escape(person.surname)+'</strong>':'Vítej v archivu')+'</h1>'+(person?'<p class="personal-signature">'+escape(person.nickname)+'</p><p>'+escape(person.motto)+'</p><a class="story-button" href="#'+own+'">Otevřít můj příběh <span>↗</span></a>':'<p>Po straně najdeš všechny postavy. Jejich příběhy si přečteš, pokud ti je hráči zpřístupní.</p>')+'<p class="personal-privacy">'+(person?'Tvůj archiv je soukromý. Ostatní do něj vstoupí pouze s tvým svolením.':'Přihlášení samo o sobě cizí příběhy neodemyká.')+'</p></div></section>';
  PortalPolish.account(person,own);PortalPolish.active(Journal.key||activePerson,Journal.key?'journal':'lore');
  UserChrome.account();UserChrome.decorateBirthdays();
 }
@@ -170,7 +171,7 @@ async function loadGrants(){
 }
 welcome.querySelector('.trust-open').onclick=async()=>{
  trustKey=identity?.owned[0];if(!trustKey)return;trustGeneration++;trustStatus('Načítám přístupy…');trust.querySelector('.trust-candidate').hidden=true;
- trust.querySelector('.trust-identity img').src='assets/icon-'+trustKey+'.png';trust.querySelector('.trust-owner-name').textContent='Přístupy k postavě '+catalog[trustKey].name;
+ mediaImage(trust.querySelector('.trust-identity img'),'icon-'+trustKey+'.png','76px',160);trust.querySelector('.trust-owner-name').textContent='Přístupy k postavě '+catalog[trustKey].name;
  trust.showModal();try{
   const data=await api('/archive/candidates');const select=trust.querySelector('select');select.replaceChildren(new Option('Jiný člen Discordu — zadat ID',''));
   for(const user of data.users)select.append(new Option(user.name,user.id));

@@ -46,6 +46,7 @@ window.Journal = (() => {
   try{await api('/journal/entries/'+journalKey+'/'+entry.id,{method:'DELETE',body:JSON.stringify({revision:entry.revision})});if(version!==requestVersion)return;entries.delete(entry.id);const first=entries.values().next().value;selected=first?.id||null;history.replaceState(null,'','#journal-'+journalKey+(selected?'/'+selected:''));renderEntry(selected);status('Zápis byl smazán.');}catch(error){if(version===requestVersion)status(error.message);}
  }
  async function open(journalKey,entryId,force=false){
+  loadDiaryFonts();
   const same=key===journalKey&&!page.hidden,version=++requestVersion,user=identity?.user.id;
   if(!same){entries.clear();nextCursor=null;selected=null;}
   key=journalKey;page.hidden=true;PortalPolish.loading(journalKey);

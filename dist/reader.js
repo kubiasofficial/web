@@ -15,7 +15,7 @@
  let chapterObserver=null;
  const cleanTitle=title=>title.replace(/^[IVXLCDM]+\.\s*/,'').replace(/\s*\([^)]*\)\s*$/,'');
  function figure(key,scene,escape){
-  return `<figure class="scene-figure${scene.side?' scene-side':''}"><div class="scene-media" style="--scene-row:${scene.row}"><img src="assets/${key}-scenes.png" alt="${escape(scene.title)}" loading="lazy" decoding="async" width="1254" height="1254"></div><figcaption>${escape(scene.title)}<span>ILUSTRACE K PŘÍBĚHU</span></figcaption></figure>`;
+  return `<figure class="scene-figure${scene.side?' scene-side':''}"><div class="scene-media" style="--scene-row:${scene.row}"><img src="${mediaURL(key+'-scenes.png',1600)}" srcset="${mediaSrcset(key+'-scenes.png')}" sizes="(max-width:700px) 95vw, 800px" alt="${escape(scene.title)}" loading="lazy" decoding="async" width="1254" height="1254"></div><figcaption>${escape(scene.title)}<span>ILUSTRACE K PŘÍBĚHU</span></figcaption></figure>`;
  }
  function update(){
   frame=0;
@@ -56,13 +56,13 @@
    profile.querySelectorAll('.chronicle-seal,.chronicle-atmosphere,.relation-medallion').forEach(node=>node.remove());
    {
     profile.querySelector('.profile-hero').insertAdjacentHTML('afterbegin','<div class="chronicle-atmosphere" aria-hidden="true"><div class="chronicle-fog"></div>'+Array.from({length:12},(_,i)=>'<i style="--i:'+i+'"></i>').join('')+'</div>');
-    profile.querySelector('.profile-heading').insertAdjacentHTML('afterbegin','<div class="chronicle-seal"><img src="assets/icon-'+key+'.png" alt="" width="96" height="96"><span>NEW HORIZON ARCHIVES<small>'+escape(theme.world.toUpperCase())+'</small></span></div>');
+    profile.querySelector('.profile-heading').insertAdjacentHTML('afterbegin','<div class="chronicle-seal"><img src="'+mediaURL('icon-'+key+'.png',320)+'" alt="" width="96" height="96"><span>NEW HORIZON ARCHIVES<small>'+escape(theme.world.toUpperCase())+'</small></span></div>');
     profile.querySelectorAll('.family-members>div').forEach((card,index)=>{
      const member=person.family[index];
-     if(member.href)card.insertAdjacentHTML('afterbegin','<a class="relation-medallion" href="'+member.href+'" aria-label="'+escape(member.name)+'"><img src="assets/icon-'+member.href.slice(1)+'.png" alt="" width="100" height="100" loading="lazy"></a>');
+     if(member.href)card.insertAdjacentHTML('afterbegin','<a class="relation-medallion" href="'+member.href+'" aria-label="'+escape(member.name)+'"><img src="'+mediaURL('icon-'+member.href.slice(1)+'.png',320)+'" alt="" width="100" height="100" loading="lazy"></a>');
     });
    }
-   const photo=profile.querySelector('.sidebar-portrait img');photo.src='assets/icon-'+key+'.png';
+   const photo=profile.querySelector('.sidebar-portrait img');mediaImage(photo,'icon-'+key+'.png','180px',320);
    photo.alt='Portrét: '+person.name;
    profile.querySelector('.sidebar-signature').textContent=person.nickname;
    profile.querySelector('.sidebar-identity>.eyebrow').textContent='OSOBNÍ SPIS № '+person.number;
