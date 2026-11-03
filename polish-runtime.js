@@ -7,7 +7,7 @@ const PortalPolish = (() => {
   if(!browser?.open)return;
   browser.close();portal.after(rail);rail.classList.remove('cast-in-dialog');
   castToggle.setAttribute('aria-expanded','false');document.body.classList.remove('cast-browser-open');
-  if(returnFocus?.isConnected)returnFocus.focus({preventScroll:true});returnFocus=null;
+  if(returnFocus?.isConnected){const target=returnFocus.closest('[inert]')?document.querySelector('.user-trigger'):returnFocus;target?.focus({preventScroll:true});}returnFocus=null;
  }
  function openCast(){
   if(!identity||browser.open)return;
@@ -100,6 +100,7 @@ const PortalPolish = (() => {
  }
  function revealProfile(key){
   let journalLink=profile.querySelector('.profile-journal-link');if(!journalLink){journalLink=document.createElement('a');journalLink.className='profile-journal-link';profile.querySelector('.profile-heading .story-button').after(journalLink);}journalLink.href='#journal-'+key;journalLink.innerHTML=book(key,true)+'<span>Osobní deník ↗</span>';
+  UserChrome.decorateBirthdays();
   if(motionAllowed()){profile.querySelector('.hero-character').animate([{opacity:0,transform:'translateX(35px) scale(1.015)'},{opacity:1,transform:'translateX(0) scale(1)'}],{duration:650,easing:'cubic-bezier(.2,.65,.25,1)'});profile.querySelector('.profile-heading').animate([{opacity:0,transform:'translateY(16px)'},{opacity:1,transform:'translateY(0)'}],{duration:550,easing:'ease-out'});}
  }
  return {init,account,loading,active,book,confirm:confirmAction,closeCast,cancelConfirmation:()=>{if(resolveConfirmation)settle(false);},revealProfile};

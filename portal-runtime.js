@@ -82,11 +82,12 @@ denial.querySelector('.dialog-close').onclick=closeDenial;denial.querySelector('
 denial.addEventListener('cancel',event=>{event.preventDefault();closeDenial();});
 function renderAccount(){
  Community.sync();
+ UserChrome.refresh();
  const fingerprint=identity?JSON.stringify([identity.user,identity.owned,identity.access,identity.journalAccess,identity.directory,new Intl.DateTimeFormat('cs-CZ',{timeZone:'Europe/Prague'}).format(new Date())]):'guest';
  if(fingerprint===accountFingerprint)return;accountFingerprint=fingerprint;
  document.body.classList.toggle('signed-in',!!identity);welcome.hidden=!identity;rail.hidden=!identity;
  accountControls.replaceChildren();
- if(!identity){Community.purge();PortalPolish.closeCast();rail.replaceChildren();portal.replaceChildren();const login=document.createElement('a');login.href=loginHref;login.className='discord-login';login.textContent='Přihlásit přes Discord';accountControls.append(login);return;}
+ if(!identity){Community.purge();PortalPolish.closeCast();rail.replaceChildren();portal.replaceChildren();const login=document.createElement('a');login.href=loginHref;login.className='discord-login';login.textContent='Přihlásit přes Discord';accountControls.append(login);UserChrome.account();return;}
  const photo=new Image(34,34);photo.src=identity.user.avatar;photo.alt='';accountControls.append(photo);
  const name=document.createElement('span');name.textContent=identity.user.name;accountControls.append(name);
  const logout=document.createElement('button');logout.type='button';logout.textContent='Odhlásit';logout.onclick=async()=>{
@@ -102,6 +103,7 @@ function renderAccount(){
  rail.innerHTML='<header class="cast-heading"><div><span class="eyebrow">SEDM OSUDŮ. JEDEN HORIZONT.</span><h2>Příběhy kolem tebe<span aria-hidden="true">✦</span></h2><p>Známé tváře. Vlastní tajemství. Každý příběh otevírá důvěra.</p></div><span class="cast-count">'+String(Object.keys(catalog).length-(own?1:0)).padStart(2,'0')+'<small>DALŠÍCH PŘÍBĚHŮ</small></span></header><div class="cast-grid">'+Object.entries(catalog).filter(([key])=>key!==own).map(([key,p])=>'<a href="#'+key+'" class="private-medallion" style="--aura:'+p.color+'"><img src="assets/icon-'+key+'.png" alt="" width="180" height="180"><span>'+escape(p.nickname)+'</span></a>').join('')+'</div><p class="cast-footnote">Příběh a deník mají vlastní povolení. O přístup můžeš požádat přímo hráče.</p>';
  portal.innerHTML='<section class="personal-scene" style="--aura:'+(person?.color||'#c88e4a')+'">'+(person?'<img class="personal-portrait" src="assets/'+person.image+'" alt="'+escape(person.name)+'" width="1024" height="1536">':'<img class="personal-emblem" src="assets/NH.png" alt="New Horizon RP">')+'<div class="personal-copy"><span class="eyebrow">'+(person?'PŘÍBĚH, O KTERÉM ROZHODUJEŠ TY':'KAŽDÁ DŮVĚRA MÁ SVŮJ PŘÍBĚH')+'</span><h1>'+(person?escape(person.given)+'<strong>'+escape(person.surname)+'</strong>':'Vítej v archivu')+'</h1>'+(person?'<p class="personal-signature">'+escape(person.nickname)+'</p><p>'+escape(person.motto)+'</p><a class="story-button" href="#'+own+'">Otevřít můj příběh <span>↗</span></a>':'<p>Po straně najdeš všechny postavy. Jejich příběhy si přečteš, pokud ti je hráči zpřístupní.</p>')+'<p class="personal-privacy">'+(person?'Tvůj archiv je soukromý. Ostatní do něj vstoupí pouze s tvým svolením.':'Přihlášení samo o sobě cizí příběhy neodemyká.')+'</p></div></section>';
  PortalPolish.account(person,own);PortalPolish.active(Journal.key||activePerson,Journal.key?'journal':'lore');
+ UserChrome.account();UserChrome.decorateBirthdays();
 }
 async function refreshSession(initial=false){
  if(loggingOut)return;const version=++refreshVersion;
@@ -114,7 +116,7 @@ async function refreshSession(initial=false){
   identity=next;csrf=data.csrf||'';ready=true;renderAccount();
   if(!identity||activePerson&&!identity.access.includes(activePerson)||Journal.key&&!identity.journalAccess?.includes(Journal.key)){purgeProfile();Journal.purge();await route();}
   else if(initial||changed||Community.matches&&!Community.active||Community.active==='manage'&&!Community.allowed()||directoryChanged&&currentKey()||currentKey()&&activePerson!==currentKey()&&identity.access.includes(currentKey())||Journal.route&&!Journal.key)await route();
- }catch(error){if(version!==refreshVersion)return;ready=true;purgeProfile();Journal.purge({preserveDraft:true});Community.purge({preserveDraft:true});if(initial){identity=null;renderAccount();selection.hidden=false;}setNotice(error.message);}
+ }catch(error){if(version!==refreshVersion)return;ready=true;purgeProfile();Journal.purge({preserveDraft:true});Community.purge({preserveDraft:true});UserChrome.clearPrivate();if(initial){identity=null;renderAccount();selection.hidden=false;}setNotice(error.message);}
 }
 async function route(){
  const version=++routeVersion,journalMatch=Journal.route,key=journalMatch?.[1]||currentKey(),previous=activePerson;
@@ -190,10 +192,10 @@ trust.querySelector('form').onsubmit=async event=>{
 };
 window.addEventListener('hashchange',route);
 window.addEventListener('keydown',event=>{if(event.key==='Escape'&&!event.defaultPrevented&&!document.querySelector('dialog[open]')&&!profile.hidden)location.hash='';});
-document.addEventListener('visibilitychange',()=>{if(document.hidden){routeVersion++;purgeProfile();Journal.purge({preserveDraft:true});Community.purge({preserveDraft:true});PortalPolish.loading('',false);}else refreshSession(true);});
+document.addEventListener('visibilitychange',()=>{if(document.hidden){routeVersion++;purgeProfile();Journal.purge({preserveDraft:true});Community.purge({preserveDraft:true});UserChrome.clearPrivate();UserChrome.closeMenu();PortalPolish.loading('',false);}else refreshSession(true);});
 window.addEventListener('pageshow',event=>{if(event.persisted){routeVersion++;purgeProfile();Journal.purge();refreshSession(true);}});
 setInterval(()=>{if(!document.hidden&&identity)refreshSession();},15000);
-PortalPolish.init();Journal.init();Community.init();renderAccount();
+PortalPolish.init();Journal.init();Community.init();UserChrome.init();renderAccount();
 const loginResult=new URLSearchParams(location.search).get('login');
 if(loginResult){setNotice(loginResult==='failed'?'Přihlášení se nepodařilo. Ověř, že jsi členem vašeho Discord serveru, a zkus to znovu.':'Přihlášení bylo zrušeno.');history.replaceState(null,'',location.pathname+location.hash);}
 refreshSession(true);
