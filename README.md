@@ -1,5 +1,7 @@
 # New Horizon RP — sedm příběhů
 
+Mobilní rozložení: [RELEASE-MOBILE-2.md](RELEASE-MOBILE-2.md). Samostatné portréty, čitelná galerie a mřížka postav, větší ovládání a upravené formuláře. Poslední responzivní vrstva je `dist/mobile.css`.
+
 Aktuální gramofon a sezóny: [RELEASE-SHARED-GRAMOPHONE.md](RELEASE-SHARED-GRAMOPHONE.md). Hudba z místní složky `../pisnicky-gramofon` se připraví přes `node tools/sync-music.mjs` a zveřejní pushem webu. Gramofon je pro všechny přihlášené hráče a hraje na pozadí; sezónní atmosféra je na celém webu. Tato aktualizace nevyžaduje nové SQL ani změnu Workeru.
 
 Osobní deníky: vstup přes ikonu koženého zápisníku, vlastní stránka pro každý deník, editor a samostatné sdílení přístupu. Klientské zdroje jsou `journal-runtime.js` a `polish-runtime.js`, styl `dist/journal.css`. Sestavení: `node ../bot/prepare-web.mjs`. Nasazení vyžaduje databázové doplnění a nový Worker podle `../bot/JOURNAL_SETUP.md`. Texty o aktualizaci jsou v `../bot/UPDATE-JOURNAL.md`.
