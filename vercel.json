@@ -8,6 +8,22 @@
     {
       "source": "/api/ubd/:path*",
       "destination": "https://ubd-bot.suslik-kuba.workers.dev/:path*"
+    },
+    {
+      "source": "/assets/scarlett.png",
+      "destination": "/assets/annie-v2.png"
+    },
+    {
+      "source": "/assets/icon-scarlett.png",
+      "destination": "/assets/icon-annie-v2.png"
+    },
+    {
+      "source": "/assets/scarlett-scenes.png",
+      "destination": "/assets/annie-scenes-v2.png"
+    },
+    {
+      "source": "/assets/postavy.png",
+      "destination": "/assets/postavy-annie-v2.png"
     }
   ],
   "headers": [
@@ -30,7 +46,7 @@
       ]
     },
     {
-      "source": "/site.5a9ed6c9afb7.css",
+      "source": "/site.d1392aee7397.css",
       "headers": [
         {
           "key": "Cache-Control",
@@ -57,7 +73,7 @@
       ]
     },
     {
-      "source": "/media.51fec74cd76a.js",
+      "source": "/media.514d66fb1b60.js",
       "headers": [
         {
           "key": "Cache-Control",
