@@ -1,7 +1,7 @@
 const Community=(()=>{
  let page,nav,generation=0,loadedHash='',view='',editorState=null,suspended=null,mailRequest=null,mailDraft=null;
  const labels={given:'Jméno',surname:'Příjmení',nickname:'Přezdívka',age:'Věk v lore',birth:'Datum narození',occupation:'Povolání',relatives:'Rodina a blízcí',kicker:'Motto',description:'Úvodní charakteristika',quote:'Osobní citát',closing:'Závěrečná slova',origin:'Původ',familyTitle:'Nadpis vztahů',familyDescription:'Úvod ke vztahům',chapters:'Kapitoly lore',family:'Vztahy'};
- const permissionLabels={review:'Schvalování změn',activity:'Přehled přihlášení',official:'Telegramy za správu'};
+ const permissionLabels={review:'Schvalování změn',activity:'Přehled přihlášení',official:'Telegramy za správu',blacklist:'Správa blacklistu'};
  const icons={edit:'M5 19l4-1L20 7l-3-3L6 15zM14 7l3 3',mail:'M3 6h18v13H3zM3 6l9 7 9-7',admin:'M12 2l8 4v6c0 5-8 10-8 10S4 17 4 12V6zM8 12l3 3 5-6',home:'M3 11l9-8 9 8M6 9v12h12V9',users:'M15 21v-3c0-5-12-5-12 0v3M9 4a4 4 0 1 0 0 8 4 4 0 0 0 0-8M17 5c5 0 5 7 0 7M18 15c3 0 3 3 3 6',clock:'M12 8v5l3 2M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18',check:'M4 12l5 5L20 6'};
  const icon=name=>'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="'+icons[name]+'"/></svg>';
  const stamp=state=>({pending:'Čeká na schválení',approved:'Schváleno',rejected:'Zamítnuto'}[state]||state);
@@ -24,6 +24,7 @@ const Community=(()=>{
   if(!nav)return;
   nav.querySelector('.nav-edit').hidden=!identity?.owned.length;
   nav.querySelector('.nav-manage').hidden=!identity?.admin?.owner&&!identity?.admin?.permissions.length;
+  nav.querySelector('.nav-mail').hidden=!!identity?.restricted;
   for(const [selector,count]of [['.nav-mail',identity?.unread||0],['.nav-manage',identity?.pending||0]]){const badge=nav.querySelector(selector+' .web-badge');badge.hidden=!count;badge.textContent=String(count);}
  }
  function values(){
@@ -98,7 +99,7 @@ const Community=(()=>{
  async function manage(version,user){
   const overview=await api('/manage/overview');if(!valid(version,user))return;
   const own=overview.admin.owner,permissions=overview.admin.permissions;
-  const items=[['#manage','Přehled','admin']];if(permissions.includes('review'))items.push(['#manage/requests','Změny','edit']);if(permissions.includes('activity'))items.push(['#manage/users','Uživatelé a přihlášení','users']);if(own)items.push(['#manage/admins','Správci a oprávnění','admin']);if(permissions.includes('official'))items.push(['#manage/mail','Telegramy správy','mail']);if(permissions.includes('review'))items.push(['#manage/audit','Historie rozhodnutí','clock']);menu(items);
+  const items=[['#manage','Přehled','admin']];if(permissions.includes('review'))items.push(['#manage/requests','Změny','edit']);if(permissions.includes('activity'))items.push(['#manage/users','Uživatelé a přihlášení','users']);if(own)items.push(['#manage/admins','Správci a oprávnění','admin']);if(permissions.includes('blacklist'))items.push(['#manage/blacklist','Blacklist','admin']);if(permissions.includes('official'))items.push(['#manage/mail','Telegramy správy','mail']);if(permissions.includes('review'))items.push(['#manage/audit','Historie rozhodnutí','clock']);menu(items);
   const changes=page.querySelector('.community-menu a[href="#manage/requests"]');if(changes&&overview.pending){changes.classList.add('has-pending');changes.dataset.count=overview.pending;}
   const path=loadedHash.split('/');
   if(path[1]==='requests'){
@@ -109,9 +110,10 @@ const Community=(()=>{
    const result=await api('/manage/users');if(!valid(version,user))return;
    content().innerHTML='<h2>Uživatelé a poslední přihlášení</h2><p class="web-muted">Čas posledního úspěšného přihlášení přes Discord. Obnovení stránky jej nemění.</p><div class="user-list">'+result.users.map(r=>'<article class="web-list-row">'+(r.avatar?'<img src="'+text(r.avatar)+'" width="44" height="44" alt="">':'')+'<div><strong>'+text(r.display_name)+'</strong><p>'+text(r.characters.map(k=>catalog[k].name).join(', ')||'Bez přiřazené postavy')+'</p></div><time>'+date(r.last_login)+'</time></article>').join('')+'</div>';
   }else if(path[1]==='admins'){await administrators(version,user);}
+  else if(path[1]==='blacklist'){await blacklist(version,user);}
   else if(path[1]==='audit'){
    const result=await api('/manage/audit');if(!valid(version,user))return;
-   const actionLabels={'character.approved':'Schválení postavy','character.rejected':'Zamítnutí návrhu','admin.updated':'Úprava oprávnění správce','admin.removed':'Odebrání správce'};
+   const actionLabels={'character.approved':'Schválení postavy','character.rejected':'Zamítnutí návrhu','admin.updated':'Úprava oprávnění správce','admin.removed':'Odebrání správce','blacklist.added':'Omezení přístupu k webu','blacklist.removed':'Obnovení přístupu k webu'};
    content().innerHTML='<h2>Historie rozhodnutí</h2>'+result.events.map(r=>'<article class="web-list-row"><div><strong>'+text(actionLabels[r.action]||'Rozhodnutí správy')+'</strong><p>'+text(r.character_key?catalog[r.character_key].name:r.target)+'</p><p>'+text(r.action.startsWith('admin.')?'Změna přístupu ke správě webu.':r.detail)+'</p><small>Provedl: '+text(r.actor_name||(r.actor_id===identity.user.id?identity.user.name:r.actor_id))+'</small>'+(r.character_key?'<p><a class="web-back" href="#manage/requests/'+r.target+'">Otevřít rozhodnutí ↗</a></p>':'')+'</div><time>'+date(r.created_at)+'</time></article>').join('');
   }else if(path[1]==='mail'){
    if(!permissions.includes('official'))throw Error('Nemáš oprávnění odesílat za správu.');
@@ -119,6 +121,19 @@ const Community=(()=>{
   }else{
    content().innerHTML='<div class="manage-stats">'+(permissions.includes('review')?'<a href="#manage/requests" class="manage-stat"><span class="signal '+(overview.pending?'signal-pending':'')+'"></span><strong>'+overview.pending+'</strong><h2>Změny ke schválení</h2><p>'+ (overview.pending?'Spisy čekají na tvoje rozhodnutí.':'V tuto chvíli nic nečeká.')+'</p></a>':'')+'<a href="#telegrams" class="manage-stat">'+icon('mail')+'<strong>'+overview.unread+'</strong><h2>Nepřečtené telegramy</h2><p>Tvoje soukromá poštovní schránka.</p></a></div><div class="web-callout"><div><h2>Pracovna správce</h2><p>Každé rozhodnutí má svou stopu. Spravuj pouze údaje, ke kterým máš oprávnění. Soukromé deníky a cizí telegramy zůstávají pod vlastními přístupy.</p></div></div>';
   }
+ }
+ async function blacklist(version,user){
+  const result=await api('/manage/blacklist');if(!valid(version,user))return;
+  content().innerHTML='<div class="section-heading"><h2>Blacklist webu</h2><span class="status-pill pending">'+result.users.length+' omezených účtů</span></div><p class="web-muted">Přihlášení zůstane dostupné. Omezený uživatel uvidí pouze oznámení a kontakt na vedení Ústavu. Po obnovení přístupu se vrátí jeho původní oprávnění.</p><form class="blacklist-form"><label>Discord ID hráče<input name="userId" inputmode="numeric" pattern="[0-9]{17,20}" maxlength="20" required placeholder="Např. 642857462982115357"></label><label>Interní poznámka pro správu (nepovinná)<textarea name="reason" maxlength="500" rows="3"></textarea></label><p class="field-help">Poznámku vidí pouze oprávněná správa. Hlavního vlastníka webu nelze zablokovat.</p><button class="web-button primary">Odebrat přístup k webu</button></form><h2>Účty s omezeným přístupem</h2><div class="blacklist-list"></div>';
+  const list=page.querySelector('.blacklist-list');if(!result.users.length)list.innerHTML='<div class="web-empty">'+icon('check')+'<h3>Žádné omezené účty.</h3></div>';
+  for(const row of result.users){const item=document.createElement('article');item.className='web-list-row blacklist-entry';item.dataset.userId=row.user_id;item.innerHTML='<div><strong>'+text(row.display_name)+'</strong><small>'+text(row.user_id)+'</small><p>'+text(row.reason||'Bez interní poznámky.')+'</p><small>Zařazeno: '+date(row.created_at)+' · Správce: '+text(row.created_by)+'</small></div>';item.append(button('Obnovit přístup',async()=>{
+   if(!await PortalPolish.confirm('Obnovit přístup k webu?',row.display_name+' bude znovu moci používat web v rozsahu svých oprávnění.','Obnovit přístup'))return;
+   const b=item.querySelector('button');b.disabled=true;try{await api('/manage/blacklist/'+row.user_id,{method:'DELETE'});if(valid(version,user))await open();}catch(error){if(valid(version,user)){setStatus(error.message);b.disabled=false;}}
+  },'subtle'));list.append(item);}
+  page.querySelector('.blacklist-form').onsubmit=async event=>{event.preventDefault();const f=event.target,id=f.elements.userId.value.trim(),reason=f.elements.reason.value;
+   if(!await PortalPolish.confirm('Odebrat přístup k webu?',id+' se bude moci přihlásit, ale webové funkce pro něj budou uzamčené.','Odebrat přístup'))return;
+   if(!valid(version,user))return;f.querySelector('button').disabled=true;try{await api('/manage/blacklist/'+id,{method:'PUT',body:JSON.stringify({reason})});if(valid(version,user))await open();}catch(error){if(valid(version,user)){setStatus(error.message);f.querySelector('button').disabled=false;}}
+  };
  }
  function printable(value){return Array.isArray(value)?value.map(r=>Object.entries(r).map(([k,v])=>k+': '+v).join('\n')).join('\n\n'):String(value||'');}
  async function review(id,version,user){
@@ -169,6 +184,6 @@ const Community=(()=>{
   if(!ids.length||!await PortalPolish.confirm(ids.length===1?'Smazat tento telegram?':'Smazat vybrané telegramy?','Zmizí pouze z tvé příchozí schránky. Odesílateli zůstane jeho kopie. Smazání nelze vrátit.','Smazat'))return;
   const user=identity?.user.id,version=generation;try{await api('/telegrams',{method:'DELETE',body:JSON.stringify({ids})});if(!valid(version,user))return;await refreshSession();if(location.hash==='#telegrams')await open();else location.hash='#telegrams';}catch(error){if(valid(version,user))setStatus(error.message);}
  }
- function allowed(){const path=location.hash.split('/')[1];if(path==='admins')return !!identity?.admin?.owner;const permission={requests:'review',audit:'review',users:'activity',mail:'official'}[path];return permission?has(permission):!!identity?.admin?.owner||!!identity?.admin?.permissions.length;}
+ function allowed(){const path=location.hash.split('/')[1];if(path==='admins')return !!identity?.admin?.owner;const permission={requests:'review',audit:'review',users:'activity',mail:'official',blacklist:'blacklist'}[path];return permission?has(permission):!!identity?.admin?.owner||!!identity?.admin?.permissions.length;}
  return {init,sync,open,purge,beforeRoute,beforeLogout,get matches(){return routeMatch();},get active(){return view;},allowed};
 })();

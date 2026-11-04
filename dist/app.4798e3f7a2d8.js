@@ -260,7 +260,7 @@ window.Journal = (() => {
 const Community=(()=>{
  let page,nav,generation=0,loadedHash='',view='',editorState=null,suspended=null,mailRequest=null,mailDraft=null;
  const labels={given:'Jméno',surname:'Příjmení',nickname:'Přezdívka',age:'Věk v lore',birth:'Datum narození',occupation:'Povolání',relatives:'Rodina a blízcí',kicker:'Motto',description:'Úvodní charakteristika',quote:'Osobní citát',closing:'Závěrečná slova',origin:'Původ',familyTitle:'Nadpis vztahů',familyDescription:'Úvod ke vztahům',chapters:'Kapitoly lore',family:'Vztahy'};
- const permissionLabels={review:'Schvalování změn',activity:'Přehled přihlášení',official:'Telegramy za správu'};
+ const permissionLabels={review:'Schvalování změn',activity:'Přehled přihlášení',official:'Telegramy za správu',blacklist:'Správa blacklistu'};
  const icons={edit:'M5 19l4-1L20 7l-3-3L6 15zM14 7l3 3',mail:'M3 6h18v13H3zM3 6l9 7 9-7',admin:'M12 2l8 4v6c0 5-8 10-8 10S4 17 4 12V6zM8 12l3 3 5-6',home:'M3 11l9-8 9 8M6 9v12h12V9',users:'M15 21v-3c0-5-12-5-12 0v3M9 4a4 4 0 1 0 0 8 4 4 0 0 0 0-8M17 5c5 0 5 7 0 7M18 15c3 0 3 3 3 6',clock:'M12 8v5l3 2M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18',check:'M4 12l5 5L20 6'};
  const icon=name=>'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="'+icons[name]+'"/></svg>';
  const stamp=state=>({pending:'Čeká na schválení',approved:'Schváleno',rejected:'Zamítnuto'}[state]||state);
@@ -283,6 +283,7 @@ const Community=(()=>{
   if(!nav)return;
   nav.querySelector('.nav-edit').hidden=!identity?.owned.length;
   nav.querySelector('.nav-manage').hidden=!identity?.admin?.owner&&!identity?.admin?.permissions.length;
+  nav.querySelector('.nav-mail').hidden=!!identity?.restricted;
   for(const [selector,count]of [['.nav-mail',identity?.unread||0],['.nav-manage',identity?.pending||0]]){const badge=nav.querySelector(selector+' .web-badge');badge.hidden=!count;badge.textContent=String(count);}
  }
  function values(){
@@ -357,7 +358,7 @@ const Community=(()=>{
  async function manage(version,user){
   const overview=await api('/manage/overview');if(!valid(version,user))return;
   const own=overview.admin.owner,permissions=overview.admin.permissions;
-  const items=[['#manage','Přehled','admin']];if(permissions.includes('review'))items.push(['#manage/requests','Změny','edit']);if(permissions.includes('activity'))items.push(['#manage/users','Uživatelé a přihlášení','users']);if(own)items.push(['#manage/admins','Správci a oprávnění','admin']);if(permissions.includes('official'))items.push(['#manage/mail','Telegramy správy','mail']);if(permissions.includes('review'))items.push(['#manage/audit','Historie rozhodnutí','clock']);menu(items);
+  const items=[['#manage','Přehled','admin']];if(permissions.includes('review'))items.push(['#manage/requests','Změny','edit']);if(permissions.includes('activity'))items.push(['#manage/users','Uživatelé a přihlášení','users']);if(own)items.push(['#manage/admins','Správci a oprávnění','admin']);if(permissions.includes('blacklist'))items.push(['#manage/blacklist','Blacklist','admin']);if(permissions.includes('official'))items.push(['#manage/mail','Telegramy správy','mail']);if(permissions.includes('review'))items.push(['#manage/audit','Historie rozhodnutí','clock']);menu(items);
   const changes=page.querySelector('.community-menu a[href="#manage/requests"]');if(changes&&overview.pending){changes.classList.add('has-pending');changes.dataset.count=overview.pending;}
   const path=loadedHash.split('/');
   if(path[1]==='requests'){
@@ -368,9 +369,10 @@ const Community=(()=>{
    const result=await api('/manage/users');if(!valid(version,user))return;
    content().innerHTML='<h2>Uživatelé a poslední přihlášení</h2><p class="web-muted">Čas posledního úspěšného přihlášení přes Discord. Obnovení stránky jej nemění.</p><div class="user-list">'+result.users.map(r=>'<article class="web-list-row">'+(r.avatar?'<img src="'+text(r.avatar)+'" width="44" height="44" alt="">':'')+'<div><strong>'+text(r.display_name)+'</strong><p>'+text(r.characters.map(k=>catalog[k].name).join(', ')||'Bez přiřazené postavy')+'</p></div><time>'+date(r.last_login)+'</time></article>').join('')+'</div>';
   }else if(path[1]==='admins'){await administrators(version,user);}
+  else if(path[1]==='blacklist'){await blacklist(version,user);}
   else if(path[1]==='audit'){
    const result=await api('/manage/audit');if(!valid(version,user))return;
-   const actionLabels={'character.approved':'Schválení postavy','character.rejected':'Zamítnutí návrhu','admin.updated':'Úprava oprávnění správce','admin.removed':'Odebrání správce'};
+   const actionLabels={'character.approved':'Schválení postavy','character.rejected':'Zamítnutí návrhu','admin.updated':'Úprava oprávnění správce','admin.removed':'Odebrání správce','blacklist.added':'Omezení přístupu k webu','blacklist.removed':'Obnovení přístupu k webu'};
    content().innerHTML='<h2>Historie rozhodnutí</h2>'+result.events.map(r=>'<article class="web-list-row"><div><strong>'+text(actionLabels[r.action]||'Rozhodnutí správy')+'</strong><p>'+text(r.character_key?catalog[r.character_key].name:r.target)+'</p><p>'+text(r.action.startsWith('admin.')?'Změna přístupu ke správě webu.':r.detail)+'</p><small>Provedl: '+text(r.actor_name||(r.actor_id===identity.user.id?identity.user.name:r.actor_id))+'</small>'+(r.character_key?'<p><a class="web-back" href="#manage/requests/'+r.target+'">Otevřít rozhodnutí ↗</a></p>':'')+'</div><time>'+date(r.created_at)+'</time></article>').join('');
   }else if(path[1]==='mail'){
    if(!permissions.includes('official'))throw Error('Nemáš oprávnění odesílat za správu.');
@@ -378,6 +380,19 @@ const Community=(()=>{
   }else{
    content().innerHTML='<div class="manage-stats">'+(permissions.includes('review')?'<a href="#manage/requests" class="manage-stat"><span class="signal '+(overview.pending?'signal-pending':'')+'"></span><strong>'+overview.pending+'</strong><h2>Změny ke schválení</h2><p>'+ (overview.pending?'Spisy čekají na tvoje rozhodnutí.':'V tuto chvíli nic nečeká.')+'</p></a>':'')+'<a href="#telegrams" class="manage-stat">'+icon('mail')+'<strong>'+overview.unread+'</strong><h2>Nepřečtené telegramy</h2><p>Tvoje soukromá poštovní schránka.</p></a></div><div class="web-callout"><div><h2>Pracovna správce</h2><p>Každé rozhodnutí má svou stopu. Spravuj pouze údaje, ke kterým máš oprávnění. Soukromé deníky a cizí telegramy zůstávají pod vlastními přístupy.</p></div></div>';
   }
+ }
+ async function blacklist(version,user){
+  const result=await api('/manage/blacklist');if(!valid(version,user))return;
+  content().innerHTML='<div class="section-heading"><h2>Blacklist webu</h2><span class="status-pill pending">'+result.users.length+' omezených účtů</span></div><p class="web-muted">Přihlášení zůstane dostupné. Omezený uživatel uvidí pouze oznámení a kontakt na vedení Ústavu. Po obnovení přístupu se vrátí jeho původní oprávnění.</p><form class="blacklist-form"><label>Discord ID hráče<input name="userId" inputmode="numeric" pattern="[0-9]{17,20}" maxlength="20" required placeholder="Např. 642857462982115357"></label><label>Interní poznámka pro správu (nepovinná)<textarea name="reason" maxlength="500" rows="3"></textarea></label><p class="field-help">Poznámku vidí pouze oprávněná správa. Hlavního vlastníka webu nelze zablokovat.</p><button class="web-button primary">Odebrat přístup k webu</button></form><h2>Účty s omezeným přístupem</h2><div class="blacklist-list"></div>';
+  const list=page.querySelector('.blacklist-list');if(!result.users.length)list.innerHTML='<div class="web-empty">'+icon('check')+'<h3>Žádné omezené účty.</h3></div>';
+  for(const row of result.users){const item=document.createElement('article');item.className='web-list-row blacklist-entry';item.dataset.userId=row.user_id;item.innerHTML='<div><strong>'+text(row.display_name)+'</strong><small>'+text(row.user_id)+'</small><p>'+text(row.reason||'Bez interní poznámky.')+'</p><small>Zařazeno: '+date(row.created_at)+' · Správce: '+text(row.created_by)+'</small></div>';item.append(button('Obnovit přístup',async()=>{
+   if(!await PortalPolish.confirm('Obnovit přístup k webu?',row.display_name+' bude znovu moci používat web v rozsahu svých oprávnění.','Obnovit přístup'))return;
+   const b=item.querySelector('button');b.disabled=true;try{await api('/manage/blacklist/'+row.user_id,{method:'DELETE'});if(valid(version,user))await open();}catch(error){if(valid(version,user)){setStatus(error.message);b.disabled=false;}}
+  },'subtle'));list.append(item);}
+  page.querySelector('.blacklist-form').onsubmit=async event=>{event.preventDefault();const f=event.target,id=f.elements.userId.value.trim(),reason=f.elements.reason.value;
+   if(!await PortalPolish.confirm('Odebrat přístup k webu?',id+' se bude moci přihlásit, ale webové funkce pro něj budou uzamčené.','Odebrat přístup'))return;
+   if(!valid(version,user))return;f.querySelector('button').disabled=true;try{await api('/manage/blacklist/'+id,{method:'PUT',body:JSON.stringify({reason})});if(valid(version,user))await open();}catch(error){if(valid(version,user)){setStatus(error.message);f.querySelector('button').disabled=false;}}
+  };
  }
  function printable(value){return Array.isArray(value)?value.map(r=>Object.entries(r).map(([k,v])=>k+': '+v).join('\n')).join('\n\n'):String(value||'');}
  async function review(id,version,user){
@@ -428,7 +443,7 @@ const Community=(()=>{
   if(!ids.length||!await PortalPolish.confirm(ids.length===1?'Smazat tento telegram?':'Smazat vybrané telegramy?','Zmizí pouze z tvé příchozí schránky. Odesílateli zůstane jeho kopie. Smazání nelze vrátit.','Smazat'))return;
   const user=identity?.user.id,version=generation;try{await api('/telegrams',{method:'DELETE',body:JSON.stringify({ids})});if(!valid(version,user))return;await refreshSession();if(location.hash==='#telegrams')await open();else location.hash='#telegrams';}catch(error){if(valid(version,user))setStatus(error.message);}
  }
- function allowed(){const path=location.hash.split('/')[1];if(path==='admins')return !!identity?.admin?.owner;const permission={requests:'review',audit:'review',users:'activity',mail:'official'}[path];return permission?has(permission):!!identity?.admin?.owner||!!identity?.admin?.permissions.length;}
+ function allowed(){const path=location.hash.split('/')[1];if(path==='admins')return !!identity?.admin?.owner;const permission={requests:'review',audit:'review',users:'activity',mail:'official',blacklist:'blacklist'}[path];return permission?has(permission):!!identity?.admin?.owner||!!identity?.admin?.permissions.length;}
  return {init,sync,open,purge,beforeRoute,beforeLogout,get matches(){return routeMatch();},get active(){return view;},allowed};
 })();
 
@@ -462,6 +477,7 @@ const UserChrome=(()=>{
  }
  function account(){
   closeMenu();nav.querySelector('.menu-logout')?.remove();clearPrivate();
+  for(const selector of ['.portal-home','.cast-toggle','.notification-settings'])nav.querySelector(selector).hidden=!!identity?.restricted;
   if(!identity){trigger=null;return;}
   const avatar=accountControls.querySelector('img'),name=accountControls.querySelector('span'),logout=accountControls.querySelector('button');
   trigger=document.createElement('button');trigger.type='button';trigger.className='user-trigger';trigger.setAttribute('aria-controls',nav.id);trigger.setAttribute('aria-expanded','false');trigger.setAttribute('aria-label','Otevřít nabídku účtu '+identity.user.name);
@@ -503,6 +519,20 @@ const UserChrome=(()=>{
   finally{if(version===settingsVersion)form.querySelector('fieldset').disabled=false;}
  }
  return {init,account,refresh,clearPrivate,closeMenu,decorateBirthdays};
+})();
+
+const RestrictedAccess=(()=>{
+ let page;
+ function show(){
+  PortalPolish.closeCast();PortalPolish.cancelConfirmation();PortalPolish.loading('',false);purgeProfile();Journal.purge();Community.purge();UserChrome.clearPrivate();resetTrust();if(denial.open)denial.close();
+  selection.hidden=true;portal.hidden=true;welcome.hidden=true;rail.hidden=true;rail.replaceChildren();portal.replaceChildren();setNotice('');
+  if(!page){page=document.createElement('main');page.id='restricted-page';page.setAttribute('aria-labelledby','restricted-title');page.innerHTML='<section class="restricted-card"><div class="restricted-orbit" aria-hidden="true"><span></span><svg viewBox="0 0 100 100"><path d="M50 10 80 23v24c0 23-30 39-30 39S20 70 20 47V23Z"/><rect x="35" y="42" width="30" height="25" rx="4"/><path d="M40 42v-7a10 10 0 0 1 20 0v7M50 52v6"/></svg></div><span class="eyebrow">ÚSTAV BEZ DOZORU · SPRÁVA KRONIKY</span><h1 id="restricted-title">Tato kapitola je<br>pro tebe uzavřená.</h1><div class="restricted-divider" aria-hidden="true">✦</div><p class="restricted-message">Byl ti odebrán přístup k webovým funkcím. Pro jeho obnovení kontaktuj vedení Ústavu.</p><p class="restricted-account"></p><div class="restricted-actions"><a class="web-button primary" href="https://discord.com/channels/1561680787676467230" target="_blank" rel="noopener noreferrer">Kontaktovat vedení ↗</a><button type="button" class="web-button restricted-recheck">Zkontrolovat přístup</button></div><p class="restricted-status" role="status" aria-live="polite"></p><footer>NEW HORIZON · SOUKROMÁ KRONIKA</footer></section>';document.body.append(page);
+   page.querySelector('button').onclick=async event=>{const b=event.currentTarget;b.disabled=true;await refreshSession(true);if(identity?.restricted)page.querySelector('.restricted-status').textContent='Přístup je stále omezený. Kontaktuj vedení Ústavu.';b.disabled=false;};
+  }
+  page.hidden=false;page.querySelector('.restricted-account').textContent='Přihlášen jako '+identity.user.name;document.title='Přístup k webu byl odebrán · New Horizon';
+ }
+ function hide(){if(page){page.hidden=true;page.querySelector('.restricted-status').textContent='';page.querySelector('.restricted-account').textContent='';}}
+ return {show,hide};
 })();
 
 // Browser receives private profile data only after server authorization.
@@ -548,7 +578,7 @@ const api = async (path, options = {}) => {
  const response = await fetch(apiRoot + path, { credentials: 'same-origin', cache: 'no-store', signal: AbortSignal.timeout(7000),
   ...options, headers: { ...(options.body ? { 'Content-Type': 'application/json' } : {}), ...(options.method && options.method !== 'GET' ? { 'X-CSRF-Token': csrf } : {}), ...options.headers } });
  let data;try{data=await response.json();}catch{throw Object.assign(Error('Archiv je dočasně nedostupný.'),{status:503});}
- if(!response.ok)throw Object.assign(Error(data.error || 'Archiv není dostupný.'),{status:response.status});
+ if(!response.ok){if(data.restricted&&identity){identity={authenticated:true,restricted:true,user:identity.user,csrf,owned:[],access:[],journalAccess:[],directory:{},admin:{owner:false,permissions:[]},unread:0,pending:0};routeVersion++;renderAccount();}throw Object.assign(Error(data.error || 'Archiv není dostupný.'),{status:response.status,restricted:!!data.restricted});}
  return data;
 };
 const escape = escapeHTML;
@@ -574,6 +604,7 @@ function purgeProfile(){
 function currentKey(){const hash=location.hash;return Object.keys(catalog).find(key=>hash==='#'+key||hash.startsWith('#'+key+'-'))||((hash==='#pribeh'||/^#kapitola-\d+$/.test(hash))?'nathaniel':null);}
 function setNotice(text){notice.textContent=text;notice.hidden=!text;}
 function deny(key,message=deniedText,scope='lore'){
+ if(identity?.restricted){RestrictedAccess.show();return;}
  purgeProfile();Journal.purge();PortalPolish.loading(key,false);selection.hidden=!!identity;portal.hidden=!identity;
  const person=catalog[key];denial.style.setProperty('--aura',person.color);
  mediaImage(denial.querySelector('img'),'icon-'+key+'.png','180px',320);
@@ -590,9 +621,10 @@ denial.addEventListener('cancel',event=>{event.preventDefault();closeDenial();})
 function renderAccount(){
  Community.sync();
  UserChrome.refresh();
- const fingerprint=identity?JSON.stringify([identity.user,identity.owned,identity.access,identity.journalAccess,identity.directory,new Intl.DateTimeFormat('cs-CZ',{timeZone:'Europe/Prague'}).format(new Date())]):'guest';
+ const fingerprint=identity?JSON.stringify([identity.user,identity.restricted,identity.owned,identity.access,identity.journalAccess,identity.directory,new Intl.DateTimeFormat('cs-CZ',{timeZone:'Europe/Prague'}).format(new Date())]):'guest';
  if(fingerprint===accountFingerprint)return;accountFingerprint=fingerprint;
  document.body.classList.toggle('signed-in',!!identity);welcome.hidden=!identity;rail.hidden=!identity;
+ document.body.classList.toggle('restricted-user',!!identity?.restricted);if(!identity?.restricted)RestrictedAccess.hide();
  accountControls.replaceChildren();
  if(!identity){Community.purge();PortalPolish.closeCast();rail.replaceChildren();portal.replaceChildren();const login=document.createElement('a');login.href=loginHref;login.className='discord-login';login.textContent='Přihlásit přes Discord';accountControls.append(login);UserChrome.account();return;}
  const photo=new Image(34,34);photo.src=identity.user.avatar;photo.alt='';accountControls.append(photo);
@@ -601,6 +633,7 @@ function renderAccount(){
   if(!await Community.beforeLogout())return;
   logout.disabled=true;loggingOut=true;refreshVersion++;try{await api('/auth/logout',{method:'POST'});identity=null;csrf='';purgeProfile();Journal.purge();resetTrust();renderAccount();location.hash='';await route();}catch(error){setNotice(error.message);logout.disabled=false;}finally{loggingOut=false;}
  };accountControls.append(logout);
+ if(identity.restricted){UserChrome.account();RestrictedAccess.show();return;}
  const day=new Intl.DateTimeFormat('cs-CZ',{weekday:'long',timeZone:'Europe/Prague'}).format(new Date());
  const greeting={pondělí:'Krásné pondělí',úterý:'Krásné úterý',středa:'Krásnou středu',čtvrtek:'Krásný čtvrtek',pátek:'Krásný pátek',sobota:'Krásnou sobotu',neděle:'Krásnou neděli'};
  welcome.querySelector('h2').textContent=(greeting[day]||'Krásný den')+', '+identity.user.name+'.';
@@ -616,12 +649,13 @@ function renderAccount(){
 async function refreshSession(initial=false){
  if(loggingOut)return;const version=++refreshVersion;
  try{
-  const data=await api('/auth/session');if(version!==refreshVersion)return;const next=data.authenticated?data:null,changed=identity?.user.id!==next?.user.id;
+  const data=await api('/auth/session');if(version!==refreshVersion)return;const next=data.authenticated?data:null,changed=identity?.user.id!==next?.user.id||!!identity?.restricted!==!!next?.restricted;
   if(changed){purgeProfile();Journal.purge();Community.purge();resetTrust();}
   const freshDirectory=JSON.stringify(data.directory||{}),directoryChanged=directoryFingerprint!==freshDirectory;directoryFingerprint=freshDirectory;
   for(const [key,patch]of Object.entries(data.directory||{}))if(catalog[key])Object.assign(catalog[key],patch);
   if(directoryChanged&&activePerson)purgeProfile();
   identity=next;csrf=data.csrf||'';ready=true;renderAccount();
+  if(identity?.restricted){RestrictedAccess.show();return;}
   if(!identity||activePerson&&!identity.access.includes(activePerson)||Journal.key&&!identity.journalAccess?.includes(Journal.key)){purgeProfile();Journal.purge();await route();}
   else if(initial||changed||Community.matches&&!Community.active||Community.active==='manage'&&!Community.allowed()||directoryChanged&&currentKey()||currentKey()&&activePerson!==currentKey()&&identity.access.includes(currentKey())||Journal.route&&!Journal.key)await route();
  }catch(error){if(version!==refreshVersion)return;ready=true;purgeProfile();Journal.purge({preserveDraft:true});Community.purge({preserveDraft:true});UserChrome.clearPrivate();if(initial){identity=null;renderAccount();selection.hidden=false;}setNotice(error.message);}
@@ -629,6 +663,7 @@ async function refreshSession(initial=false){
 async function route(){
  const version=++routeVersion,journalMatch=Journal.route,key=journalMatch?.[1]||currentKey(),previous=activePerson;
  if(!ready)return;
+ if(identity?.restricted){RestrictedAccess.show();return;}
  if(!await Community.beforeRoute())return;
  if(denial.open)denial.close();
  if(Community.matches){purgeProfile();Journal.purge();PortalPolish.closeCast();selection.hidden=true;portal.hidden=true;await Community.open();return;}

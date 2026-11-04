@@ -28,6 +28,7 @@ const UserChrome=(()=>{
  }
  function account(){
   closeMenu();nav.querySelector('.menu-logout')?.remove();clearPrivate();
+  for(const selector of ['.portal-home','.cast-toggle','.notification-settings'])nav.querySelector(selector).hidden=!!identity?.restricted;
   if(!identity){trigger=null;return;}
   const avatar=accountControls.querySelector('img'),name=accountControls.querySelector('span'),logout=accountControls.querySelector('button');
   trigger=document.createElement('button');trigger.type='button';trigger.className='user-trigger';trigger.setAttribute('aria-controls',nav.id);trigger.setAttribute('aria-expanded','false');trigger.setAttribute('aria-label','Otevřít nabídku účtu '+identity.user.name);

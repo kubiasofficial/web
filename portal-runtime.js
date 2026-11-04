@@ -41,7 +41,7 @@ const api = async (path, options = {}) => {
  const response = await fetch(apiRoot + path, { credentials: 'same-origin', cache: 'no-store', signal: AbortSignal.timeout(7000),
   ...options, headers: { ...(options.body ? { 'Content-Type': 'application/json' } : {}), ...(options.method && options.method !== 'GET' ? { 'X-CSRF-Token': csrf } : {}), ...options.headers } });
  let data;try{data=await response.json();}catch{throw Object.assign(Error('Archiv je dočasně nedostupný.'),{status:503});}
- if(!response.ok)throw Object.assign(Error(data.error || 'Archiv není dostupný.'),{status:response.status});
+ if(!response.ok){if(data.restricted&&identity){identity={authenticated:true,restricted:true,user:identity.user,csrf,owned:[],access:[],journalAccess:[],directory:{},admin:{owner:false,permissions:[]},unread:0,pending:0};routeVersion++;renderAccount();}throw Object.assign(Error(data.error || 'Archiv není dostupný.'),{status:response.status,restricted:!!data.restricted});}
  return data;
 };
 const escape = escapeHTML;
@@ -67,6 +67,7 @@ function purgeProfile(){
 function currentKey(){const hash=location.hash;return Object.keys(catalog).find(key=>hash==='#'+key||hash.startsWith('#'+key+'-'))||((hash==='#pribeh'||/^#kapitola-\d+$/.test(hash))?'nathaniel':null);}
 function setNotice(text){notice.textContent=text;notice.hidden=!text;}
 function deny(key,message=deniedText,scope='lore'){
+ if(identity?.restricted){RestrictedAccess.show();return;}
  purgeProfile();Journal.purge();PortalPolish.loading(key,false);selection.hidden=!!identity;portal.hidden=!identity;
  const person=catalog[key];denial.style.setProperty('--aura',person.color);
  mediaImage(denial.querySelector('img'),'icon-'+key+'.png','180px',320);
@@ -83,9 +84,10 @@ denial.addEventListener('cancel',event=>{event.preventDefault();closeDenial();})
 function renderAccount(){
  Community.sync();
  UserChrome.refresh();
- const fingerprint=identity?JSON.stringify([identity.user,identity.owned,identity.access,identity.journalAccess,identity.directory,new Intl.DateTimeFormat('cs-CZ',{timeZone:'Europe/Prague'}).format(new Date())]):'guest';
+ const fingerprint=identity?JSON.stringify([identity.user,identity.restricted,identity.owned,identity.access,identity.journalAccess,identity.directory,new Intl.DateTimeFormat('cs-CZ',{timeZone:'Europe/Prague'}).format(new Date())]):'guest';
  if(fingerprint===accountFingerprint)return;accountFingerprint=fingerprint;
  document.body.classList.toggle('signed-in',!!identity);welcome.hidden=!identity;rail.hidden=!identity;
+ document.body.classList.toggle('restricted-user',!!identity?.restricted);if(!identity?.restricted)RestrictedAccess.hide();
  accountControls.replaceChildren();
  if(!identity){Community.purge();PortalPolish.closeCast();rail.replaceChildren();portal.replaceChildren();const login=document.createElement('a');login.href=loginHref;login.className='discord-login';login.textContent='Přihlásit přes Discord';accountControls.append(login);UserChrome.account();return;}
  const photo=new Image(34,34);photo.src=identity.user.avatar;photo.alt='';accountControls.append(photo);
@@ -94,6 +96,7 @@ function renderAccount(){
   if(!await Community.beforeLogout())return;
   logout.disabled=true;loggingOut=true;refreshVersion++;try{await api('/auth/logout',{method:'POST'});identity=null;csrf='';purgeProfile();Journal.purge();resetTrust();renderAccount();location.hash='';await route();}catch(error){setNotice(error.message);logout.disabled=false;}finally{loggingOut=false;}
  };accountControls.append(logout);
+ if(identity.restricted){UserChrome.account();RestrictedAccess.show();return;}
  const day=new Intl.DateTimeFormat('cs-CZ',{weekday:'long',timeZone:'Europe/Prague'}).format(new Date());
  const greeting={pondělí:'Krásné pondělí',úterý:'Krásné úterý',středa:'Krásnou středu',čtvrtek:'Krásný čtvrtek',pátek:'Krásný pátek',sobota:'Krásnou sobotu',neděle:'Krásnou neděli'};
  welcome.querySelector('h2').textContent=(greeting[day]||'Krásný den')+', '+identity.user.name+'.';
@@ -109,12 +112,13 @@ function renderAccount(){
 async function refreshSession(initial=false){
  if(loggingOut)return;const version=++refreshVersion;
  try{
-  const data=await api('/auth/session');if(version!==refreshVersion)return;const next=data.authenticated?data:null,changed=identity?.user.id!==next?.user.id;
+  const data=await api('/auth/session');if(version!==refreshVersion)return;const next=data.authenticated?data:null,changed=identity?.user.id!==next?.user.id||!!identity?.restricted!==!!next?.restricted;
   if(changed){purgeProfile();Journal.purge();Community.purge();resetTrust();}
   const freshDirectory=JSON.stringify(data.directory||{}),directoryChanged=directoryFingerprint!==freshDirectory;directoryFingerprint=freshDirectory;
   for(const [key,patch]of Object.entries(data.directory||{}))if(catalog[key])Object.assign(catalog[key],patch);
   if(directoryChanged&&activePerson)purgeProfile();
   identity=next;csrf=data.csrf||'';ready=true;renderAccount();
+  if(identity?.restricted){RestrictedAccess.show();return;}
   if(!identity||activePerson&&!identity.access.includes(activePerson)||Journal.key&&!identity.journalAccess?.includes(Journal.key)){purgeProfile();Journal.purge();await route();}
   else if(initial||changed||Community.matches&&!Community.active||Community.active==='manage'&&!Community.allowed()||directoryChanged&&currentKey()||currentKey()&&activePerson!==currentKey()&&identity.access.includes(currentKey())||Journal.route&&!Journal.key)await route();
  }catch(error){if(version!==refreshVersion)return;ready=true;purgeProfile();Journal.purge({preserveDraft:true});Community.purge({preserveDraft:true});UserChrome.clearPrivate();if(initial){identity=null;renderAccount();selection.hidden=false;}setNotice(error.message);}
@@ -122,6 +126,7 @@ async function refreshSession(initial=false){
 async function route(){
  const version=++routeVersion,journalMatch=Journal.route,key=journalMatch?.[1]||currentKey(),previous=activePerson;
  if(!ready)return;
+ if(identity?.restricted){RestrictedAccess.show();return;}
  if(!await Community.beforeRoute())return;
  if(denial.open)denial.close();
  if(Community.matches){purgeProfile();Journal.purge();PortalPolish.closeCast();selection.hidden=true;portal.hidden=true;await Community.open();return;}
