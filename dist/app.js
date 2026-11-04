@@ -287,107 +287,142 @@ const SeasonLab=(()=>{
   if(!reduced.matches&&season!=='off'&&(season!=='winter'||holes.length))schedule();
  }
  function schedule(){if(frame||disposed||!visible||document.hidden)return;frame=requestAnimationFrame(time=>{frame=0;if(time-lastFrame<40){schedule();return;}lastFrame=time;paint(time);});}
- function change(value){season=value==='auto'?currentSeason():value;holes=[];stage.dataset.season=season;feedback.textContent=season==='winter'?'Přejeď myší nebo se dotkni skla. Vyčištěná stopa později znovu namrzne.':season==='off'?'Náhled je vypnutý.':'Soukromý náhled: '+seasons[season]+'.';stop();paint(performance.now());}
+ function change(value){season=value==='auto'?currentSeason():value;holes=[];stage.dataset.season=season;feedback.textContent=season==='winter'?'Přejeď myší nebo se dotkni skla. Vyčištěná stopa později znovu namrzne.':season==='off'?'Sezónní vzhled je vypnutý.':'Tvoje atmosféra: '+seasons[season]+'.';stop();paint(performance.now());}
  async function open(container){
-  dispose();const user=identity?.user.id;await api('/manage/experiments');if(identity?.user.id!==user||!container.isConnected||identity?.restricted)return;
+  dispose();if(!identity||!container.isConnected||identity.restricted)return;
   disposed=false;season='off';strength=65;visible=true;reduced=matchMedia('(prefers-reduced-motion: reduce)');
   container.innerHTML='<div class="section-heading"><h2>Sezónní laboratoř</h2><span class="status-pill">JEN TVŮJ NÁHLED</span></div><p class="web-muted">Zkoušej atmosféru přímo na skle kroniky. Ostatním hráčům se vzhled nemění.</p><div class="season-controls"><label>Roční období<select class="season-choice"><option value="off">Bez efektu</option><option value="auto">Podle aktuálního období</option><option value="spring">Jaro</option><option value="summer">Léto</option><option value="autumn">Podzim</option><option value="winter">Zima · zamrzlé sklo</option></select></label><label>Síla efektu <output class="season-level">65 %</output><input class="season-strength" type="range" min="10" max="100" value="65"></label><button class="web-button frost-reset" type="button">Obnovit námrazu</button><button class="web-button season-off" type="button">Vypnout náhled</button></div><section class="season-stage" data-season="off" aria-label="Náhled sezónní atmosféry"><div class="season-landscape" aria-hidden="true"></div><div class="season-sunlight" aria-hidden="true"></div><div class="season-preview-copy"><span class="eyebrow">SEDM OSUDŮ · JEDEN HORIZONT</span><h3>Příběhy pod<br>stejným nebem.</h3><p class="season-greeting">Tvoje kronika. Tvoje atmosféra.</p><button type="button" class="web-button season-click-test">Zkusit tlačítko ↗</button><span class="season-click-result" role="status"></span></div><canvas class="season-canvas" aria-hidden="true"></canvas></section><p class="season-feedback" role="status"></p>';
+  container.querySelector('h2').textContent='Tvoje roční období';container.querySelector('.status-pill').textContent='VZHLED PRO TEBE';container.querySelector('.web-muted').textContent='Období se mění automaticky podle kalendáře. Tady si můžeš zvolit vlastní atmosféru, její sílu nebo efekty vypnout. Volba platí pro celý web v tomto prohlížeči.';
   stage=container.querySelector('.season-stage');canvas=stage.querySelector('canvas');ctx=canvas.getContext('2d');feedback=container.querySelector('.season-feedback');
   const greetings={spring:'Ráno voní novým začátkem.',summer:'Slunce zlátne nad cestami kroniky.',autumn:'Za okny padá listí. Tvůj příběh pokračuje.',winter:'Za zamrzlým sklem příběhy neutichají.',off:'Tvoje kronika. Tvoje atmosféra.'};
-  container.querySelector('select').onchange=event=>{change(event.target.value);stage.querySelector('.season-greeting').textContent=greetings[season];};
-  container.querySelector('.season-strength').oninput=event=>{strength=Number(event.target.value);container.querySelector('output').textContent=strength+' %';drawFrost();stop();paint(performance.now());};
-  container.querySelector('.frost-reset').onclick=()=>{container.querySelector('select').value='winter';change('winter');};container.querySelector('.season-off').onclick=()=>{container.querySelector('select').value='off';change('off');};
+  const choose=value=>{container.querySelector('select').value=value;change(value);stage.querySelector('.season-greeting').textContent=greetings[season];SeasonAtmosphere.configure(value,strength);};
+  container.querySelector('select').onchange=event=>choose(event.target.value);
+  container.querySelector('.season-strength').oninput=event=>{strength=Number(event.target.value);container.querySelector('output').textContent=strength+' %';drawFrost();stop();paint(performance.now());SeasonAtmosphere.configure(container.querySelector('select').value,strength);};
+  container.querySelector('.frost-reset').onclick=()=>choose('winter');container.querySelector('.season-off').onclick=()=>choose('off');
   stage.querySelector('.season-click-test').onclick=()=>stage.querySelector('.season-click-result').textContent='Klikání funguje i přes námrazu.';
   const melt=event=>{if(season!=='winter')return;const r=stage.getBoundingClientRect(),p={x:(event.clientX-r.left)/r.width,y:(event.clientY-r.top)/r.height,time:performance.now()},last=holes.at(-1);if(last&&Math.hypot((last.x-p.x)*r.width,(last.y-p.y)*r.height)<9)return;holes.push(p);if(holes.length>100)holes.shift();paint(p.time);};stage.addEventListener('pointermove',melt,{passive:true});stage.addEventListener('pointerdown',melt,{passive:true});
-  observer=new IntersectionObserver(entries=>{visible=entries[0].isIntersecting;if(visible)paint(performance.now());else stop();});observer.observe(stage);resize=new ResizeObserver(fit);resize.observe(stage);watchVisibility=()=>{if(document.hidden)stop();else if(visible)paint(performance.now());};document.addEventListener('visibilitychange',watchVisibility);watchReduced=()=>{stop();paint(performance.now());};reduced.addEventListener('change',watchReduced);fit();change('off');
+  observer=new IntersectionObserver(entries=>{visible=entries[0].isIntersecting;if(visible)paint(performance.now());else stop();});observer.observe(stage);resize=new ResizeObserver(fit);resize.observe(stage);watchVisibility=()=>{if(document.hidden)stop();else if(visible)paint(performance.now());};document.addEventListener('visibilitychange',watchVisibility);watchReduced=()=>{stop();paint(performance.now());};reduced.addEventListener('change',watchReduced);
+  strength=SeasonAtmosphere.strength;container.querySelector('.season-strength').value=strength;container.querySelector('output').textContent=strength+' %';fit();choose(SeasonAtmosphere.mode);
  }
  return{open,dispose};
 })();
 
-const Gramophone=(()=>{
- let root,audio,tracks=[],selected=null,placed=false,busy=false,generation=0,action=0,dialog,editorVersion=0,volume=.65;
- const flights=new Set(),longRequest=()=>({signal:AbortSignal.timeout(15000)}),silent='data:audio/wav;base64,UklGRnQAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YVAAAACAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgA==';
- const alive=g=>root?.isConnected&&generation===g&&identity?.admin?.owner&&!identity?.restricted;
- const label=track=>'<span class="vinyl"><span class="vinyl-label"><b>'+escapeHTML(track.title)+'</b></span></span>';
- function status(message){if(root?.isConnected)root.querySelector('.gramophone-status').textContent=message;}
- function dispose(){generation++;action++;editorVersion++;const old=audio;root=null;audio=null;if(old){old.pause();old.removeAttribute('src');old.load();}for(const a of flights)a.cancel();flights.clear();document.querySelectorAll('.record-flight').forEach(e=>e.remove());if(dialog?.open)dialog.close();dialog?.remove();dialog=null;selected=null;placed=false;busy=false;tracks=[];}
- function time(value){if(!Number.isFinite(value))return '0:00';return Math.floor(value/60)+':'+String(Math.floor(value%60)).padStart(2,'0');}
- function update(){
-  if(!root?.isConnected||!audio)return;
-  root.querySelector('.gramophone-now-title').textContent=selected?.title||'Vyber si desku';root.querySelector('.gramophone-artist').textContent=selected?.artist||'Soukromá hudební místnost · náhled';
-  const playing=placed&&!audio.paused&&!audio.ended;root.querySelector('.deck-record').classList.toggle('is-spinning',playing);root.querySelector('.gramophone-play').textContent=playing?'Pozastavit':'Přehrát';
-  root.querySelector('.gramophone-play').disabled=!selected||busy;root.querySelector('.gramophone-stop').disabled=!selected||busy;
-  const seek=root.querySelector('.gramophone-position');seek.disabled=!selected||!Number.isFinite(audio.duration)||busy;seek.value=Number.isFinite(audio.duration)&&audio.duration>0?String(audio.currentTime/audio.duration*1000):'0';root.querySelector('.gramophone-current').textContent=time(audio.currentTime);root.querySelector('.gramophone-duration').textContent=time(audio.duration);
-  root.querySelectorAll('.record-pick,.record-tools button,.gramophone-add').forEach(b=>b.disabled=busy);
+// Public, viewport-sized atmosphere. It contains no account data and never
+// intercepts input. Only this browser's preference is saved, not other players'.
+const SeasonAtmosphere=(()=>{
+ const modes=['auto','off','spring','summer','autumn','winter'];
+ let host,canvas,ctx,ice,frame=0,lastFrame=0,holes=[],mode='auto',strength=45,season='off',reduced;
+ const current=()=>{const m=Number(new Intl.DateTimeFormat('en',{month:'numeric',timeZone:'Europe/Prague'}).format(new Date()));return m>=3&&m<=5?'spring':m>=6&&m<=8?'summer':m>=9&&m<=11?'autumn':'winter';};
+ const noise=i=>{const n=Math.sin(i*83.71+9)*43758.54;return n-Math.floor(n);};
+ function stop(){cancelAnimationFrame(frame);frame=0;}
+ function frost(){
+  if(!ice)return;const c=ice.getContext('2d'),w=ice.width,h=ice.height,s=strength/100;c.clearRect(0,0,w,h);
+  const veil=c.createRadialGradient(w/2,h/2,Math.min(w,h)*.25,w/2,h/2,Math.max(w,h)*.64);veil.addColorStop(0,'rgba(214,237,251,0)');veil.addColorStop(.55,'rgba(214,237,251,'+s*.04+')');veil.addColorStop(1,'rgba(230,245,255,'+s*.8+')');c.fillStyle=veil;c.fillRect(0,0,w,h);c.strokeStyle='rgba(223,243,255,'+s*.65+')';c.lineWidth=.8;
+  for(let i=0;i<70;i++){const side=i%4,x=side<2?noise(i+4)*w:side===2?noise(i+3)*w*.06:w-noise(i+3)*w*.06,y=side<2?(side===0?noise(i+9)*h*.07:h-noise(i+9)*h*.07):noise(i+4)*h,size=10+noise(i+12)*32;c.save();c.translate(x,y);c.rotate(noise(i)*6);for(let a=0;a<6;a++){c.rotate(Math.PI/3);c.beginPath();c.moveTo(0,0);c.lineTo(0,size);for(let j=1;j<=3;j++){const v=size*j/4;c.moveTo(0,v);c.lineTo(-size*.18,v-size*.18);c.moveTo(0,v);c.lineTo(size*.18,v-size*.18);}c.stroke();}c.restore();}
  }
- function setBusy(value){busy=value;update();}
+ function fit(){if(!host)return;const w=innerWidth,h=innerHeight;if(!w||!h)return;canvas.width=Math.round(Math.min(1200,w));canvas.height=Math.round(canvas.width*h/w);ice=document.createElement('canvas');ice.width=canvas.width;ice.height=canvas.height;frost();paint(performance.now());}
+ function paint(t){
+  stop();if(!ctx||document.hidden)return;const w=canvas.width,h=canvas.height;ctx.clearRect(0,0,w,h);if(season==='off')return;
+  if(season==='winter'){
+   ctx.drawImage(ice,0,0);holes=holes.filter(p=>t-p.t<14000);ctx.globalCompositeOperation='destination-out';
+   for(const p of holes){const r=Math.min(w,h)*.18,a=Math.min(1,(14000-t+p.t)/6500),g=ctx.createRadialGradient(p.x*w,p.y*h,0,p.x*w,p.y*h,r);g.addColorStop(0,'rgba(0,0,0,'+a+')');g.addColorStop(.55,'rgba(0,0,0,'+a+')');g.addColorStop(1,'rgba(0,0,0,0)');ctx.fillStyle=g;ctx.fillRect(p.x*w-r,p.y*h-r,r*2,r*2);}ctx.globalCompositeOperation='source-over';
+  }else{
+   const n=innerWidth<600?3:Math.ceil(2+strength/18);
+   for(let i=0;i<n;i++){const p=reduced.matches?noise(i+4):(t/1000*(season==='autumn'?.023:.012)+noise(i+4))%1,x=(noise(i+1)+Math.sin(p*6+i)*.06)*w,y=p*(h+60)-30;ctx.save();ctx.translate(x,y);ctx.rotate(i+p*4);ctx.globalAlpha=season==='autumn'?.58:.25;
+    if(season==='autumn'){const s=10+noise(i+9)*8;ctx.fillStyle=['#b97b39','#bc6536','#d1a65e'][i%3];ctx.beginPath();ctx.moveTo(0,-s);ctx.bezierCurveTo(s,-s*.5,s,s,0,s);ctx.bezierCurveTo(-s,s,-s,-s*.5,0,-s);ctx.fill();ctx.strokeStyle='#633e2a';ctx.beginPath();ctx.moveTo(0,-s*.6);ctx.lineTo(0,s*1.25);ctx.stroke();}
+    else{ctx.fillStyle=season==='spring'?'#c9dfa2':'#f2cd89';ctx.beginPath();ctx.ellipse(0,0,season==='spring'?4:1.6,season==='spring'?2:1.6,0,0,Math.PI*2);ctx.fill();}ctx.restore();}
+  }
+  if(!reduced.matches&&(season!=='winter'||holes.length))schedule();
+ }
+ function schedule(){if(frame||document.hidden||season==='off')return;frame=requestAnimationFrame(t=>{frame=0;if(t-lastFrame<40){schedule();return;}lastFrame=t;paint(t);});}
+ function apply(){if(!host)return;season=identity?.restricted?'off':mode==='auto'?current():mode;host.dataset.season=season;document.documentElement.dataset.season=season;holes=[];frost();paint(performance.now());}
+ function configure(next,level){mode=modes.includes(next)?next:'auto';strength=Math.min(100,Math.max(10,Number(level)||45));try{localStorage.setItem('nh-season',JSON.stringify({mode,strength}));}catch{}apply();}
+ function init(){
+  if(host)return;try{const saved=JSON.parse(localStorage.getItem('nh-season'));if(saved&&modes.includes(saved.mode)){mode=saved.mode;strength=Math.min(100,Math.max(10,Number(saved.strength)||45));}}catch{}
+  reduced=matchMedia('(prefers-reduced-motion: reduce)');host=document.createElement('div');host.className='season-global';host.setAttribute('aria-hidden','true');host.innerHTML='<span class="season-global-light"></span><canvas></canvas>';document.body.append(host);canvas=host.querySelector('canvas');ctx=canvas.getContext('2d');
+  const melt=event=>{if(season!=='winter'||document.hidden)return;const p={x:event.clientX/innerWidth,y:event.clientY/innerHeight,t:performance.now()},last=holes.at(-1);if(last&&Math.hypot((last.x-p.x)*innerWidth,(last.y-p.y)*innerHeight)<10)return;holes.push(p);if(holes.length>70)holes.shift();if(reduced.matches)paint(p.t);else schedule();};
+  window.addEventListener('pointermove',melt,{passive:true});window.addEventListener('pointerdown',melt,{passive:true});window.addEventListener('resize',fit,{passive:true});
+  document.addEventListener('visibilitychange',()=>document.hidden?stop():apply());reduced.addEventListener('change',()=>paint(performance.now()));fit();apply();
+ }
+ function syncSession(){const next=identity?.restricted?'off':mode==='auto'?current():mode;if(host&&season!==next)apply();}
+ return{init,configure,syncSession,get mode(){return mode;},get strength(){return strength;}};
+})();
+
+// Audio belongs to the application, never to a route's DOM tree.
+const Gramophone=(()=>{
+ let root=null,audio=null,dock=null,tracks=[],selected=null,busy=false,volume=.65,viewVersion=0,action=0,message='',owner=null;
+ const flights=new Set(),authorized=()=>!!identity&&!identity.restricted;
+ const label=track=>'<span class="vinyl"><span class="vinyl-label"><b>'+escapeHTML(track.title)+'</b></span></span>';
+ const time=value=>Number.isFinite(value)?Math.floor(value/60)+':'+String(Math.floor(value%60)).padStart(2,'0'):'0:00';
+ function status(text){message=text;update();}
+ function cancelFlights(){for(const animation of flights)animation.cancel();flights.clear();document.querySelectorAll('.record-flight').forEach(e=>e.remove());}
+ function detach(){viewVersion++;cancelFlights();root=null;update();}
+ function stop(){action++;busy=false;selected=null;message='Deska je zpátky ve sbírce.';if(audio){audio.pause();audio.removeAttribute('src');audio.load();}update();}
+ function dispose(){detach();stop();audio?.remove();audio=null;dock?.remove();dock=null;owner=null;tracks=[];if('mediaSession' in navigator){navigator.mediaSession.metadata=null;navigator.mediaSession.playbackState='none';}}
+ function syncSession(){if(!authorized()||owner&&owner!==identity.user.id)dispose();}
+ function initAudio(){
+  if(audio)return;owner=identity.user.id;audio=document.createElement('audio');audio.preload='metadata';audio.hidden=true;audio.className='gramophone-audio';audio.volume=volume;document.body.append(audio);
+  dock=document.createElement('aside');dock.className='gramophone-dock';dock.hidden=true;dock.setAttribute('aria-label','Hudba na pozadí');
+  dock.innerHTML='<a href="#gramophone" class="dock-open"><span aria-hidden="true">♫</span><span class="dock-title"></span></a><button type="button" class="dock-pause" aria-label="Pozastavit hudbu">Ⅱ</button><button type="button" class="dock-stop" aria-label="Vypnout hudbu">×</button>';
+  document.body.append(dock);dock.querySelector('.dock-pause').onclick=playPause;dock.querySelector('.dock-stop').onclick=stop;
+  for(const event of ['loadedmetadata','durationchange','timeupdate','play','pause','playing','waiting'])audio.addEventListener(event,update);
+  audio.addEventListener('ended',()=>{if(root?.isConnected)putAway();else stop();});
+  audio.addEventListener('error',()=>{if(selected)status('Skladbu se nepodařilo přehrát. Zkus ji spustit znovu.');});
+  if('mediaSession' in navigator){for(const [name,handler]of [['play',()=>{if(audio?.paused)playPause();}],['pause',()=>audio?.pause()],['stop',stop],['seekto',event=>{if(audio&&Number.isFinite(audio.duration)&&Number.isFinite(event.seekTime))audio.currentTime=Math.min(audio.duration,Math.max(0,event.seekTime));}]])try{navigator.mediaSession.setActionHandler(name,handler);}catch{}}
+ }
+ function update(){
+  if(!audio)return;const playing=!!selected&&!audio.paused&&!audio.ended;
+  if(dock){dock.hidden=!selected||!!root?.isConnected||!authorized();dock.querySelector('.dock-title').textContent=selected?.title||'';dock.querySelector('.dock-pause').textContent=playing?'Ⅱ':'▶';dock.querySelector('.dock-pause').setAttribute('aria-label',playing?'Pozastavit hudbu':'Přehrát hudbu');}
+  if('mediaSession' in navigator)navigator.mediaSession.playbackState=selected?(playing?'playing':'paused'):'none';
+  document.body.classList.toggle('has-background-music',!!dock&&!dock.hidden);
+  if(!root?.isConnected)return;
+  root.querySelector('.gramophone-now-title').textContent=selected?.title||'Vyber si desku';root.querySelector('.gramophone-artist').textContent=selected?.artist||'Hudební místnost New Horizon';
+  const deck=root.querySelector('.deck-record');deck.hidden=!selected||busy;deck.classList.toggle('is-spinning',playing&&!document.hidden);if(selected&&deck.dataset.id!==selected.id){deck.innerHTML=label(selected);deck.dataset.id=selected.id;}
+  root.querySelector('.tonearm').classList.toggle('is-lowered',!!selected);
+  const play=root.querySelector('.gramophone-play');play.textContent=playing?'Pozastavit':'Přehrát';play.disabled=!selected||busy;root.querySelector('.gramophone-stop').disabled=!selected||busy;
+  const seek=root.querySelector('.gramophone-position');seek.disabled=!selected||!Number.isFinite(audio.duration)||busy;seek.value=Number.isFinite(audio.duration)&&audio.duration>0?String(audio.currentTime/audio.duration*1000):'0';root.querySelector('.gramophone-current').textContent=time(audio.currentTime);root.querySelector('.gramophone-duration').textContent=time(audio.duration);
+  root.querySelector('.gramophone-status').textContent=message||'Klikni na desku a nech kroniku rozeznít.';
+  root.querySelectorAll('.record-card').forEach(card=>{card.classList.toggle('is-selected',selected?.id===card.dataset.id);card.querySelector('button').disabled=busy;});
+ }
  async function fly(track,toDeck){
-  const g=generation,stage=root.querySelector('.gramophone-stage').getBoundingClientRect(),token=root.querySelector('.record-card[data-id="'+track.id+'"] .record-token')?.getBoundingClientRect();if(!token)return;
+  if(!root?.isConnected||!motionAllowed()||document.hidden)return;
+  const stage=root.querySelector('.gramophone-stage').getBoundingClientRect(),token=root.querySelector('.record-card[data-id="'+track.id+'"] .record-token')?.getBoundingClientRect();if(!token)return;
   const size=stage.width*.32,deck={x:stage.left+stage.width*.555,y:stage.top+stage.height*.612},shelf={x:token.left+token.width/2,y:token.top+token.height/2};
   const transform=(p,sx,sy)=>'translate('+(p.x-size/2)+'px,'+(p.y-size/2)+'px) scale('+sx+','+sy+')';
-  const start=transform(shelf,token.width/size,token.height/size),end=transform(deck,1,.28),flight=document.createElement('div');flight.className='record-flight';flight.style.width=size+'px';flight.innerHTML=label(track);document.body.append(flight);root.querySelector('.deck-record').hidden=true;
-  const animation=flight.animate(toDeck?[{transform:start,opacity:1},{transform:end,opacity:1}]:[{transform:end,opacity:1},{transform:start,opacity:1}],{duration:motionAllowed()?720:0,easing:'cubic-bezier(.22,.68,.25,1)',fill:'both'});flights.add(animation);
-  try{await animation.finished;}catch{}finally{flights.delete(animation);flight.remove();}
-  if(alive(g)&&toDeck){const deckNode=root.querySelector('.deck-record');deckNode.innerHTML=label(track);deckNode.hidden=false;}
- }
- async function putAway(){
-  if(!selected||busy)return;const g=generation,t=++action,track=selected;setBusy(true);audio.pause();root.querySelector('.tonearm').classList.remove('is-lowered');status('Zvedám raménko a uklízím desku…');
-  await new Promise(r=>setTimeout(r,motionAllowed()?140:0));if(!alive(g)||t!==action)return;await fly(track,false);if(!alive(g)||t!==action)return;
-  selected=null;placed=false;audio.removeAttribute('src');audio.load();root.querySelector('.deck-record').hidden=true;root.querySelectorAll('.record-card').forEach(e=>e.classList.remove('is-selected'));setBusy(false);status('Deska je zpátky ve sbírce.');
+  const start=transform(shelf,token.width/size,token.height/size),end=transform(deck,1,.28),flight=document.createElement('div');flight.className='record-flight';flight.style.width=size+'px';flight.innerHTML=label(track);document.body.append(flight);
+  const animation=flight.animate(toDeck?[{transform:start,opacity:1},{transform:end,opacity:1}]:[{transform:end,opacity:1},{transform:start,opacity:1}],{duration:720,easing:'cubic-bezier(.22,.68,.25,1)',fill:'both'});flights.add(animation);try{await animation.finished;}catch{}finally{flights.delete(animation);flight.remove();}
  }
  async function select(track){
-  if(busy)return;if(selected?.id===track.id){await playPause();return;}if(selected)await putAway();if(!root?.isConnected)return;
-  const g=generation,t=++action;selected=track;placed=false;setBusy(true);root.querySelectorAll('.record-card').forEach(e=>e.classList.toggle('is-selected',e.dataset.id===track.id));status('Připravuji zvukovou stopu…');
-  const stage=root.querySelector('.gramophone-stage'),rect=stage.getBoundingClientRect();if(rect.top<0||rect.bottom>innerHeight)stage.scrollIntoView({block:'center',behavior:'instant'});
-  // Unlock the same media element during the original user gesture.
-  audio.src=silent;try{await audio.play();}catch{}if(!alive(g)||t!==action)return;audio.pause();
-  try{const source=await api('/gramophone/tracks/'+track.id+'/source',longRequest());if(!alive(g)||t!==action)return;audio.src=source.url;audio.load();status('Pokládám desku na gramofon…');await fly(track,true);if(!alive(g)||t!==action)return;placed=true;root.querySelector('.tonearm').classList.add('is-lowered');setBusy(false);
-   try{await audio.play();if(alive(g)&&t===action)status('Právě hraje · '+track.title);}catch(error){if(alive(g)&&t===action)status(error.name==='NotAllowedError'?'Deska je připravená. Klikni na Přehrát.':'Zvuk se nepodařilo spustit. Zkus Přehrát pro obnovení zdroje.');}if(alive(g))update();
-  }catch(error){if(!alive(g)||t!==action)return;selected=null;placed=false;root.querySelectorAll('.record-card').forEach(e=>e.classList.remove('is-selected'));setBusy(false);status(error.message);}
+  if(busy||!authorized())return;if(selected?.id===track.id){await playPause();return;}
+  initAudio();const t=++action;busy=true;selected=track;message='Pokládám desku na gramofon…';audio.src=track.url;audio.load();
+  if('mediaSession' in navigator&&typeof MediaMetadata!=='undefined')navigator.mediaSession.metadata=new MediaMetadata({title:track.title,artist:track.artist,album:'New Horizon RP'});
+  // play() runs in the click gesture, before asynchronous animation work.
+  const playback=audio.play().then(()=>{if(t===action)status('Právě hraje · '+track.title);},error=>{if(t===action)status(error.name==='NotAllowedError'?'Deska je připravená. Klikni na Přehrát.':'Zvuk není dostupný. Zkus skladbu spustit znovu.');});
+  update();if(root){const stage=root.querySelector('.gramophone-stage'),r=stage.getBoundingClientRect();if(r.top<0||r.bottom>innerHeight)stage.scrollIntoView({block:'center',behavior:'instant'});}
+  await fly(track,true);if(t===action){busy=false;update();}await playback;
  }
  async function playPause(){
-  if(!audio||!selected||busy)return;if(!audio.paused){audio.pause();status('Pozastaveno · '+selected.title);return;}
-  const g=generation,t=action;try{if(audio.error){setBusy(true);const source=await api('/gramophone/tracks/'+selected.id+'/source?refresh=1',longRequest());if(!alive(g)||t!==action)return;audio.src=source.url;setBusy(false);}await audio.play();if(alive(g)&&t===action&&selected)status('Právě hraje · '+selected.title);}catch(error){if(alive(g)&&t===action){setBusy(false);status(error.name==='NotAllowedError'?'Prohlížeč čeká na potvrzení. Klikni znovu na Přehrát.':'Skladba není dostupná. Zkus ji znovu nebo ji otevři na Suno.');}}
+  if(!audio||!selected||busy||!authorized())return;if(!audio.paused){audio.pause();status('Pozastaveno · '+selected.title);return;}
+  const t=action;try{if(audio.error){audio.src=selected.url;audio.load();}await audio.play();if(t===action&&selected)status('Právě hraje · '+selected.title);}catch{if(t===action)status('Přehrávání se nepodařilo spustit. Zkus Přehrát znovu.');}
  }
- function shelf(){
-  const list=root.querySelector('.record-shelf');list.replaceChildren();root.querySelector('.gramophone-count').textContent=tracks.length+' '+(tracks.length===1?'deska':'desek');
-  if(!tracks.length){list.innerHTML='<p class="gramophone-empty">Police je prázdná. Přidej první skladbu ze Suno.</p>';return;}
-  for(const [index,track]of tracks.entries()){
-   const card=document.createElement('article');card.className='record-card'+(selected?.id===track.id?' is-selected':'');card.dataset.id=track.id;
-   card.innerHTML='<button type="button" class="record-pick" aria-label="Přehrát: '+escapeHTML(track.title)+'"><span class="record-token">'+label(track)+'</span><span class="record-title">'+escapeHTML(track.title)+'</span></button><p class="record-author">'+escapeHTML(track.artist||'Skladba ze Suno')+'</p><p class="record-audio-state">'+(track.has_audio?'Zvuk připravený':'Čeká na zvukový soubor')+'</p><div class="record-tools"><button type="button" class="record-upload">'+(track.has_audio?'Vyměnit zvuk':'Přiložit zvuk')+'</button><button type="button" class="record-rename">Upravit</button><button type="button" class="record-up" aria-label="Posunout dříve">←</button><button type="button" class="record-down" aria-label="Posunout později">→</button><button type="button" class="record-delete">Odebrat</button></div><a class="record-suno" href="'+escapeHTML(track.suno_url)+'" target="_blank" rel="noopener noreferrer">Otevřít na Suno ↗</a>';
-   card.querySelector('.record-upload').onclick=()=>chooseFile(track);
-   card.querySelector('.record-pick').onclick=()=>select(track);card.querySelector('.record-rename').onclick=()=>edit(track);card.querySelector('.record-delete').onclick=()=>remove(track);card.querySelector('.record-up').onclick=()=>move(index,-1);card.querySelector('.record-down').onclick=()=>move(index,1);card.querySelector('.record-up').hidden=index===0;card.querySelector('.record-down').hidden=index===tracks.length-1;list.append(card);
-  }update();
- }
- function chooseFile(track){
-  if(busy)return;const input=document.createElement('input');input.type='file';input.accept='.mp3,.wav,audio/mpeg,audio/wav';input.hidden=true;root.append(input);input.addEventListener('cancel',()=>input.remove(),{once:true});input.onchange=async()=>{const file=input.files?.[0];input.remove();if(file)await upload(track,file);};input.click();
- }
- async function upload(track,file){
-  const mime=/\.mp3$/i.test(file.name)?'audio/mpeg':/\.wav$/i.test(file.name)?'audio/wav':'';
-  if(!mime||file.size<44||file.size>8*1024*1024){status('Vyber MP3 nebo WAV do 8 MB.');return;}
-  const g=generation;if(selected?.id===track.id)await putAway();if(!alive(g))return;setBusy(true);status('Připravuji nahrání zvuku…');
-  try{const ticket=await api('/gramophone/tracks/'+track.id+'/upload',{method:'POST',body:JSON.stringify({size:file.size,name:file.name,mime})});
-   for(let part=0;part<ticket.parts;part++){if(!alive(g))return;await api('/gramophone/uploads/'+ticket.id+'/'+part,{method:'PUT',headers:{'Content-Type':'application/octet-stream'},body:file.slice(part*ticket.chunkSize,Math.min(file.size,(part+1)*ticket.chunkSize)),signal:AbortSignal.timeout(30000)});if(alive(g))status('Nahrávám zvuk · '+Math.round((part+1)/ticket.parts*100)+' %');}
-   if(!alive(g))return;await api('/gramophone/uploads/'+ticket.id+'/complete',{method:'POST'});if(alive(g)){await reload(g);status('Zvuk je připravený. Klikni na desku a nech ji rozehrát.');}
-  }catch(error){if(alive(g))status(error.message);}finally{if(alive(g))setBusy(false);}
- }
- async function reload(g=generation){const result=await api('/gramophone/tracks');if(!alive(g))return;tracks=result.tracks;if(selected){selected=tracks.find(t=>t.id===selected.id)||selected;root.querySelector('.deck-record').innerHTML=label(selected);}shelf();}
- async function move(index,direction){if(busy)return;const g=generation,ids=tracks.map(t=>t.id),other=index+direction;[ids[index],ids[other]]=[ids[other],ids[index]];setBusy(true);try{await api('/gramophone/order',{method:'PUT',body:JSON.stringify({ids})});if(alive(g))await reload(g);}catch(error){if(alive(g))status(error.message);}finally{if(alive(g))setBusy(false);}}
- async function remove(track){if(busy||!await PortalPolish.confirm('Odebrat tuto desku?',track.title+' zmizí z této sbírky. Původní skladba na Suno zůstane zachovaná.','Odebrat desku'))return;const g=generation;if(selected?.id===track.id)await putAway();if(!alive(g))return;setBusy(true);try{await api('/gramophone/tracks/'+track.id,{method:'DELETE'});if(alive(g)){await reload(g);status('Deska byla odebrána ze sbírky.');}}catch(error){if(alive(g))status(error.message);}finally{if(alive(g))setBusy(false);}}
- function edit(track=null){
-  if(busy)return;if(!dialog){dialog=document.createElement('dialog');dialog.className='gramophone-editor';dialog.setAttribute('aria-labelledby','gramophone-editor-title');dialog.innerHTML='<button type="button" class="dialog-close" aria-label="Zavřít">×</button><h2 id="gramophone-editor-title"></h2><form class="gramophone-form"><fieldset><label>Odkaz na skladbu Suno<input name="url" type="url" maxlength="700" required placeholder="https://suno.com/s/…"></label><button type="button" class="web-button gramophone-resolve">Načíst údaje ze Suno</button><label>Název skladby<input name="title" maxlength="160" required></label><label>Autor<input name="artist" maxlength="100"></label><button class="web-button primary gramophone-save">Uložit desku</button></fieldset></form><p class="gramophone-editor-status" role="status"></p>';document.body.append(dialog);dialog.querySelector('.dialog-close').onclick=()=>{editorVersion++;dialog.close();};dialog.addEventListener('cancel',()=>editorVersion++);}
-  const version=++editorVersion,g=generation,form=dialog.querySelector('form'),notice=dialog.querySelector('.gramophone-editor-status');form.reset();form.querySelector('fieldset').disabled=false;form.elements.url.readOnly=!!track;form.elements.url.value=track?.suno_url||'';form.elements.title.value=track?.title||'';form.elements.artist.value=track?.artist||'';dialog.querySelector('h2').textContent=track?'Upravit štítek desky':'Přidat novou desku';dialog.querySelector('.gramophone-resolve').hidden=!!track;notice.textContent='';dialog.showModal();
-  dialog.querySelector('.gramophone-resolve').onclick=async()=>{const url=form.elements.url.value;form.querySelector('fieldset').disabled=true;notice.textContent='Načítám veřejné údaje skladby…';try{const info=await api('/gramophone/resolve',{method:'POST',body:JSON.stringify({url}),...longRequest()});if(version!==editorVersion||!alive(g))return;form.elements.title.value=info.title;form.elements.artist.value=info.artist;notice.textContent='Údaje načtené. Štítek si můžeš upravit.';}catch(error){if(version===editorVersion)notice.textContent=error.message;}finally{if(version===editorVersion)form.querySelector('fieldset').disabled=false;}};
-  form.onsubmit=async event=>{event.preventDefault();form.querySelector('fieldset').disabled=true;notice.textContent='Ukládám desku…';try{await api(track?'/gramophone/tracks/'+track.id:'/gramophone/tracks',{method:track?'PUT':'POST',body:JSON.stringify({url:form.elements.url.value,title:form.elements.title.value,artist:form.elements.artist.value}),...longRequest()});if(version!==editorVersion||!alive(g))return;dialog.close();await reload(g);status(track?'Štítek desky byl upraven.':'Nová deska je ve sbírce.');}catch(error){if(version===editorVersion)notice.textContent=error.message;}finally{if(version===editorVersion)form.querySelector('fieldset').disabled=false;}};
+ async function putAway(){
+  if(!selected||busy)return;const t=++action,track=selected;busy=true;audio.pause();status('Zvedám raménko a uklízím desku…');if(root)root.querySelector('.tonearm').classList.remove('is-lowered');await fly(track,false);if(t===action)stop();
  }
  async function open(container){
-  dispose();const g=generation,user=identity?.user.id,result=await api('/gramophone/tracks');if(g!==generation||identity?.user.id!==user||!container.isConnected)return;root=container;tracks=result.tracks;
-  root.innerHTML='<section class="gramophone-page"><div class="gramophone-intro"><div><span class="eyebrow">SOUKROMÝ NÁHLED · JEN PRO TEBE</span><h2>Nech kroniku rozeznít.</h2></div><button class="web-button primary gramophone-add" type="button">＋ Přidat skladbu</button></div><div class="gramophone-player"><div class="gramophone-stage"><img class="gramophone-art" src="'+mediaURL('gramophone.png',1600)+'" srcset="'+mediaSrcset('gramophone.png')+'" sizes="(max-width:700px) 95vw, 850px" alt="Starožitný mosazný gramofon na dřevěném podstavci" width="1536" height="1024"><div class="deck-record" hidden></div><span class="tonearm" aria-hidden="true"></span></div><section class="gramophone-controls" aria-label="Ovládání gramofonu"><h3 class="gramophone-now-title">Vyber si desku</h3><p class="gramophone-artist"></p><div class="gramophone-buttons"><button type="button" class="web-button primary gramophone-play" disabled>Přehrát</button><button type="button" class="web-button gramophone-stop" disabled>Vypnout a uklidit</button></div><div class="gramophone-seek"><span class="gramophone-current">0:00</span><input type="range" class="gramophone-position" min="0" max="1000" value="0" aria-label="Pozice ve skladbě" disabled><span class="gramophone-duration">0:00</span></div><label class="gramophone-volume">Hlasitost<input type="range" min="0" max="100" value="'+Math.round(volume*100)+'" aria-label="Hlasitost"></label><p class="gramophone-status" role="status" aria-live="polite">Klikni na desku. Gramofon začne hrát až na tvůj pokyn.</p></section></div><div class="section-heading"><h2>Tvoje sbírka</h2><span class="gramophone-count"></span></div><div class="record-shelf"></div><p class="web-muted">Odkaz Suno načte název a autora. Pro přehrávání k desce přilož vlastní MP3 nebo WAV do 8 MB. Při opuštění místnosti nebo skrytí záložky se přehrávání vypne. Tato zkušební sbírka zatím není přístupná ostatním hráčům.</p></section>';
-  audio=document.createElement('audio');audio.preload='metadata';audio.hidden=true;audio.className='gramophone-audio';audio.volume=volume;root.append(audio);
-  for(const event of ['loadedmetadata','durationchange','timeupdate','play','pause','playing','ended'])audio.addEventListener(event,()=>{if(!alive(g))return;update();if(event==='ended'&&placed&&!busy)putAway();});audio.onerror=()=>{if(alive(g)&&selected&&placed)status('Zvuk nebyl dostupný. Tlačítkem Přehrát můžeš obnovit zdroj.');};
-  root.querySelector('.gramophone-add').onclick=()=>edit();root.querySelector('.gramophone-play').onclick=playPause;root.querySelector('.gramophone-stop').onclick=putAway;root.querySelector('.gramophone-position').oninput=event=>{if(Number.isFinite(audio.duration)){audio.currentTime=Number(event.target.value)/1000*audio.duration;update();}};root.querySelector('.gramophone-volume input').oninput=event=>{volume=Number(event.target.value)/100;audio.volume=volume;};shelf();update();
+  detach();if(!authorized())throw Error('Pro poslech se přihlas přes Discord.');const v=viewVersion,user=identity.user.id;
+  const response=await fetch('/music-library.json',{cache:'no-store',signal:AbortSignal.timeout(10000)});if(!response.ok)throw Error('Hudební sbírku se nepodařilo načíst.');const library=await response.json();
+  if(v!==viewVersion||!authorized()||identity.user.id!==user||!container.isConnected)return;
+  tracks=Array.isArray(library.tracks)?library.tracks.filter(t=>/^[a-f0-9]{20}$/.test(t.id)&&/^\/music\/[a-f0-9]{20}\.[a-f0-9]{16}\.(mp3|wav|m4a|ogg)$/.test(t.url)&&typeof t.title==='string'):[];initAudio();root=container;
+  root.innerHTML='<section class="gramophone-page"><div class="gramophone-intro"><div><span class="eyebrow">HUDEBNÍ MÍSTNOST · NEW HORIZON</span><h2>Nech kroniku rozeznít.</h2></div></div><div class="gramophone-player"><div class="gramophone-stage"><img class="gramophone-art" src="'+mediaURL('gramophone.png',1600)+'" srcset="'+mediaSrcset('gramophone.png')+'" sizes="(max-width:700px) 95vw, 850px" alt="Starožitný mosazný gramofon na dřevěném podstavci" width="1536" height="1024"><div class="deck-record" hidden></div><span class="tonearm" aria-hidden="true"></span></div><section class="gramophone-controls" aria-label="Ovládání gramofonu"><h3 class="gramophone-now-title"></h3><p class="gramophone-artist"></p><div class="gramophone-buttons"><button type="button" class="web-button primary gramophone-play" disabled>Přehrát</button><button type="button" class="web-button gramophone-stop" disabled>Vypnout a uklidit</button></div><div class="gramophone-seek"><span class="gramophone-current">0:00</span><input type="range" class="gramophone-position" min="0" max="1000" value="0" aria-label="Pozice ve skladbě" disabled><span class="gramophone-duration">0:00</span></div><label class="gramophone-volume">Hlasitost<input type="range" min="0" max="100" value="'+Math.round(volume*100)+'" aria-label="Hlasitost"></label><p class="gramophone-status" role="status"></p></section></div><div class="section-heading"><h2>Naše sbírka</h2><span class="gramophone-count"></span></div><div class="record-shelf"></div><p class="web-muted">Hudba hraje dál i při čtení příběhů nebo po přepnutí záložky. Zastavíš ji tady nebo malým přehrávačem na pozadí.</p></section>';
+  root.querySelector('.gramophone-count').textContent=tracks.length+' '+(tracks.length===1?'deska':tracks.length>=2&&tracks.length<=4?'desky':'desek');
+  const shelf=root.querySelector('.record-shelf');if(!tracks.length)shelf.innerHTML='<p class="gramophone-empty">První desky už jsou na cestě.</p>';
+  for(const track of tracks){const card=document.createElement('article');card.className='record-card';card.dataset.id=track.id;card.innerHTML='<button type="button" class="record-pick" aria-label="Přehrát: '+escapeHTML(track.title)+'"><span class="record-token">'+label(track)+'</span><span class="record-title">'+escapeHTML(track.title)+'</span></button><p class="record-author">'+escapeHTML(track.artist||'New Horizon RP')+'</p>';card.querySelector('button').onclick=()=>select(track);shelf.append(card);}
+  root.querySelector('.gramophone-play').onclick=playPause;root.querySelector('.gramophone-stop').onclick=putAway;
+  root.querySelector('.gramophone-position').oninput=event=>{if(Number.isFinite(audio.duration)){audio.currentTime=Number(event.target.value)/1000*audio.duration;update();}};
+  root.querySelector('.gramophone-volume input').oninput=event=>{volume=Number(event.target.value)/100;audio.volume=volume;};update();
  }
- return{open,dispose};
+ document.addEventListener('visibilitychange',()=>{if(document.hidden)cancelFlights();update();});
+ return{open,detach,dispose,syncSession};
 })();
 
 const Community=(()=>{
@@ -398,7 +433,7 @@ const Community=(()=>{
  const icon=name=>'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="'+icons[name]+'"/></svg>';
  const stamp=state=>({pending:'Čeká na schválení',approved:'Schváleno',rejected:'Zamítnuto'}[state]||state);
  const date=t=>t?new Intl.DateTimeFormat('cs-CZ',{dateStyle:'medium',timeStyle:'short',timeZone:'Europe/Prague'}).format(new Date(t*1000)):'Zatím nezaznamenáno';
- const routeMatch=()=>/^#(?:manage|edit|telegrams|gramophone)(?:\/|$)/.test(location.hash);
+ const routeMatch=()=>/^#(?:manage|edit|telegrams|gramophone|seasons)(?:\/|$)/.test(location.hash);
  const has=permission=>identity?.admin?.permissions.includes(permission);
  const text=data=>escapeHTML(data);
  function setStatus(message){page.querySelector('.community-status').textContent=message;}
@@ -410,6 +445,7 @@ const Community=(()=>{
   const edit=document.createElement('a');edit.href='#edit';edit.className='nav-edit';edit.innerHTML=icon('edit')+'Upravit postavu';nav.append(edit);
   const mail=document.createElement('a');mail.href='#telegrams';mail.className='nav-mail';mail.innerHTML=icon('mail')+'Telegramy <span class="web-badge" hidden></span>';nav.append(mail);
   const music=document.createElement('a');music.href='#gramophone';music.className='nav-gramophone';music.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 19h16v3H4zM7 19v-4h10v4M12 15V7l8-4v9l-8-5M7 15a3 3 0 1 1 0-6"/></svg>Gramofon';nav.append(music);
+  const seasons=document.createElement('a');seasons.href='#seasons';seasons.className='nav-seasons';seasons.innerHTML=icon('clock')+'Roční období';nav.append(seasons);
   const admin=document.createElement('a');admin.href='#manage';admin.className='nav-manage';admin.innerHTML=icon('admin')+'Pro správu webu <span class="web-badge review-badge" hidden></span>';nav.append(admin);
   window.addEventListener('beforeunload',event=>{if(dirty()){event.preventDefault();event.returnValue='';}});
  }
@@ -418,7 +454,8 @@ const Community=(()=>{
   nav.querySelector('.nav-edit').hidden=!identity?.owned.length;
   nav.querySelector('.nav-manage').hidden=!identity?.admin?.owner&&!identity?.admin?.permissions.length;
   nav.querySelector('.nav-mail').hidden=!!identity?.restricted;
-  nav.querySelector('.nav-gramophone').hidden=!identity?.admin?.owner||!!identity?.restricted;
+  nav.querySelector('.nav-gramophone').hidden=!identity||!!identity.restricted;
+  nav.querySelector('.nav-seasons').hidden=!identity||!!identity.restricted;
   for(const [selector,count]of [['.nav-mail',identity?.unread||0],['.nav-manage',identity?.pending||0]]){const badge=nav.querySelector(selector+' .web-badge');badge.hidden=!count;badge.textContent=String(count);}
  }
  function values(){
@@ -435,7 +472,7 @@ const Community=(()=>{
   if(loadedHash!==location.hash&&dirty()&&!await PortalPolish.confirm(view==='mail'?'Zahodit rozepsaný telegram?':'Opustit rozepsanou postavu?',view==='mail'?'Neodeslaný text telegramu se zahodí.':'Neuložené změny se zahodí. Koncept uložený na serveru zůstane zachovaný.',view==='mail'?'Zahodit telegram':'Opustit editor')){history.replaceState(null,'',loadedHash);return false;}return true;
  }
  function purge({preserveDraft=false}={}){
-  SeasonLab.dispose();Gramophone.dispose();
+  SeasonLab.dispose();Gramophone.detach();
   if(preserveDraft&&view==='mail'&&mailValues())mailDraft={user:identity?.user.id,hash:loadedHash,data:mailValues(),requestId:mailRequest};else if(!preserveDraft)mailDraft=null;
   if(preserveDraft&&view==='edit'&&editorState)suspended={user:identity?.user.id,data:values(),state:editorState};else if(!preserveDraft)suspended=null;
   generation++;page.hidden=true;page.replaceChildren();document.body.classList.remove('community-view');view='';editorState=null;loadedHash='';mailRequest=null;
@@ -451,7 +488,8 @@ const Community=(()=>{
   if(!identity){shell('Vstup do svého archivu','Pro správu postavy a telegramy se přihlas přes Discord.');content().innerHTML='<a class="web-button" href="'+loginHref+'">Přihlásit přes Discord</a>';return;}
   try{
    if(loadedHash.startsWith('#edit')){view='edit';shell('Tvůj příběh. Tvými slovy.','Uprav svou postavu. Zveřejní se až po schválení správou.','editor');menu([['#','Můj archiv','home'],['#edit','Upravit postavu','edit'],['#telegrams','Telegramy','mail']]);await editor(version,user);}
-   else if(loadedHash.startsWith('#gramophone')){view='gramophone';shell('Gramofon','Desky, které dávají příběhům vlastní hlas.','gramophone');menu([['#','Můj archiv','home'],['#gramophone','Gramofon','home'],['#manage/seasons','Sezónní náhled','admin']]);await Gramophone.open(content());}
+   else if(loadedHash.startsWith('#gramophone')){view='gramophone';shell('Gramofon','Desky, které dávají příběhům vlastní hlas.','gramophone');menu([['#','Můj archiv','home'],['#gramophone','Gramofon','home'],['#seasons','Roční období','clock']]);await Gramophone.open(content());}
+   else if(loadedHash.startsWith('#seasons')){view='seasons';shell('Roční období','Atmosféra kroniky podle tebe.','seasons');menu([['#','Můj archiv','home'],['#gramophone','Gramofon','home'],['#seasons','Roční období','clock']]);await SeasonLab.open(content());}
    else if(loadedHash.startsWith('#manage')){view='manage';shell('Správa kroniky','Pracovna pro lidi, kteří drží příběhy pohromadě.','manage');await manage(version,user);}
    else{view='mail';shell('Telegrafní kancelář','Slova, která mají svého adresáta. Soukromá pošta mezi hráči.','mail');await telegrams(version,user);}
    if(version!==generation||user!==identity?.user.id||document.hidden)return;
@@ -496,7 +534,7 @@ const Community=(()=>{
   const overview=await api('/manage/overview');if(!valid(version,user))return;
   const own=overview.admin.owner,permissions=overview.admin.permissions;
   const items=[['#manage','Přehled','admin']];if(permissions.includes('review'))items.push(['#manage/requests','Změny','edit']);if(permissions.includes('activity'))items.push(['#manage/users','Uživatelé a přihlášení','users']);if(own)items.push(['#manage/admins','Správci a oprávnění','admin']);if(permissions.includes('blacklist'))items.push(['#manage/blacklist','Blacklist','admin']);if(permissions.includes('official'))items.push(['#manage/mail','Telegramy správy','mail']);if(permissions.includes('review'))items.push(['#manage/audit','Historie rozhodnutí','clock']);menu(items);
-  if(own){items.push(['#manage/seasons','Sezónní laboratoř','admin'],['#gramophone','Gramofon · náhled','home']);menu(items);}
+  if(own){items.push(['#seasons','Roční období','clock'],['#gramophone','Gramofon','home']);menu(items);}
   const changes=page.querySelector('.community-menu a[href="#manage/requests"]');if(changes&&overview.pending){changes.classList.add('has-pending');changes.dataset.count=overview.pending;}
   const path=loadedHash.split('/');
   if(path[1]==='requests'){
@@ -582,7 +620,7 @@ const Community=(()=>{
   if(!ids.length||!await PortalPolish.confirm(ids.length===1?'Smazat tento telegram?':'Smazat vybrané telegramy?','Zmizí pouze z tvé příchozí schránky. Odesílateli zůstane jeho kopie. Smazání nelze vrátit.','Smazat'))return;
   const user=identity?.user.id,version=generation;try{await api('/telegrams',{method:'DELETE',body:JSON.stringify({ids})});if(!valid(version,user))return;await refreshSession();if(location.hash==='#telegrams')await open();else location.hash='#telegrams';}catch(error){if(valid(version,user))setStatus(error.message);}
  }
- function allowed(){const path=location.hash.split('/')[1];if(path==='admins'||path==='seasons'||location.hash.startsWith('#gramophone'))return !!identity?.admin?.owner;const permission={requests:'review',audit:'review',users:'activity',mail:'official',blacklist:'blacklist'}[path];return permission?has(permission):!!identity?.admin?.owner||!!identity?.admin?.permissions.length;}
+ function allowed(){if(/^#(?:gramophone|seasons)(?:\/|$)/.test(location.hash))return !!identity&&!identity.restricted;const path=location.hash.split('/')[1];if(path==='admins'||path==='seasons')return !!identity?.admin?.owner;const permission={requests:'review',audit:'review',users:'activity',mail:'official',blacklist:'blacklist'}[path];return permission?has(permission):!!identity?.admin?.owner||!!identity?.admin?.permissions.length;}
  return {init,sync,open,purge,beforeRoute,beforeLogout,get matches(){return routeMatch();},get active(){return view;},allowed};
 })();
 
@@ -663,6 +701,7 @@ const UserChrome=(()=>{
 const RestrictedAccess=(()=>{
  let page;
  function show(){
+  Gramophone.dispose();SeasonAtmosphere.syncSession();
   PortalPolish.closeCast();PortalPolish.cancelConfirmation();PortalPolish.loading('',false);purgeProfile();Journal.purge();Community.purge();UserChrome.clearPrivate();resetTrust();if(denial.open)denial.close();
   selection.hidden=true;portal.hidden=true;welcome.hidden=true;rail.hidden=true;rail.replaceChildren();portal.replaceChildren();setNotice('');
   if(!page){page=document.createElement('main');page.id='restricted-page';page.setAttribute('aria-labelledby','restricted-title');page.innerHTML='<section class="restricted-card"><div class="restricted-orbit" aria-hidden="true"><span></span><svg viewBox="0 0 100 100"><path d="M50 10 80 23v24c0 23-30 39-30 39S20 70 20 47V23Z"/><rect x="35" y="42" width="30" height="25" rx="4"/><path d="M40 42v-7a10 10 0 0 1 20 0v7M50 52v6"/></svg></div><span class="eyebrow">ÚSTAV BEZ DOZORU · SPRÁVA KRONIKY</span><h1 id="restricted-title">Tato kapitola je<br>pro tebe uzavřená.</h1><div class="restricted-divider" aria-hidden="true">✦</div><p class="restricted-message">Byl ti odebrán přístup k webovým funkcím. Pro jeho obnovení kontaktuj vedení Ústavu.</p><p class="restricted-account"></p><div class="restricted-actions"><a class="web-button primary" href="https://discord.com/channels/1561680787676467230" target="_blank" rel="noopener noreferrer">Kontaktovat vedení ↗</a><button type="button" class="web-button restricted-recheck">Zkontrolovat přístup</button></div><p class="restricted-status" role="status" aria-live="polite"></p><footer>NEW HORIZON · SOUKROMÁ KRONIKA</footer></section>';document.body.append(page);
@@ -758,6 +797,7 @@ function closeDenial(){denial.close();location.hash='';}
 denial.querySelector('.dialog-close').onclick=closeDenial;denial.querySelector('.denial-back').onclick=closeDenial;
 denial.addEventListener('cancel',event=>{event.preventDefault();closeDenial();});
 function renderAccount(){
+ Gramophone.syncSession();SeasonAtmosphere.syncSession();
  Community.sync();
  UserChrome.refresh();
  const fingerprint=identity?JSON.stringify([identity.user,identity.restricted,identity.owned,identity.access,identity.journalAccess,identity.directory,new Intl.DateTimeFormat('cs-CZ',{timeZone:'Europe/Prague'}).format(new Date())]):'guest';
@@ -797,7 +837,7 @@ async function refreshSession(initial=false){
   if(identity?.restricted){RestrictedAccess.show();return;}
   if(!identity||activePerson&&!identity.access.includes(activePerson)||Journal.key&&!identity.journalAccess?.includes(Journal.key)){purgeProfile();Journal.purge();await route();}
   else if(initial||changed||Community.matches&&!Community.active||Community.active==='manage'&&!Community.allowed()||directoryChanged&&currentKey()||currentKey()&&activePerson!==currentKey()&&identity.access.includes(currentKey())||Journal.route&&!Journal.key)await route();
- }catch(error){if(version!==refreshVersion)return;ready=true;purgeProfile();Journal.purge({preserveDraft:true});Community.purge({preserveDraft:true});UserChrome.clearPrivate();if(initial){identity=null;renderAccount();selection.hidden=false;}setNotice(error.message);}
+ }catch(error){if(version!==refreshVersion)return;ready=true;Gramophone.dispose();purgeProfile();Journal.purge({preserveDraft:true});Community.purge({preserveDraft:true});UserChrome.clearPrivate();if(initial){identity=null;renderAccount();selection.hidden=false;}setNotice(error.message);}
 }
 async function route(){
  const version=++routeVersion,journalMatch=Journal.route,key=journalMatch?.[1]||currentKey(),previous=activePerson;
@@ -877,7 +917,7 @@ window.addEventListener('keydown',event=>{if(event.key==='Escape'&&!event.defaul
 document.addEventListener('visibilitychange',()=>{if(document.hidden){routeVersion++;purgeProfile();Journal.purge({preserveDraft:true});Community.purge({preserveDraft:true});UserChrome.clearPrivate();UserChrome.closeMenu();PortalPolish.loading('',false);}else refreshSession(true);});
 window.addEventListener('pageshow',event=>{if(event.persisted){routeVersion++;purgeProfile();Journal.purge();refreshSession(true);}});
 setInterval(()=>{if(!document.hidden&&identity)refreshSession();},15000);
-PortalPolish.init();Journal.init();Community.init();UserChrome.init();renderAccount();
+PortalPolish.init();Journal.init();Community.init();UserChrome.init();SeasonAtmosphere.init();renderAccount();
 const loginResult=new URLSearchParams(location.search).get('login');
 if(loginResult){setNotice(loginResult==='failed'?'Přihlášení se nepodařilo. Ověř, že jsi členem vašeho Discord serveru, a zkus to znovu.':'Přihlášení bylo zrušeno.');history.replaceState(null,'',location.pathname+location.hash);}
 refreshSession(true);

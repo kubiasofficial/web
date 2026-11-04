@@ -28,19 +28,63 @@ const SeasonLab=(()=>{
   if(!reduced.matches&&season!=='off'&&(season!=='winter'||holes.length))schedule();
  }
  function schedule(){if(frame||disposed||!visible||document.hidden)return;frame=requestAnimationFrame(time=>{frame=0;if(time-lastFrame<40){schedule();return;}lastFrame=time;paint(time);});}
- function change(value){season=value==='auto'?currentSeason():value;holes=[];stage.dataset.season=season;feedback.textContent=season==='winter'?'Přejeď myší nebo se dotkni skla. Vyčištěná stopa později znovu namrzne.':season==='off'?'Náhled je vypnutý.':'Soukromý náhled: '+seasons[season]+'.';stop();paint(performance.now());}
+ function change(value){season=value==='auto'?currentSeason():value;holes=[];stage.dataset.season=season;feedback.textContent=season==='winter'?'Přejeď myší nebo se dotkni skla. Vyčištěná stopa později znovu namrzne.':season==='off'?'Sezónní vzhled je vypnutý.':'Tvoje atmosféra: '+seasons[season]+'.';stop();paint(performance.now());}
  async function open(container){
-  dispose();const user=identity?.user.id;await api('/manage/experiments');if(identity?.user.id!==user||!container.isConnected||identity?.restricted)return;
+  dispose();if(!identity||!container.isConnected||identity.restricted)return;
   disposed=false;season='off';strength=65;visible=true;reduced=matchMedia('(prefers-reduced-motion: reduce)');
   container.innerHTML='<div class="section-heading"><h2>Sezónní laboratoř</h2><span class="status-pill">JEN TVŮJ NÁHLED</span></div><p class="web-muted">Zkoušej atmosféru přímo na skle kroniky. Ostatním hráčům se vzhled nemění.</p><div class="season-controls"><label>Roční období<select class="season-choice"><option value="off">Bez efektu</option><option value="auto">Podle aktuálního období</option><option value="spring">Jaro</option><option value="summer">Léto</option><option value="autumn">Podzim</option><option value="winter">Zima · zamrzlé sklo</option></select></label><label>Síla efektu <output class="season-level">65 %</output><input class="season-strength" type="range" min="10" max="100" value="65"></label><button class="web-button frost-reset" type="button">Obnovit námrazu</button><button class="web-button season-off" type="button">Vypnout náhled</button></div><section class="season-stage" data-season="off" aria-label="Náhled sezónní atmosféry"><div class="season-landscape" aria-hidden="true"></div><div class="season-sunlight" aria-hidden="true"></div><div class="season-preview-copy"><span class="eyebrow">SEDM OSUDŮ · JEDEN HORIZONT</span><h3>Příběhy pod<br>stejným nebem.</h3><p class="season-greeting">Tvoje kronika. Tvoje atmosféra.</p><button type="button" class="web-button season-click-test">Zkusit tlačítko ↗</button><span class="season-click-result" role="status"></span></div><canvas class="season-canvas" aria-hidden="true"></canvas></section><p class="season-feedback" role="status"></p>';
+  container.querySelector('h2').textContent='Tvoje roční období';container.querySelector('.status-pill').textContent='VZHLED PRO TEBE';container.querySelector('.web-muted').textContent='Období se mění automaticky podle kalendáře. Tady si můžeš zvolit vlastní atmosféru, její sílu nebo efekty vypnout. Volba platí pro celý web v tomto prohlížeči.';
   stage=container.querySelector('.season-stage');canvas=stage.querySelector('canvas');ctx=canvas.getContext('2d');feedback=container.querySelector('.season-feedback');
   const greetings={spring:'Ráno voní novým začátkem.',summer:'Slunce zlátne nad cestami kroniky.',autumn:'Za okny padá listí. Tvůj příběh pokračuje.',winter:'Za zamrzlým sklem příběhy neutichají.',off:'Tvoje kronika. Tvoje atmosféra.'};
-  container.querySelector('select').onchange=event=>{change(event.target.value);stage.querySelector('.season-greeting').textContent=greetings[season];};
-  container.querySelector('.season-strength').oninput=event=>{strength=Number(event.target.value);container.querySelector('output').textContent=strength+' %';drawFrost();stop();paint(performance.now());};
-  container.querySelector('.frost-reset').onclick=()=>{container.querySelector('select').value='winter';change('winter');};container.querySelector('.season-off').onclick=()=>{container.querySelector('select').value='off';change('off');};
+  const choose=value=>{container.querySelector('select').value=value;change(value);stage.querySelector('.season-greeting').textContent=greetings[season];SeasonAtmosphere.configure(value,strength);};
+  container.querySelector('select').onchange=event=>choose(event.target.value);
+  container.querySelector('.season-strength').oninput=event=>{strength=Number(event.target.value);container.querySelector('output').textContent=strength+' %';drawFrost();stop();paint(performance.now());SeasonAtmosphere.configure(container.querySelector('select').value,strength);};
+  container.querySelector('.frost-reset').onclick=()=>choose('winter');container.querySelector('.season-off').onclick=()=>choose('off');
   stage.querySelector('.season-click-test').onclick=()=>stage.querySelector('.season-click-result').textContent='Klikání funguje i přes námrazu.';
   const melt=event=>{if(season!=='winter')return;const r=stage.getBoundingClientRect(),p={x:(event.clientX-r.left)/r.width,y:(event.clientY-r.top)/r.height,time:performance.now()},last=holes.at(-1);if(last&&Math.hypot((last.x-p.x)*r.width,(last.y-p.y)*r.height)<9)return;holes.push(p);if(holes.length>100)holes.shift();paint(p.time);};stage.addEventListener('pointermove',melt,{passive:true});stage.addEventListener('pointerdown',melt,{passive:true});
-  observer=new IntersectionObserver(entries=>{visible=entries[0].isIntersecting;if(visible)paint(performance.now());else stop();});observer.observe(stage);resize=new ResizeObserver(fit);resize.observe(stage);watchVisibility=()=>{if(document.hidden)stop();else if(visible)paint(performance.now());};document.addEventListener('visibilitychange',watchVisibility);watchReduced=()=>{stop();paint(performance.now());};reduced.addEventListener('change',watchReduced);fit();change('off');
+  observer=new IntersectionObserver(entries=>{visible=entries[0].isIntersecting;if(visible)paint(performance.now());else stop();});observer.observe(stage);resize=new ResizeObserver(fit);resize.observe(stage);watchVisibility=()=>{if(document.hidden)stop();else if(visible)paint(performance.now());};document.addEventListener('visibilitychange',watchVisibility);watchReduced=()=>{stop();paint(performance.now());};reduced.addEventListener('change',watchReduced);
+  strength=SeasonAtmosphere.strength;container.querySelector('.season-strength').value=strength;container.querySelector('output').textContent=strength+' %';fit();choose(SeasonAtmosphere.mode);
  }
  return{open,dispose};
+})();
+
+// Public, viewport-sized atmosphere. It contains no account data and never
+// intercepts input. Only this browser's preference is saved, not other players'.
+const SeasonAtmosphere=(()=>{
+ const modes=['auto','off','spring','summer','autumn','winter'];
+ let host,canvas,ctx,ice,frame=0,lastFrame=0,holes=[],mode='auto',strength=45,season='off',reduced;
+ const current=()=>{const m=Number(new Intl.DateTimeFormat('en',{month:'numeric',timeZone:'Europe/Prague'}).format(new Date()));return m>=3&&m<=5?'spring':m>=6&&m<=8?'summer':m>=9&&m<=11?'autumn':'winter';};
+ const noise=i=>{const n=Math.sin(i*83.71+9)*43758.54;return n-Math.floor(n);};
+ function stop(){cancelAnimationFrame(frame);frame=0;}
+ function frost(){
+  if(!ice)return;const c=ice.getContext('2d'),w=ice.width,h=ice.height,s=strength/100;c.clearRect(0,0,w,h);
+  const veil=c.createRadialGradient(w/2,h/2,Math.min(w,h)*.25,w/2,h/2,Math.max(w,h)*.64);veil.addColorStop(0,'rgba(214,237,251,0)');veil.addColorStop(.55,'rgba(214,237,251,'+s*.04+')');veil.addColorStop(1,'rgba(230,245,255,'+s*.8+')');c.fillStyle=veil;c.fillRect(0,0,w,h);c.strokeStyle='rgba(223,243,255,'+s*.65+')';c.lineWidth=.8;
+  for(let i=0;i<70;i++){const side=i%4,x=side<2?noise(i+4)*w:side===2?noise(i+3)*w*.06:w-noise(i+3)*w*.06,y=side<2?(side===0?noise(i+9)*h*.07:h-noise(i+9)*h*.07):noise(i+4)*h,size=10+noise(i+12)*32;c.save();c.translate(x,y);c.rotate(noise(i)*6);for(let a=0;a<6;a++){c.rotate(Math.PI/3);c.beginPath();c.moveTo(0,0);c.lineTo(0,size);for(let j=1;j<=3;j++){const v=size*j/4;c.moveTo(0,v);c.lineTo(-size*.18,v-size*.18);c.moveTo(0,v);c.lineTo(size*.18,v-size*.18);}c.stroke();}c.restore();}
+ }
+ function fit(){if(!host)return;const w=innerWidth,h=innerHeight;if(!w||!h)return;canvas.width=Math.round(Math.min(1200,w));canvas.height=Math.round(canvas.width*h/w);ice=document.createElement('canvas');ice.width=canvas.width;ice.height=canvas.height;frost();paint(performance.now());}
+ function paint(t){
+  stop();if(!ctx||document.hidden)return;const w=canvas.width,h=canvas.height;ctx.clearRect(0,0,w,h);if(season==='off')return;
+  if(season==='winter'){
+   ctx.drawImage(ice,0,0);holes=holes.filter(p=>t-p.t<14000);ctx.globalCompositeOperation='destination-out';
+   for(const p of holes){const r=Math.min(w,h)*.18,a=Math.min(1,(14000-t+p.t)/6500),g=ctx.createRadialGradient(p.x*w,p.y*h,0,p.x*w,p.y*h,r);g.addColorStop(0,'rgba(0,0,0,'+a+')');g.addColorStop(.55,'rgba(0,0,0,'+a+')');g.addColorStop(1,'rgba(0,0,0,0)');ctx.fillStyle=g;ctx.fillRect(p.x*w-r,p.y*h-r,r*2,r*2);}ctx.globalCompositeOperation='source-over';
+  }else{
+   const n=innerWidth<600?3:Math.ceil(2+strength/18);
+   for(let i=0;i<n;i++){const p=reduced.matches?noise(i+4):(t/1000*(season==='autumn'?.023:.012)+noise(i+4))%1,x=(noise(i+1)+Math.sin(p*6+i)*.06)*w,y=p*(h+60)-30;ctx.save();ctx.translate(x,y);ctx.rotate(i+p*4);ctx.globalAlpha=season==='autumn'?.58:.25;
+    if(season==='autumn'){const s=10+noise(i+9)*8;ctx.fillStyle=['#b97b39','#bc6536','#d1a65e'][i%3];ctx.beginPath();ctx.moveTo(0,-s);ctx.bezierCurveTo(s,-s*.5,s,s,0,s);ctx.bezierCurveTo(-s,s,-s,-s*.5,0,-s);ctx.fill();ctx.strokeStyle='#633e2a';ctx.beginPath();ctx.moveTo(0,-s*.6);ctx.lineTo(0,s*1.25);ctx.stroke();}
+    else{ctx.fillStyle=season==='spring'?'#c9dfa2':'#f2cd89';ctx.beginPath();ctx.ellipse(0,0,season==='spring'?4:1.6,season==='spring'?2:1.6,0,0,Math.PI*2);ctx.fill();}ctx.restore();}
+  }
+  if(!reduced.matches&&(season!=='winter'||holes.length))schedule();
+ }
+ function schedule(){if(frame||document.hidden||season==='off')return;frame=requestAnimationFrame(t=>{frame=0;if(t-lastFrame<40){schedule();return;}lastFrame=t;paint(t);});}
+ function apply(){if(!host)return;season=identity?.restricted?'off':mode==='auto'?current():mode;host.dataset.season=season;document.documentElement.dataset.season=season;holes=[];frost();paint(performance.now());}
+ function configure(next,level){mode=modes.includes(next)?next:'auto';strength=Math.min(100,Math.max(10,Number(level)||45));try{localStorage.setItem('nh-season',JSON.stringify({mode,strength}));}catch{}apply();}
+ function init(){
+  if(host)return;try{const saved=JSON.parse(localStorage.getItem('nh-season'));if(saved&&modes.includes(saved.mode)){mode=saved.mode;strength=Math.min(100,Math.max(10,Number(saved.strength)||45));}}catch{}
+  reduced=matchMedia('(prefers-reduced-motion: reduce)');host=document.createElement('div');host.className='season-global';host.setAttribute('aria-hidden','true');host.innerHTML='<span class="season-global-light"></span><canvas></canvas>';document.body.append(host);canvas=host.querySelector('canvas');ctx=canvas.getContext('2d');
+  const melt=event=>{if(season!=='winter'||document.hidden)return;const p={x:event.clientX/innerWidth,y:event.clientY/innerHeight,t:performance.now()},last=holes.at(-1);if(last&&Math.hypot((last.x-p.x)*innerWidth,(last.y-p.y)*innerHeight)<10)return;holes.push(p);if(holes.length>70)holes.shift();if(reduced.matches)paint(p.t);else schedule();};
+  window.addEventListener('pointermove',melt,{passive:true});window.addEventListener('pointerdown',melt,{passive:true});window.addEventListener('resize',fit,{passive:true});
+  document.addEventListener('visibilitychange',()=>document.hidden?stop():apply());reduced.addEventListener('change',()=>paint(performance.now()));fit();apply();
+ }
+ function syncSession(){const next=identity?.restricted?'off':mode==='auto'?current():mode;if(host&&season!==next)apply();}
+ return{init,configure,syncSession,get mode(){return mode;},get strength(){return strength;}};
 })();

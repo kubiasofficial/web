@@ -1,85 +1,76 @@
+// Audio belongs to the application, never to a route's DOM tree.
 const Gramophone=(()=>{
- let root,audio,tracks=[],selected=null,placed=false,busy=false,generation=0,action=0,dialog,editorVersion=0,volume=.65;
- const flights=new Set(),longRequest=()=>({signal:AbortSignal.timeout(15000)}),silent='data:audio/wav;base64,UklGRnQAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YVAAAACAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgA==';
- const alive=g=>root?.isConnected&&generation===g&&identity?.admin?.owner&&!identity?.restricted;
+ let root=null,audio=null,dock=null,tracks=[],selected=null,busy=false,volume=.65,viewVersion=0,action=0,message='',owner=null;
+ const flights=new Set(),authorized=()=>!!identity&&!identity.restricted;
  const label=track=>'<span class="vinyl"><span class="vinyl-label"><b>'+escapeHTML(track.title)+'</b></span></span>';
- function status(message){if(root?.isConnected)root.querySelector('.gramophone-status').textContent=message;}
- function dispose(){generation++;action++;editorVersion++;const old=audio;root=null;audio=null;if(old){old.pause();old.removeAttribute('src');old.load();}for(const a of flights)a.cancel();flights.clear();document.querySelectorAll('.record-flight').forEach(e=>e.remove());if(dialog?.open)dialog.close();dialog?.remove();dialog=null;selected=null;placed=false;busy=false;tracks=[];}
- function time(value){if(!Number.isFinite(value))return '0:00';return Math.floor(value/60)+':'+String(Math.floor(value%60)).padStart(2,'0');}
- function update(){
-  if(!root?.isConnected||!audio)return;
-  root.querySelector('.gramophone-now-title').textContent=selected?.title||'Vyber si desku';root.querySelector('.gramophone-artist').textContent=selected?.artist||'Soukromá hudební místnost · náhled';
-  const playing=placed&&!audio.paused&&!audio.ended;root.querySelector('.deck-record').classList.toggle('is-spinning',playing);root.querySelector('.gramophone-play').textContent=playing?'Pozastavit':'Přehrát';
-  root.querySelector('.gramophone-play').disabled=!selected||busy;root.querySelector('.gramophone-stop').disabled=!selected||busy;
-  const seek=root.querySelector('.gramophone-position');seek.disabled=!selected||!Number.isFinite(audio.duration)||busy;seek.value=Number.isFinite(audio.duration)&&audio.duration>0?String(audio.currentTime/audio.duration*1000):'0';root.querySelector('.gramophone-current').textContent=time(audio.currentTime);root.querySelector('.gramophone-duration').textContent=time(audio.duration);
-  root.querySelectorAll('.record-pick,.record-tools button,.gramophone-add').forEach(b=>b.disabled=busy);
+ const time=value=>Number.isFinite(value)?Math.floor(value/60)+':'+String(Math.floor(value%60)).padStart(2,'0'):'0:00';
+ function status(text){message=text;update();}
+ function cancelFlights(){for(const animation of flights)animation.cancel();flights.clear();document.querySelectorAll('.record-flight').forEach(e=>e.remove());}
+ function detach(){viewVersion++;cancelFlights();root=null;update();}
+ function stop(){action++;busy=false;selected=null;message='Deska je zpátky ve sbírce.';if(audio){audio.pause();audio.removeAttribute('src');audio.load();}update();}
+ function dispose(){detach();stop();audio?.remove();audio=null;dock?.remove();dock=null;owner=null;tracks=[];if('mediaSession' in navigator){navigator.mediaSession.metadata=null;navigator.mediaSession.playbackState='none';}}
+ function syncSession(){if(!authorized()||owner&&owner!==identity.user.id)dispose();}
+ function initAudio(){
+  if(audio)return;owner=identity.user.id;audio=document.createElement('audio');audio.preload='metadata';audio.hidden=true;audio.className='gramophone-audio';audio.volume=volume;document.body.append(audio);
+  dock=document.createElement('aside');dock.className='gramophone-dock';dock.hidden=true;dock.setAttribute('aria-label','Hudba na pozadí');
+  dock.innerHTML='<a href="#gramophone" class="dock-open"><span aria-hidden="true">♫</span><span class="dock-title"></span></a><button type="button" class="dock-pause" aria-label="Pozastavit hudbu">Ⅱ</button><button type="button" class="dock-stop" aria-label="Vypnout hudbu">×</button>';
+  document.body.append(dock);dock.querySelector('.dock-pause').onclick=playPause;dock.querySelector('.dock-stop').onclick=stop;
+  for(const event of ['loadedmetadata','durationchange','timeupdate','play','pause','playing','waiting'])audio.addEventListener(event,update);
+  audio.addEventListener('ended',()=>{if(root?.isConnected)putAway();else stop();});
+  audio.addEventListener('error',()=>{if(selected)status('Skladbu se nepodařilo přehrát. Zkus ji spustit znovu.');});
+  if('mediaSession' in navigator){for(const [name,handler]of [['play',()=>{if(audio?.paused)playPause();}],['pause',()=>audio?.pause()],['stop',stop],['seekto',event=>{if(audio&&Number.isFinite(audio.duration)&&Number.isFinite(event.seekTime))audio.currentTime=Math.min(audio.duration,Math.max(0,event.seekTime));}]])try{navigator.mediaSession.setActionHandler(name,handler);}catch{}}
  }
- function setBusy(value){busy=value;update();}
+ function update(){
+  if(!audio)return;const playing=!!selected&&!audio.paused&&!audio.ended;
+  if(dock){dock.hidden=!selected||!!root?.isConnected||!authorized();dock.querySelector('.dock-title').textContent=selected?.title||'';dock.querySelector('.dock-pause').textContent=playing?'Ⅱ':'▶';dock.querySelector('.dock-pause').setAttribute('aria-label',playing?'Pozastavit hudbu':'Přehrát hudbu');}
+  if('mediaSession' in navigator)navigator.mediaSession.playbackState=selected?(playing?'playing':'paused'):'none';
+  document.body.classList.toggle('has-background-music',!!dock&&!dock.hidden);
+  if(!root?.isConnected)return;
+  root.querySelector('.gramophone-now-title').textContent=selected?.title||'Vyber si desku';root.querySelector('.gramophone-artist').textContent=selected?.artist||'Hudební místnost New Horizon';
+  const deck=root.querySelector('.deck-record');deck.hidden=!selected||busy;deck.classList.toggle('is-spinning',playing&&!document.hidden);if(selected&&deck.dataset.id!==selected.id){deck.innerHTML=label(selected);deck.dataset.id=selected.id;}
+  root.querySelector('.tonearm').classList.toggle('is-lowered',!!selected);
+  const play=root.querySelector('.gramophone-play');play.textContent=playing?'Pozastavit':'Přehrát';play.disabled=!selected||busy;root.querySelector('.gramophone-stop').disabled=!selected||busy;
+  const seek=root.querySelector('.gramophone-position');seek.disabled=!selected||!Number.isFinite(audio.duration)||busy;seek.value=Number.isFinite(audio.duration)&&audio.duration>0?String(audio.currentTime/audio.duration*1000):'0';root.querySelector('.gramophone-current').textContent=time(audio.currentTime);root.querySelector('.gramophone-duration').textContent=time(audio.duration);
+  root.querySelector('.gramophone-status').textContent=message||'Klikni na desku a nech kroniku rozeznít.';
+  root.querySelectorAll('.record-card').forEach(card=>{card.classList.toggle('is-selected',selected?.id===card.dataset.id);card.querySelector('button').disabled=busy;});
+ }
  async function fly(track,toDeck){
-  const g=generation,stage=root.querySelector('.gramophone-stage').getBoundingClientRect(),token=root.querySelector('.record-card[data-id="'+track.id+'"] .record-token')?.getBoundingClientRect();if(!token)return;
+  if(!root?.isConnected||!motionAllowed()||document.hidden)return;
+  const stage=root.querySelector('.gramophone-stage').getBoundingClientRect(),token=root.querySelector('.record-card[data-id="'+track.id+'"] .record-token')?.getBoundingClientRect();if(!token)return;
   const size=stage.width*.32,deck={x:stage.left+stage.width*.555,y:stage.top+stage.height*.612},shelf={x:token.left+token.width/2,y:token.top+token.height/2};
   const transform=(p,sx,sy)=>'translate('+(p.x-size/2)+'px,'+(p.y-size/2)+'px) scale('+sx+','+sy+')';
-  const start=transform(shelf,token.width/size,token.height/size),end=transform(deck,1,.28),flight=document.createElement('div');flight.className='record-flight';flight.style.width=size+'px';flight.innerHTML=label(track);document.body.append(flight);root.querySelector('.deck-record').hidden=true;
-  const animation=flight.animate(toDeck?[{transform:start,opacity:1},{transform:end,opacity:1}]:[{transform:end,opacity:1},{transform:start,opacity:1}],{duration:motionAllowed()?720:0,easing:'cubic-bezier(.22,.68,.25,1)',fill:'both'});flights.add(animation);
-  try{await animation.finished;}catch{}finally{flights.delete(animation);flight.remove();}
-  if(alive(g)&&toDeck){const deckNode=root.querySelector('.deck-record');deckNode.innerHTML=label(track);deckNode.hidden=false;}
- }
- async function putAway(){
-  if(!selected||busy)return;const g=generation,t=++action,track=selected;setBusy(true);audio.pause();root.querySelector('.tonearm').classList.remove('is-lowered');status('Zvedám raménko a uklízím desku…');
-  await new Promise(r=>setTimeout(r,motionAllowed()?140:0));if(!alive(g)||t!==action)return;await fly(track,false);if(!alive(g)||t!==action)return;
-  selected=null;placed=false;audio.removeAttribute('src');audio.load();root.querySelector('.deck-record').hidden=true;root.querySelectorAll('.record-card').forEach(e=>e.classList.remove('is-selected'));setBusy(false);status('Deska je zpátky ve sbírce.');
+  const start=transform(shelf,token.width/size,token.height/size),end=transform(deck,1,.28),flight=document.createElement('div');flight.className='record-flight';flight.style.width=size+'px';flight.innerHTML=label(track);document.body.append(flight);
+  const animation=flight.animate(toDeck?[{transform:start,opacity:1},{transform:end,opacity:1}]:[{transform:end,opacity:1},{transform:start,opacity:1}],{duration:720,easing:'cubic-bezier(.22,.68,.25,1)',fill:'both'});flights.add(animation);try{await animation.finished;}catch{}finally{flights.delete(animation);flight.remove();}
  }
  async function select(track){
-  if(busy)return;if(selected?.id===track.id){await playPause();return;}if(selected)await putAway();if(!root?.isConnected)return;
-  const g=generation,t=++action;selected=track;placed=false;setBusy(true);root.querySelectorAll('.record-card').forEach(e=>e.classList.toggle('is-selected',e.dataset.id===track.id));status('Připravuji zvukovou stopu…');
-  const stage=root.querySelector('.gramophone-stage'),rect=stage.getBoundingClientRect();if(rect.top<0||rect.bottom>innerHeight)stage.scrollIntoView({block:'center',behavior:'instant'});
-  // Unlock the same media element during the original user gesture.
-  audio.src=silent;try{await audio.play();}catch{}if(!alive(g)||t!==action)return;audio.pause();
-  try{const source=await api('/gramophone/tracks/'+track.id+'/source',longRequest());if(!alive(g)||t!==action)return;audio.src=source.url;audio.load();status('Pokládám desku na gramofon…');await fly(track,true);if(!alive(g)||t!==action)return;placed=true;root.querySelector('.tonearm').classList.add('is-lowered');setBusy(false);
-   try{await audio.play();if(alive(g)&&t===action)status('Právě hraje · '+track.title);}catch(error){if(alive(g)&&t===action)status(error.name==='NotAllowedError'?'Deska je připravená. Klikni na Přehrát.':'Zvuk se nepodařilo spustit. Zkus Přehrát pro obnovení zdroje.');}if(alive(g))update();
-  }catch(error){if(!alive(g)||t!==action)return;selected=null;placed=false;root.querySelectorAll('.record-card').forEach(e=>e.classList.remove('is-selected'));setBusy(false);status(error.message);}
+  if(busy||!authorized())return;if(selected?.id===track.id){await playPause();return;}
+  initAudio();const t=++action;busy=true;selected=track;message='Pokládám desku na gramofon…';audio.src=track.url;audio.load();
+  if('mediaSession' in navigator&&typeof MediaMetadata!=='undefined')navigator.mediaSession.metadata=new MediaMetadata({title:track.title,artist:track.artist,album:'New Horizon RP'});
+  // play() runs in the click gesture, before asynchronous animation work.
+  const playback=audio.play().then(()=>{if(t===action)status('Právě hraje · '+track.title);},error=>{if(t===action)status(error.name==='NotAllowedError'?'Deska je připravená. Klikni na Přehrát.':'Zvuk není dostupný. Zkus skladbu spustit znovu.');});
+  update();if(root){const stage=root.querySelector('.gramophone-stage'),r=stage.getBoundingClientRect();if(r.top<0||r.bottom>innerHeight)stage.scrollIntoView({block:'center',behavior:'instant'});}
+  await fly(track,true);if(t===action){busy=false;update();}await playback;
  }
  async function playPause(){
-  if(!audio||!selected||busy)return;if(!audio.paused){audio.pause();status('Pozastaveno · '+selected.title);return;}
-  const g=generation,t=action;try{if(audio.error){setBusy(true);const source=await api('/gramophone/tracks/'+selected.id+'/source?refresh=1',longRequest());if(!alive(g)||t!==action)return;audio.src=source.url;setBusy(false);}await audio.play();if(alive(g)&&t===action&&selected)status('Právě hraje · '+selected.title);}catch(error){if(alive(g)&&t===action){setBusy(false);status(error.name==='NotAllowedError'?'Prohlížeč čeká na potvrzení. Klikni znovu na Přehrát.':'Skladba není dostupná. Zkus ji znovu nebo ji otevři na Suno.');}}
+  if(!audio||!selected||busy||!authorized())return;if(!audio.paused){audio.pause();status('Pozastaveno · '+selected.title);return;}
+  const t=action;try{if(audio.error){audio.src=selected.url;audio.load();}await audio.play();if(t===action&&selected)status('Právě hraje · '+selected.title);}catch{if(t===action)status('Přehrávání se nepodařilo spustit. Zkus Přehrát znovu.');}
  }
- function shelf(){
-  const list=root.querySelector('.record-shelf');list.replaceChildren();root.querySelector('.gramophone-count').textContent=tracks.length+' '+(tracks.length===1?'deska':'desek');
-  if(!tracks.length){list.innerHTML='<p class="gramophone-empty">Police je prázdná. Přidej první skladbu ze Suno.</p>';return;}
-  for(const [index,track]of tracks.entries()){
-   const card=document.createElement('article');card.className='record-card'+(selected?.id===track.id?' is-selected':'');card.dataset.id=track.id;
-   card.innerHTML='<button type="button" class="record-pick" aria-label="Přehrát: '+escapeHTML(track.title)+'"><span class="record-token">'+label(track)+'</span><span class="record-title">'+escapeHTML(track.title)+'</span></button><p class="record-author">'+escapeHTML(track.artist||'Skladba ze Suno')+'</p><p class="record-audio-state">'+(track.has_audio?'Zvuk připravený':'Čeká na zvukový soubor')+'</p><div class="record-tools"><button type="button" class="record-upload">'+(track.has_audio?'Vyměnit zvuk':'Přiložit zvuk')+'</button><button type="button" class="record-rename">Upravit</button><button type="button" class="record-up" aria-label="Posunout dříve">←</button><button type="button" class="record-down" aria-label="Posunout později">→</button><button type="button" class="record-delete">Odebrat</button></div><a class="record-suno" href="'+escapeHTML(track.suno_url)+'" target="_blank" rel="noopener noreferrer">Otevřít na Suno ↗</a>';
-   card.querySelector('.record-upload').onclick=()=>chooseFile(track);
-   card.querySelector('.record-pick').onclick=()=>select(track);card.querySelector('.record-rename').onclick=()=>edit(track);card.querySelector('.record-delete').onclick=()=>remove(track);card.querySelector('.record-up').onclick=()=>move(index,-1);card.querySelector('.record-down').onclick=()=>move(index,1);card.querySelector('.record-up').hidden=index===0;card.querySelector('.record-down').hidden=index===tracks.length-1;list.append(card);
-  }update();
- }
- function chooseFile(track){
-  if(busy)return;const input=document.createElement('input');input.type='file';input.accept='.mp3,.wav,audio/mpeg,audio/wav';input.hidden=true;root.append(input);input.addEventListener('cancel',()=>input.remove(),{once:true});input.onchange=async()=>{const file=input.files?.[0];input.remove();if(file)await upload(track,file);};input.click();
- }
- async function upload(track,file){
-  const mime=/\.mp3$/i.test(file.name)?'audio/mpeg':/\.wav$/i.test(file.name)?'audio/wav':'';
-  if(!mime||file.size<44||file.size>8*1024*1024){status('Vyber MP3 nebo WAV do 8 MB.');return;}
-  const g=generation;if(selected?.id===track.id)await putAway();if(!alive(g))return;setBusy(true);status('Připravuji nahrání zvuku…');
-  try{const ticket=await api('/gramophone/tracks/'+track.id+'/upload',{method:'POST',body:JSON.stringify({size:file.size,name:file.name,mime})});
-   for(let part=0;part<ticket.parts;part++){if(!alive(g))return;await api('/gramophone/uploads/'+ticket.id+'/'+part,{method:'PUT',headers:{'Content-Type':'application/octet-stream'},body:file.slice(part*ticket.chunkSize,Math.min(file.size,(part+1)*ticket.chunkSize)),signal:AbortSignal.timeout(30000)});if(alive(g))status('Nahrávám zvuk · '+Math.round((part+1)/ticket.parts*100)+' %');}
-   if(!alive(g))return;await api('/gramophone/uploads/'+ticket.id+'/complete',{method:'POST'});if(alive(g)){await reload(g);status('Zvuk je připravený. Klikni na desku a nech ji rozehrát.');}
-  }catch(error){if(alive(g))status(error.message);}finally{if(alive(g))setBusy(false);}
- }
- async function reload(g=generation){const result=await api('/gramophone/tracks');if(!alive(g))return;tracks=result.tracks;if(selected){selected=tracks.find(t=>t.id===selected.id)||selected;root.querySelector('.deck-record').innerHTML=label(selected);}shelf();}
- async function move(index,direction){if(busy)return;const g=generation,ids=tracks.map(t=>t.id),other=index+direction;[ids[index],ids[other]]=[ids[other],ids[index]];setBusy(true);try{await api('/gramophone/order',{method:'PUT',body:JSON.stringify({ids})});if(alive(g))await reload(g);}catch(error){if(alive(g))status(error.message);}finally{if(alive(g))setBusy(false);}}
- async function remove(track){if(busy||!await PortalPolish.confirm('Odebrat tuto desku?',track.title+' zmizí z této sbírky. Původní skladba na Suno zůstane zachovaná.','Odebrat desku'))return;const g=generation;if(selected?.id===track.id)await putAway();if(!alive(g))return;setBusy(true);try{await api('/gramophone/tracks/'+track.id,{method:'DELETE'});if(alive(g)){await reload(g);status('Deska byla odebrána ze sbírky.');}}catch(error){if(alive(g))status(error.message);}finally{if(alive(g))setBusy(false);}}
- function edit(track=null){
-  if(busy)return;if(!dialog){dialog=document.createElement('dialog');dialog.className='gramophone-editor';dialog.setAttribute('aria-labelledby','gramophone-editor-title');dialog.innerHTML='<button type="button" class="dialog-close" aria-label="Zavřít">×</button><h2 id="gramophone-editor-title"></h2><form class="gramophone-form"><fieldset><label>Odkaz na skladbu Suno<input name="url" type="url" maxlength="700" required placeholder="https://suno.com/s/…"></label><button type="button" class="web-button gramophone-resolve">Načíst údaje ze Suno</button><label>Název skladby<input name="title" maxlength="160" required></label><label>Autor<input name="artist" maxlength="100"></label><button class="web-button primary gramophone-save">Uložit desku</button></fieldset></form><p class="gramophone-editor-status" role="status"></p>';document.body.append(dialog);dialog.querySelector('.dialog-close').onclick=()=>{editorVersion++;dialog.close();};dialog.addEventListener('cancel',()=>editorVersion++);}
-  const version=++editorVersion,g=generation,form=dialog.querySelector('form'),notice=dialog.querySelector('.gramophone-editor-status');form.reset();form.querySelector('fieldset').disabled=false;form.elements.url.readOnly=!!track;form.elements.url.value=track?.suno_url||'';form.elements.title.value=track?.title||'';form.elements.artist.value=track?.artist||'';dialog.querySelector('h2').textContent=track?'Upravit štítek desky':'Přidat novou desku';dialog.querySelector('.gramophone-resolve').hidden=!!track;notice.textContent='';dialog.showModal();
-  dialog.querySelector('.gramophone-resolve').onclick=async()=>{const url=form.elements.url.value;form.querySelector('fieldset').disabled=true;notice.textContent='Načítám veřejné údaje skladby…';try{const info=await api('/gramophone/resolve',{method:'POST',body:JSON.stringify({url}),...longRequest()});if(version!==editorVersion||!alive(g))return;form.elements.title.value=info.title;form.elements.artist.value=info.artist;notice.textContent='Údaje načtené. Štítek si můžeš upravit.';}catch(error){if(version===editorVersion)notice.textContent=error.message;}finally{if(version===editorVersion)form.querySelector('fieldset').disabled=false;}};
-  form.onsubmit=async event=>{event.preventDefault();form.querySelector('fieldset').disabled=true;notice.textContent='Ukládám desku…';try{await api(track?'/gramophone/tracks/'+track.id:'/gramophone/tracks',{method:track?'PUT':'POST',body:JSON.stringify({url:form.elements.url.value,title:form.elements.title.value,artist:form.elements.artist.value}),...longRequest()});if(version!==editorVersion||!alive(g))return;dialog.close();await reload(g);status(track?'Štítek desky byl upraven.':'Nová deska je ve sbírce.');}catch(error){if(version===editorVersion)notice.textContent=error.message;}finally{if(version===editorVersion)form.querySelector('fieldset').disabled=false;}};
+ async function putAway(){
+  if(!selected||busy)return;const t=++action,track=selected;busy=true;audio.pause();status('Zvedám raménko a uklízím desku…');if(root)root.querySelector('.tonearm').classList.remove('is-lowered');await fly(track,false);if(t===action)stop();
  }
  async function open(container){
-  dispose();const g=generation,user=identity?.user.id,result=await api('/gramophone/tracks');if(g!==generation||identity?.user.id!==user||!container.isConnected)return;root=container;tracks=result.tracks;
-  root.innerHTML='<section class="gramophone-page"><div class="gramophone-intro"><div><span class="eyebrow">SOUKROMÝ NÁHLED · JEN PRO TEBE</span><h2>Nech kroniku rozeznít.</h2></div><button class="web-button primary gramophone-add" type="button">＋ Přidat skladbu</button></div><div class="gramophone-player"><div class="gramophone-stage"><img class="gramophone-art" src="'+mediaURL('gramophone.png',1600)+'" srcset="'+mediaSrcset('gramophone.png')+'" sizes="(max-width:700px) 95vw, 850px" alt="Starožitný mosazný gramofon na dřevěném podstavci" width="1536" height="1024"><div class="deck-record" hidden></div><span class="tonearm" aria-hidden="true"></span></div><section class="gramophone-controls" aria-label="Ovládání gramofonu"><h3 class="gramophone-now-title">Vyber si desku</h3><p class="gramophone-artist"></p><div class="gramophone-buttons"><button type="button" class="web-button primary gramophone-play" disabled>Přehrát</button><button type="button" class="web-button gramophone-stop" disabled>Vypnout a uklidit</button></div><div class="gramophone-seek"><span class="gramophone-current">0:00</span><input type="range" class="gramophone-position" min="0" max="1000" value="0" aria-label="Pozice ve skladbě" disabled><span class="gramophone-duration">0:00</span></div><label class="gramophone-volume">Hlasitost<input type="range" min="0" max="100" value="'+Math.round(volume*100)+'" aria-label="Hlasitost"></label><p class="gramophone-status" role="status" aria-live="polite">Klikni na desku. Gramofon začne hrát až na tvůj pokyn.</p></section></div><div class="section-heading"><h2>Tvoje sbírka</h2><span class="gramophone-count"></span></div><div class="record-shelf"></div><p class="web-muted">Odkaz Suno načte název a autora. Pro přehrávání k desce přilož vlastní MP3 nebo WAV do 8 MB. Při opuštění místnosti nebo skrytí záložky se přehrávání vypne. Tato zkušební sbírka zatím není přístupná ostatním hráčům.</p></section>';
-  audio=document.createElement('audio');audio.preload='metadata';audio.hidden=true;audio.className='gramophone-audio';audio.volume=volume;root.append(audio);
-  for(const event of ['loadedmetadata','durationchange','timeupdate','play','pause','playing','ended'])audio.addEventListener(event,()=>{if(!alive(g))return;update();if(event==='ended'&&placed&&!busy)putAway();});audio.onerror=()=>{if(alive(g)&&selected&&placed)status('Zvuk nebyl dostupný. Tlačítkem Přehrát můžeš obnovit zdroj.');};
-  root.querySelector('.gramophone-add').onclick=()=>edit();root.querySelector('.gramophone-play').onclick=playPause;root.querySelector('.gramophone-stop').onclick=putAway;root.querySelector('.gramophone-position').oninput=event=>{if(Number.isFinite(audio.duration)){audio.currentTime=Number(event.target.value)/1000*audio.duration;update();}};root.querySelector('.gramophone-volume input').oninput=event=>{volume=Number(event.target.value)/100;audio.volume=volume;};shelf();update();
+  detach();if(!authorized())throw Error('Pro poslech se přihlas přes Discord.');const v=viewVersion,user=identity.user.id;
+  const response=await fetch('/music-library.json',{cache:'no-store',signal:AbortSignal.timeout(10000)});if(!response.ok)throw Error('Hudební sbírku se nepodařilo načíst.');const library=await response.json();
+  if(v!==viewVersion||!authorized()||identity.user.id!==user||!container.isConnected)return;
+  tracks=Array.isArray(library.tracks)?library.tracks.filter(t=>/^[a-f0-9]{20}$/.test(t.id)&&/^\/music\/[a-f0-9]{20}\.[a-f0-9]{16}\.(mp3|wav|m4a|ogg)$/.test(t.url)&&typeof t.title==='string'):[];initAudio();root=container;
+  root.innerHTML='<section class="gramophone-page"><div class="gramophone-intro"><div><span class="eyebrow">HUDEBNÍ MÍSTNOST · NEW HORIZON</span><h2>Nech kroniku rozeznít.</h2></div></div><div class="gramophone-player"><div class="gramophone-stage"><img class="gramophone-art" src="'+mediaURL('gramophone.png',1600)+'" srcset="'+mediaSrcset('gramophone.png')+'" sizes="(max-width:700px) 95vw, 850px" alt="Starožitný mosazný gramofon na dřevěném podstavci" width="1536" height="1024"><div class="deck-record" hidden></div><span class="tonearm" aria-hidden="true"></span></div><section class="gramophone-controls" aria-label="Ovládání gramofonu"><h3 class="gramophone-now-title"></h3><p class="gramophone-artist"></p><div class="gramophone-buttons"><button type="button" class="web-button primary gramophone-play" disabled>Přehrát</button><button type="button" class="web-button gramophone-stop" disabled>Vypnout a uklidit</button></div><div class="gramophone-seek"><span class="gramophone-current">0:00</span><input type="range" class="gramophone-position" min="0" max="1000" value="0" aria-label="Pozice ve skladbě" disabled><span class="gramophone-duration">0:00</span></div><label class="gramophone-volume">Hlasitost<input type="range" min="0" max="100" value="'+Math.round(volume*100)+'" aria-label="Hlasitost"></label><p class="gramophone-status" role="status"></p></section></div><div class="section-heading"><h2>Naše sbírka</h2><span class="gramophone-count"></span></div><div class="record-shelf"></div><p class="web-muted">Hudba hraje dál i při čtení příběhů nebo po přepnutí záložky. Zastavíš ji tady nebo malým přehrávačem na pozadí.</p></section>';
+  root.querySelector('.gramophone-count').textContent=tracks.length+' '+(tracks.length===1?'deska':tracks.length>=2&&tracks.length<=4?'desky':'desek');
+  const shelf=root.querySelector('.record-shelf');if(!tracks.length)shelf.innerHTML='<p class="gramophone-empty">První desky už jsou na cestě.</p>';
+  for(const track of tracks){const card=document.createElement('article');card.className='record-card';card.dataset.id=track.id;card.innerHTML='<button type="button" class="record-pick" aria-label="Přehrát: '+escapeHTML(track.title)+'"><span class="record-token">'+label(track)+'</span><span class="record-title">'+escapeHTML(track.title)+'</span></button><p class="record-author">'+escapeHTML(track.artist||'New Horizon RP')+'</p>';card.querySelector('button').onclick=()=>select(track);shelf.append(card);}
+  root.querySelector('.gramophone-play').onclick=playPause;root.querySelector('.gramophone-stop').onclick=putAway;
+  root.querySelector('.gramophone-position').oninput=event=>{if(Number.isFinite(audio.duration)){audio.currentTime=Number(event.target.value)/1000*audio.duration;update();}};
+  root.querySelector('.gramophone-volume input').oninput=event=>{volume=Number(event.target.value)/100;audio.volume=volume;};update();
  }
- return{open,dispose};
+ document.addEventListener('visibilitychange',()=>{if(document.hidden)cancelFlights();update();});
+ return{open,detach,dispose,syncSession};
 })();

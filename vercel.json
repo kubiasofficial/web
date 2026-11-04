@@ -21,7 +21,16 @@
       ]
     },
     {
-      "source": "/site.9087b202fc6d.css",
+      "source": "/music-library.json",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=0, must-revalidate"
+        }
+      ]
+    },
+    {
+      "source": "/site.5a9ed6c9afb7.css",
       "headers": [
         {
           "key": "Cache-Control",
@@ -31,6 +40,15 @@
     },
     {
       "source": "/assets/optimized/:path*",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
+    },
+    {
+      "source": "/music/:path*",
       "headers": [
         {
           "key": "Cache-Control",
@@ -66,7 +84,7 @@
       ]
     },
     {
-      "source": "/app.2e16429d5175.js",
+      "source": "/app.c06fbaa10a27.js",
       "headers": [
         {
           "key": "Cache-Control",

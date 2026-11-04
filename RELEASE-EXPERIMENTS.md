@@ -1,5 +1,7 @@
 # Roční období a gramofon · soukromý náhled
 
+Historický záznam. Aktuální rozšíření pro všechny hráče, hudba ze složky a přehrávání na pozadí: [RELEASE-SHARED-GRAMOPHONE.md](RELEASE-SHARED-GRAMOPHONE.md).
+
 4. listopadu 2026. Připraveno lokálně k ručnímu nasazení; zatím pouze pro hlavního vlastníka, bez zapnutí pro hráče.
 
 - Sezónní laboratoř v administraci: jaro, léto, padající podzimní listí a interaktivní zimní sklo s rozmrzáním pod myší/dotykem. Síla efektu, automatická sezóna, obnovení a vypnutí.
