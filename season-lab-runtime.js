@@ -52,7 +52,7 @@ const SeasonLab=(()=>{
 // intercepts input. Only this browser's preference is saved, not other players'.
 const SeasonAtmosphere=(()=>{
  const modes=['auto','off','spring','summer','autumn','winter'];
- let host,canvas,ctx,ice,frame=0,lastFrame=0,holes=[],mode='auto',strength=45,season='off',reduced;
+ let host,canvas,ctx,ice,frame=0,lastFrame=0,holes=[],mode='auto',strength=45,season='off',reduced,paused=false;
  const current=()=>{const m=Number(new Intl.DateTimeFormat('en',{month:'numeric',timeZone:'Europe/Prague'}).format(new Date()));return m>=3&&m<=5?'spring':m>=6&&m<=8?'summer':m>=9&&m<=11?'autumn':'winter';};
  const noise=i=>{const n=Math.sin(i*83.71+9)*43758.54;return n-Math.floor(n);};
  function stop(){cancelAnimationFrame(frame);frame=0;}
@@ -63,7 +63,7 @@ const SeasonAtmosphere=(()=>{
  }
  function fit(){if(!host)return;const w=innerWidth,h=innerHeight;if(!w||!h)return;canvas.width=Math.round(Math.min(1200,w));canvas.height=Math.round(canvas.width*h/w);ice=document.createElement('canvas');ice.width=canvas.width;ice.height=canvas.height;frost();paint(performance.now());}
  function paint(t){
-  stop();if(!ctx||document.hidden)return;const w=canvas.width,h=canvas.height;ctx.clearRect(0,0,w,h);if(season==='off')return;
+  stop();if(!ctx||document.hidden||paused)return;const w=canvas.width,h=canvas.height;ctx.clearRect(0,0,w,h);if(season==='off')return;
   if(season==='winter'){
    ctx.drawImage(ice,0,0);holes=holes.filter(p=>t-p.t<14000);ctx.globalCompositeOperation='destination-out';
    for(const p of holes){const r=Math.min(w,h)*.18,a=Math.min(1,(14000-t+p.t)/6500),g=ctx.createRadialGradient(p.x*w,p.y*h,0,p.x*w,p.y*h,r);g.addColorStop(0,'rgba(0,0,0,'+a+')');g.addColorStop(.55,'rgba(0,0,0,'+a+')');g.addColorStop(1,'rgba(0,0,0,0)');ctx.fillStyle=g;ctx.fillRect(p.x*w-r,p.y*h-r,r*2,r*2);}ctx.globalCompositeOperation='source-over';
@@ -75,7 +75,7 @@ const SeasonAtmosphere=(()=>{
   }
   if(!reduced.matches&&(season!=='winter'||holes.length))schedule();
  }
- function schedule(){if(frame||document.hidden||season==='off')return;frame=requestAnimationFrame(t=>{frame=0;if(t-lastFrame<40){schedule();return;}lastFrame=t;paint(t);});}
+ function schedule(){if(frame||document.hidden||paused||season==='off')return;frame=requestAnimationFrame(t=>{frame=0;if(t-lastFrame<40){schedule();return;}lastFrame=t;paint(t);});}
  function apply(){if(!host)return;season=identity?.restricted?'off':mode==='auto'?current():mode;host.dataset.season=season;document.documentElement.dataset.season=season;holes=[];frost();paint(performance.now());}
  function configure(next,level){mode=modes.includes(next)?next:'auto';strength=Math.min(100,Math.max(10,Number(level)||45));try{localStorage.setItem('nh-season',JSON.stringify({mode,strength}));}catch{}apply();}
  function init(){
@@ -86,5 +86,6 @@ const SeasonAtmosphere=(()=>{
   document.addEventListener('visibilitychange',()=>document.hidden?stop():apply());reduced.addEventListener('change',()=>paint(performance.now()));fit();apply();
  }
  function syncSession(){const next=identity?.restricted?'off':mode==='auto'?current():mode;if(host&&season!==next)apply();}
- return{init,configure,syncSession,get mode(){return mode;},get strength(){return strength;}};
+ function suspend(value){if(paused===value)return;paused=value;if(paused){stop();if(ctx)ctx.clearRect(0,0,canvas.width,canvas.height);}else apply();}
+ return{init,configure,syncSession,suspend,get mode(){return mode;},get strength(){return strength;}};
 })();
