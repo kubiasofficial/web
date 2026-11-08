@@ -1,13 +1,50 @@
 {
-  "version": 1,
+  "version": 2,
   "tracks": [
+    {
+      "id": "c5fcece2c2ec00e3bd09",
+      "title": "❤️ TAM, KDE KONČÍ MŮJ STRACH",
+      "artist": "New Horizon RP",
+      "url": "/music/c5fcece2c2ec00e3bd09.b77bb87a2b3c7071.mp3",
+      "type": "audio/mpeg",
+      "bytes": 7281411,
+      "addedAt": "2026-11-08T15:06:28.496Z"
+    },
     {
       "id": "ea14909561b80bbf4611",
       "title": "🎄 ÚSTAV BEZ DOZORU – VÁNOCE NA HLAVU",
       "artist": "New Horizon RP",
       "url": "/music/ea14909561b80bbf4611.7272ed62282b2f1d.mp3",
       "type": "audio/mpeg",
-      "bytes": 7273481
+      "bytes": 7273481,
+      "addedAt": null
+    },
+    {
+      "id": "6fa7f632433ba64576c9",
+      "title": "🐦_⬛ TŘI STÍNY, JEDEN DOMOV",
+      "artist": "New Horizon RP",
+      "url": "/music/6fa7f632433ba64576c9.340c8673375157a2.mp3",
+      "type": "audio/mpeg",
+      "bytes": 8259779,
+      "addedAt": "2026-11-08T15:06:28.496Z"
+    },
+    {
+      "id": "6ac73b3d3f145b6f1a7a",
+      "title": "🩸 KREV NÁS NEZRADÍ",
+      "artist": "New Horizon RP",
+      "url": "/music/6ac73b3d3f145b6f1a7a.21b9c5b2dfc7465e.mp3",
+      "type": "audio/mpeg",
+      "bytes": 6825562,
+      "addedAt": "2026-11-08T15:06:28.496Z"
+    },
+    {
+      "id": "29aa855fb1cdebb727b1",
+      "title": "Annie Sky Raven",
+      "artist": "New Horizon RP",
+      "url": "/music/29aa855fb1cdebb727b1.3a75d1c45b9b3f05.mp3",
+      "type": "audio/mpeg",
+      "bytes": 4789474,
+      "addedAt": "2026-11-08T15:06:28.496Z"
     },
     {
       "id": "1d29c9c5a029c47ac4a7",
@@ -15,7 +52,8 @@
       "artist": "New Horizon RP",
       "url": "/music/1d29c9c5a029c47ac4a7.f3fa18fcd2e669ab.mp3",
       "type": "audio/mpeg",
-      "bytes": 7052233
+      "bytes": 7052233,
+      "addedAt": null
     },
     {
       "id": "1097dce02a85bbe535a1",
@@ -23,7 +61,8 @@
       "artist": "New Horizon RP",
       "url": "/music/1097dce02a85bbe535a1.b5e5a2906f3166c7.mp3",
       "type": "audio/mpeg",
-      "bytes": 6351428
+      "bytes": 6351428,
+      "addedAt": null
     },
     {
       "id": "ae5369994884ae6a1269",
@@ -31,7 +70,8 @@
       "artist": "New Horizon RP",
       "url": "/music/ae5369994884ae6a1269.3b09aff1f38d9c48.mp3",
       "type": "audio/mpeg",
-      "bytes": 6221651
+      "bytes": 6221651,
+      "addedAt": null
     },
     {
       "id": "86db0a07676220ba4d4e",
@@ -39,7 +79,8 @@
       "artist": "New Horizon RP",
       "url": "/music/86db0a07676220ba4d4e.3de7ac59916fd78f.mp3",
       "type": "audio/mpeg",
-      "bytes": 6020258
+      "bytes": 6020258,
+      "addedAt": null
     },
     {
       "id": "461c959221d23a6021dd",
@@ -47,7 +88,8 @@
       "artist": "New Horizon RP",
       "url": "/music/461c959221d23a6021dd.5450bb7419604965.mp3",
       "type": "audio/mpeg",
-      "bytes": 6609603
+      "bytes": 6609603,
+      "addedAt": null
     },
     {
       "id": "78815546f53e32a0f11e",
@@ -55,7 +97,8 @@
       "artist": "New Horizon RP",
       "url": "/music/78815546f53e32a0f11e.ff2fa342564ec725.mp3",
       "type": "audio/mpeg",
-      "bytes": 7333501
+      "bytes": 7333501,
+      "addedAt": null
     },
     {
       "id": "a18036890605a7af7a97",
@@ -63,7 +106,8 @@
       "artist": "New Horizon RP",
       "url": "/music/a18036890605a7af7a97.6d3f5d9c2ed883b7.mp3",
       "type": "audio/mpeg",
-      "bytes": 6744954
+      "bytes": 6744954,
+      "addedAt": null
     }
   ]
 }

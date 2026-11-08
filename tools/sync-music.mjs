@@ -9,6 +9,9 @@ export function syncMusic(source=path.resolve(web,'../pisnicky-gramofon'),dist=p
  // A Vercel checkout may contain only web/. Keep its already prepared library.
  if(!fs.existsSync(source)){console.log('Music source is absent; keeping the prepared library.');return null;}
  const out=path.resolve(dist,'music');fs.mkdirSync(out,{recursive:true});
+ const manifest=path.join(dist,'music-library.json');let previous=null;
+ if(fs.existsSync(manifest))previous=JSON.parse(fs.readFileSync(manifest,'utf8'));
+ const known=new Map((previous?.tracks||[]).map(t=>[t.id,t])),addedAt=new Date().toISOString();
  const tracks=[];const types={'.mp3':'audio/mpeg','.wav':'audio/wav','.m4a':'audio/mp4','.ogg':'audio/ogg'};
  for(const entry of fs.readdirSync(source,{withFileTypes:true}).sort((a,b)=>a.name.localeCompare(b.name,'cs'))){
   const ext=path.extname(entry.name).toLowerCase();if(!entry.isFile()||!types[ext])continue;
@@ -18,9 +21,11 @@ export function syncMusic(source=path.resolve(web,'../pisnicky-gramofon'),dist=p
   const id=digest(entry.name.normalize('NFC')).slice(0,20),hash=digest(bytes).slice(0,16),filename=id+'.'+hash+ext;
   const title=path.basename(entry.name,path.extname(entry.name)).replace(/\s*-\s*usesuno\.com$/i,'').trim()||entry.name;
   if(!fs.existsSync(path.join(out,filename))){fs.writeFileSync(path.join(out,filename+'.part'),bytes);fs.renameSync(path.join(out,filename+'.part'),path.join(out,filename));}
-  tracks.push({id,title,artist:'New Horizon RP',url:'/music/'+filename,type:types[ext],bytes:bytes.length});
+  // Adopt the old collection without marking every historical track as new.
+  const old=known.get(id),firstAdded=old?(old.addedAt||null):addedAt;
+  tracks.push({id,title,artist:'New Horizon RP',url:'/music/'+filename,type:types[ext],bytes:bytes.length,addedAt:firstAdded});
  }
- const result={version:1,tracks},json=JSON.stringify(result,null,2)+'\n',manifest=path.join(dist,'music-library.json');
+ const result={version:2,tracks},json=JSON.stringify(result,null,2)+'\n';
  if(!fs.existsSync(manifest)||fs.readFileSync(manifest,'utf8')!==json){fs.writeFileSync(manifest+'.part',json);fs.renameSync(manifest+'.part',manifest);}
  // Delete only our own obsolete content-addressed copies inside this output folder.
  const current=new Set(tracks.map(t=>path.basename(t.url)));
