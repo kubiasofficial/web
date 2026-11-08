@@ -1,7 +1,5 @@
 # New Horizon RP — sedm příběhů
 
-Herní saloon: [Noc v New Horizon](SALOON-CHANGELOG.md), hra pro 4–10 lidí s osmi ilustrovanými rolemi. Nasazení vyžaduje `../bot/saloon-migration.sql` a nový Worker podle `../bot/SALOON_SETUP.md`. Zadání a soubory obrázků: [SALOON-ARTWORK.md](SALOON-ARTWORK.md).
-
 Mobilní rozložení: [RELEASE-MOBILE-2.md](RELEASE-MOBILE-2.md). Samostatné portréty, čitelná galerie a mřížka postav, větší ovládání a upravené formuláře. Poslední responzivní vrstva je `dist/mobile.css`.
 
 Aktuální gramofon a sezóny: [RELEASE-SHARED-GRAMOPHONE.md](RELEASE-SHARED-GRAMOPHONE.md). Hudba z místní složky `../pisnicky-gramofon` se připraví přes `node tools/sync-music.mjs` a zveřejní pushem webu. Gramofon je pro všechny přihlášené hráče a hraje na pozadí; sezónní atmosféra je na celém webu. Tato aktualizace nevyžaduje nové SQL ani změnu Workeru.
