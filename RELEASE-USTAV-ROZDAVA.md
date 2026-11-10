@@ -61,3 +61,17 @@ https://web-mocha-seven-71.vercel.app/#games
 - Dříve uložená preference ud-music se již nečte a podkres se nespustí ani hráčům, kteří ho měli zapnutý.
 - Zůstává 14 krátkých herních zvuků s vlastním posuvníkem hlasitosti. Gramofon funguje samostatně jako dosud.
 - Stačí publikovat web, změna Workeru ani SQL není potřeba.
+
+## Druhá vizuální podoba balíčku a stolu
+
+- Pět nových samostatných ilustrací: Elijah zastavuje tah, Vincent obrací hru, Daniel podává dvě karty, Annie mění barvu a Nathaniel doručuje čtyři obálky.
+- Ilustrace vznikly vestavěným nástrojem image_gen s předlohami současných postav. Promptová sada je v `cards-art-prompts.json`; mapování optimalizovaných souborů v `cards-art.json`.
+- Hotové ilustrace jsou v `dist/assets/cards/`, pět WebP souborů o celkové velikosti přibližně 463 KiB. Texty a symboly jsou nadále vykreslené kódem, nikoli součástí obrázků.
+- Karty v desktopové ruce mají 150 × 224 px místo 112 × 165 px, detailnější výřezy portrétů, rámy, názvy a výrazné symboly speciálních účinků.
+- Ruka je na počítači rozložená do mírného vějíře; na telefonu zůstává rovná a posouvatelná. Vybraná karta vystoupí dopředu. U početné ruky se překryv upraví.
+- Stůl má kratší záhlaví, soupeře v oblouku a panel tahu vedle balíčků. Mobil zachovává přehled tahu nad balíčky.
+- Výběr a přejetí karty zobrazí její účinek nad rukou. Zahrání se nadále potvrzuje samostatným tlačítkem.
+- Speciální tahy krátce zobrazí příslušný účinek: +4 „NÁKLAD DORUČEN“, +2 „ZÁSILKA NAVÍC“, obrat, zastavení a nová barva. Dobrané karty letí k příjemci; obrat otočí šipku směru.
+- Efekty neblokují ovládání a respektují nastavení omezeného pohybu. Hudební podkres se nevrací.
+- Ověřeno přes skutečný prohlížeč → Worker → SQLite: sedm hráčů, vlastní ruce, výběr barvy, efekt +4, obnova stránky, poslední karta před/po zahrání, mobil/tablet a reduced motion.
+- Jde o změnu webu. Pro nasazení stačí push složky web, bez nové databázové migrace či změny Workeru.

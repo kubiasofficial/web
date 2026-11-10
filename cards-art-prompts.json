@@ -1,0 +1,32 @@
+{
+  "tool": "built-in image_gen",
+  "common_prompt": "Production illustration for one premium western character playing card for New Horizon RP. Vertical 2:3 artwork, cinematic painterly realism with rich tactile detail, dramatic face close-up and hands, warm antique gold rimlight against deep charcoal, strong composition readable at small size. Use the attached character image ONLY as an identity reference: preserve recognizable face, hair and clothes. Create a NEW dynamic bust portrait scene, not standing full body. Fill canvas with scene; do not draw any card border, symbols, numbers, lettering, text or UI; these will be added as crisp code. Keep the very top-left and bottom-right corners dark enough for overlaid symbols. Beautiful collectible-card illustration, expressive eyes, carefully drawn anatomically correct hands. ",
+  "use": "Five special-card illustrations; character files used only as identity references.",
+  "prompts": [
+    {
+      "key": "skip",
+      "file": "elijah",
+      "prompt": "Elijah, young dark-haired stubbled frontier man in worn black cowboy hat and dark coat. Foreshortened open hand raised toward camera in an unmistakable STOP gesture, five fingers clearly drawn, face just behind the hand looking stern directly at viewer. Dim dusty saloon doorway. Warm amber accents, no sheriff star badge."
+    },
+    {
+      "key": "reverse",
+      "file": "vincent",
+      "prompt": "Vincent, charismatic black-hatted man with mustache and goatee, rings, ornate black vest and tie. At a saloon table, one hand dramatically sweeps a fan of unmarked ivory playing cards toward the opposite side of the table, the other hand gestures back, sly grin. Dynamic curved composition strongly suggesting changing direction, subtle blue rimlight and tiny engraved dragon motif on cuff."
+    },
+    {
+      "key": "two",
+      "file": "daniel",
+      "prompt": "Daniel, rugged wavy brown-haired man with short beard, no hat, dark worn coat. Half-smiling directly at camera, extending exactly TWO clearly separated blank-backed ornate playing cards toward viewer in a gloved hand. Horse stable softly blurred behind. Rich copper and amber light. His face large and both cards clearly readable as two physical cards, not a whole deck."
+    },
+    {
+      "key": "wild",
+      "file": "annie-v2",
+      "prompt": "Annie Sky, adult young woman with bright blue eyes, freckles, long single black braid adorned with tiny blue flowers, black cowboy hat and blue scarf. Clever confident smile, holding a fanned hand of exactly four plain cards in red, cobalt blue, emerald green, amber gold, no lettering or marks. Dramatic four-color reflected light on fingers, black cat sitting subtly behind shoulder. Face dominates upper half and four color fan dominates lower half."
+    },
+    {
+      "key": "four",
+      "file": "nathaniel",
+      "prompt": "Nathaniel, mature rugged dark-hatted bearded man wearing long black coat and vest, pocket watch chain. Intense knowing stare at viewer. He is leaning across a railroad office desk laying out exactly FOUR cream sealed telegram envelopes with red wax seals in an obvious fan toward viewer. Envelopes are individually distinct, not stacked. Black raven nearby, blurred steam train through window, deep crimson and gold light. Face prominent in upper half and four sealed envelopes prominent foreground."
+    }
+  ]
+}
