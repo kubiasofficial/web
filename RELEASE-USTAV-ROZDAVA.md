@@ -1,5 +1,17 @@
 # Připravená aktualizace: Ústav rozdává
 
+## Řeči u stolu — chat, reakce a odveta
+
+- Soukromý chat pro přisednuté hráče, Discord profilky a jména, čas zpráv a počet nepřečtených. Posledních 100 zpráv zůstává při obnovení stránky i odvetě. Rozepsaný text se při soupeřově tahu nemaže.
+- Pět emoji a tři ústavní hlášky v bublinách u hráčů. Krátká životnost, omezení spamování a možnost reakce skrýt.
+- Přehled přítomnosti otevřené herní stránky a obnovení spojení. Nejde o Discord online stav.
+- Zvětšené vlastní karty včetně vysvětlení účinku a procházení ruky; tlačítko, pravý klik nebo podržení prstu.
+- Výsledky partie se skutečnými počty zahraných/dobraných/trestných karet a nachytání, délkou partie a dvěma přezdívkami podle výsledků.
+- Odveta až po souhlasu všech zbývajících hráčů; zakladatel následně připraví stůl a rozdá.
+- Mobilní chat jako samostatné okno, na počítači vedle stolu. Chat má vlastní revizi a neovlivňuje herní tahy. Historie se nepřenáší znovu při každé nezměněné kontrole.
+- Ověřeno 116 serverovými testy a skutečným prohlížečem přes Worker a SQLite: sedm hráčů, posílání zpráv, bezpečné vykreslení textu, reakce, přítomnost, náhled, výsledky, hlasování, historie a telefon.
+- Nasazení této aktualizace: `bot/cards-social-migration.sql` do existující D1, sestavený `bot/worker.js` → Deploy a push složky web. Žádné nové proměnné ani binding.
+
 Stav: sestaveno lokálně pro zkušební provoz. Produkční nasazení vyžaduje databázovou migraci, aktualizaci Workeru a publikaci webu podle `../bot/CARDS_SETUP.md`.
 
 ## Změny pro hráče
