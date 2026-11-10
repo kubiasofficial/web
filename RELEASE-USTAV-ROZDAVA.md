@@ -10,7 +10,7 @@ Stav: sestaveno lokálně pro zkušební provoz. Produkční nasazení vyžaduje
 - Westernový stůl, karty s čísly, čtyřmi barvami a odlišnými symboly, animace zahrání/dobírání.
 - Viditelný aktuální tah, směr hry, barva a serverový časový limit.
 - Poslední karta, nachytání zapomenutého hlášení, speciální karty a názorná pravidla.
-- 14 zvukových efektů, volitelný jednoduchý hudební podkres, oddělená hlasitost.
+- 14 krátkých zvukových efektů s nastavitelnou hlasitostí.
 - Responzivní ovládání ruky, potvrzení vybrané karty, omezené animace na přání systému.
 - Návrat do rozehrané partie po obnovení stránky. Herní data nezpřístupňují soukromé lore ani cizí ruce.
 
@@ -30,7 +30,7 @@ Na web přichází nová sekce **Hry** a v ní naše vlastní karetní hra **Ús
 
 🔄 Obraty, vynechání, změny barvy, +2 a +4. Pravidla najdete pod **Jak hrát**. Nezapomeňte před předposlední kartou zahlásit **Poslední, pacienti!** Jinak vás může někdo napráskat.
 
-🔊 Zvuky a hudební podkres si nastavíte zvlášť. Na telefonu vyberete kartu a její zahrání potvrdíte. Obnovení stránky vás vrátí ke stolu.
+🔊 Hlasitost herních zvuků si nastavíte podle sebe. Na telefonu vyberete kartu a její zahrání potvrdíte. Obnovení stránky vás vrátí ke stolu.
 
 **Ústav rozdává. Následky si vyřešte mezi sebou.** 😂
 
@@ -54,3 +54,10 @@ https://web-mocha-seven-71.vercel.app/#games
 - Obnovení stejného tahu nesmaže připravené hlášení ani vybranou kartu.
 - Ověřeno skutečným klikáním v prohlížeči pro hlášení před zahráním i po zahrání a automatickými testy pravidel.
 - Nasazení vyžaduje aktualizovaný `bot/worker.js` a push složky web. Nové SQL není potřeba.
+
+## Odstranění hudebního podkresu
+
+- Na základě zpětné vazby byl odstraněn syntetický opakující se podkres včetně přepínače, samostatného posuvníku a automatického spouštění při interakci.
+- Dříve uložená preference ud-music se již nečte a podkres se nespustí ani hráčům, kteří ho měli zapnutý.
+- Zůstává 14 krátkých herních zvuků s vlastním posuvníkem hlasitosti. Gramofon funguje samostatně jako dosud.
+- Stačí publikovat web, změna Workeru ani SQL není potřeba.
