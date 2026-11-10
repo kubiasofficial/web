@@ -312,6 +312,7 @@ const SeasonLab=(()=>{
 // intercepts input. Only this browser's preference is saved, not other players'.
 const SeasonAtmosphere=(()=>{
  const modes=['auto','off','spring','summer','autumn','winter'];
+ let suspended=false;
  let host,canvas,ctx,ice,frame=0,lastFrame=0,holes=[],mode='auto',strength=45,season='off',reduced;
  const current=()=>{const m=Number(new Intl.DateTimeFormat('en',{month:'numeric',timeZone:'Europe/Prague'}).format(new Date()));return m>=3&&m<=5?'spring':m>=6&&m<=8?'summer':m>=9&&m<=11?'autumn':'winter';};
  const noise=i=>{const n=Math.sin(i*83.71+9)*43758.54;return n-Math.floor(n);};
@@ -336,7 +337,7 @@ const SeasonAtmosphere=(()=>{
   if(!reduced.matches&&(season!=='winter'||holes.length))schedule();
  }
  function schedule(){if(frame||document.hidden||season==='off')return;frame=requestAnimationFrame(t=>{frame=0;if(t-lastFrame<40){schedule();return;}lastFrame=t;paint(t);});}
- function apply(){if(!host)return;season=identity?.restricted?'off':mode==='auto'?current():mode;host.dataset.season=season;document.documentElement.dataset.season=season;holes=[];frost();paint(performance.now());}
+ function apply(){if(!host)return;season=(suspended||identity?.restricted)?'off':mode==='auto'?current():mode;host.dataset.season=season;document.documentElement.dataset.season=season;holes=[];frost();paint(performance.now());}
  function configure(next,level){mode=modes.includes(next)?next:'auto';strength=Math.min(100,Math.max(10,Number(level)||45));try{localStorage.setItem('nh-season',JSON.stringify({mode,strength}));}catch{}apply();}
  function init(){
   if(host)return;try{const saved=JSON.parse(localStorage.getItem('nh-season'));if(saved&&modes.includes(saved.mode)){mode=saved.mode;strength=Math.min(100,Math.max(10,Number(saved.strength)||45));}}catch{}
@@ -345,8 +346,8 @@ const SeasonAtmosphere=(()=>{
   window.addEventListener('pointermove',melt,{passive:true});window.addEventListener('pointerdown',melt,{passive:true});window.addEventListener('resize',fit,{passive:true});
   document.addEventListener('visibilitychange',()=>document.hidden?stop():apply());reduced.addEventListener('change',()=>paint(performance.now()));fit();apply();
  }
- function syncSession(){const next=identity?.restricted?'off':mode==='auto'?current():mode;if(host&&season!==next)apply();}
- return{init,configure,syncSession,get mode(){return mode;},get strength(){return strength;}};
+ function syncSession(){const next=(suspended||identity?.restricted)?'off':mode==='auto'?current():mode;if(host&&season!==next)apply();}
+ return{init,configure,syncSession,suspend(value){suspended=!!value;apply();},get mode(){return mode;},get strength(){return strength;}};
 })();
 
 // Shared voting and discussions. Playback remains owned by Gramophone.
@@ -652,6 +653,85 @@ const Atlas=(()=>{
  return {open,dispose,dirty,get pendingDraft(){return !!savedDraft;}};
 })();
 
+// Ústav rozdává: private hands, server-authoritative turns, no background polling.
+const Cards=(()=>{
+ let root,state=null,timer=null,clock=null,version=0,busy=false,offset=0,pendingCard=null,selected=null,announce=false,controller=null,lastSeq=null,errors=0;
+ const names={red:'Červená',blue:'Modrá',amber:'Zlatá',green:'Zelená',wild:'Divoká'},symbols={red:'◆',blue:'●',amber:'✦',green:'♣',wild:'✧'},labels={skip:'STŮJ!',reverse:'OBRAT',two:'+2',wild:'BARVA',four:'+4'},portraits={scarlett:'annie-v2.png'};
+ let musicVolume=.18;try{musicVolume=Number(localStorage.getItem('ud-music-volume')??.18);if(!Number.isFinite(musicVolume))musicVolume=.18;musicVolume=Math.max(0,Math.min(1,musicVolume));}catch{}
+ let volume=.35,music=false,audioContext=null,musicTimer=null;
+ try{volume=Number(localStorage.getItem('ud-volume')??.35);if(!Number.isFinite(volume))volume=.35;volume=Math.max(0,Math.min(1,volume));music=localStorage.getItem('ud-music')==='true';}catch{}
+ function sound(kind){if(!volume||document.hidden)return;const src='sounds/cards/'+({deal:'deal',join:'tap',ready:'tap',draw:'draw',two:'two',four:'four',reverse:'reverse',skip:'skip',wild:'color',win:'win',last:'bell',catch:'catch',turn:'turn',tick:'tick'}[kind]||'play')+'.wav';const a=new Audio(src);a.volume=volume;a.play().catch(()=>{});}
+ function musicStop(){clearInterval(musicTimer);musicTimer=null;if(audioContext){audioContext.close().catch(()=>{});audioContext=null;}}
+ function musicStart(){musicStop();if(!music||!root||document.hidden)return;try{audioContext=new(window.AudioContext||window.webkitAudioContext)();let index=0;const play=()=>{if(!audioContext)return;const t=audioContext.currentTime;for(const [n,f]of [110,164.81,220,146.83,196,164.81,123.47,146.83].entries()){const o=audioContext.createOscillator(),g=audioContext.createGain();o.type='triangle';o.frequency.value=f*(index%2?1:1);g.gain.setValueAtTime(0,t+n*.5);g.gain.linearRampToValueAtTime(.07*musicVolume,t+n*.5+.02);g.gain.exponentialRampToValueAtTime(.0001,t+n*.5+.45);o.connect(g).connect(audioContext.destination);o.start(t+n*.5);o.stop(t+n*.5+.5);}index++;};play();musicTimer=setInterval(play,4000);}catch{musicStop();}}
+ const esc=x=>escapeHTML(x),me=()=>identity?.user.id;
+ const flights=new Set();
+ function stop(){for(const flight of flights){flight.animation.cancel();flight.element.remove();}flights.clear();SeasonAtmosphere.suspend(false);version++;clearTimeout(timer);clearInterval(clock);timer=clock=null;controller?.abort();controller=null;root?.querySelectorAll('dialog').forEach(d=>d.remove());root=null;state=null;pendingCard=null;selected=null;announce=false;busy=false;lastSeq=null;musicStop();}
+ function status(msg){const e=root?.querySelector('.cards-status');if(e)e.textContent=msg;}
+ function button(label,fn,cls=''){const b=document.createElement('button');b.type='button';b.className='web-button '+cls;b.textContent=label;b.onclick=fn;return b;}
+ function frame(){clock=setInterval(tick,250);root.innerHTML='<div class="cards-toolbar"><a href="#games">← Hry</a><span class="cards-preview">ZKUŠEBNÍ STŮL · 2–7 HRÁČŮ</span><button type="button" data-rules>Jak hrát</button><details class="cards-settings"><summary>Zvuk</summary><div><label>Zvuky <input aria-label="Hlasitost herních zvuků" type="range" min="0" max="100" value="'+Math.round(volume*100)+'"></label><label><input type="checkbox" data-music '+(music?'checked':'')+'> Hudební podkres</label><label>Hudba <input data-music-volume aria-label="Hlasitost hudby" type="range" min="0" max="100" value="'+Math.round(musicVolume*100)+'"></label></div></details></div><p class="cards-status" role="status" aria-live="polite"></p><div class="cards-view"></div>';
+ root.querySelector('[data-music-volume]').oninput=e=>{musicVolume=+e.target.value/100;try{localStorage.setItem('ud-music-volume',musicVolume);}catch{}if(music)musicStart();};root.querySelector('[data-rules]').onclick=rules;root.querySelector('input[type=range]').oninput=e=>{volume=+e.target.value/100;try{localStorage.setItem('ud-volume',volume);}catch{}if(music)musicStart();};root.querySelector('[data-music]').onchange=e=>{music=e.target.checked;try{localStorage.setItem('ud-music',music);}catch{}if(music){status('Hudební podkres je zapnutý. Pokud hraje gramofon, můžeš ho samostatně pozastavit.');musicStart();}else musicStop();};
+ }
+ function rules(){const d=document.createElement('dialog');d.className='cards-dialog';d.innerHTML='<button type="button" class="dialog-close" aria-label="Zavřít pravidla">×</button><span class="eyebrow">ÚSTAV ROZDÁVÁ</span><h2>Jak přežít léčbu kartami</h2><p>2–7 hráčů. Každý dostane 7 karet. Vyhrává první, kdo nemá žádnou. Karty soupeřů zůstávají skryté. Mluvte spolu přes Discord.</p><h3>Tvůj tah</h3><p>Zahraj stejnou barvu, číslo nebo symbol jako na stole. Divoká karta změní barvu. Můžeš místo hraní dobrat jednu kartu; pokud ji lze zahrát, rozhodni se mezi jejím zahráním a koncem tahu. Ostatní karty po dobrání už zahrát nelze.</p><ul><li><b>Stůj!</b> Další hráč vynechá.</li><li><b>Obrat</b> Otočí směr. Ve dvou hráčích vynechá soupeře.</li><li><b>+2 / +4</b> Další dobere a vynechá. Tresty se neskládají.</li><li><b>+4</b> Jen když nemáš aktuální barvu. Kontroluje server.</li><li><b>Změna barvy</b> Zvolíš jednu ze čtyř barev.</li></ul><h3>Poslední, pacienti!</h3><p>Před zahráním předposlední karty zaškrtni hlášení. Když zapomeneš, někdo jiný tě může nachytat tlačítkem Napráskat do dalšího zahrání, dobrání nebo vypršení tahu. Dobereš dvě.</p><h3>Čas a návrat</h3><p>30 nebo 60 sekund na tah. Při vypršení dobereš jednu a tah končí; po vlastním dobrání jen končí. Obnovením stránky se vrátíš. Přechod jinam tě ze stolu neodhlásí, ale čas běží dál. Tlačítko Opustit stůl tě vyřadí. Při jediném zbývajícím hráči partie skončí.</p><p>Zakladatel spouští hru i odvetu. V čekárně musí být všichni připravení. Stůl automaticky vyprší po 24 hodinách. Bez sázek, žetonů a placených výhod.</p>';root.append(d);d.querySelector('button').onclick=()=>d.close();d.onclose=()=>d.remove();d.showModal();}
+ async function call(path,options={}){return api('/cards'+path,options);}
+ async function open(host){stop();root=host;root.classList.add('cards-root');SeasonAtmosphere.suspend(true);frame();const v=version;const match=/^#games\/ustav\/(UD-[A-Z2-9]{8})$/.exec(location.hash);
+ if(match){await load(match[1],v,true);return;}
+ root.querySelector('.cards-view').innerHTML='<section class="cards-landing"><div><span class="eyebrow">NOVÁ HRA ÚSTAVU</span><h2>Ústav<br><em>rozdává.</em></h2><p>Sedm postav. Jeden stůl.<br>Léčba dobráním.</p><div class="cards-portrait-line">'+CARD_CAST.map(k=>'<img alt="'+esc(catalog[k].name)+'" src="'+mediaURL('icon-'+k+'.png',320)+'">').join('')+'</div><p class="cards-access">Soukromé stoly pro přátele. Tvůj nick a profilku převezmeme z Discordu.</p></div><div class="cards-entry"><h3>Přisedneš?</h3><div class="cards-resume"></div><form class="cards-join"><label>Kód stolu<input name="code" placeholder="UD-XXXXXXXX" maxlength="100" required autocomplete="off"></label><button class="web-button primary">Připojit se</button></form><form class="cards-create" hidden><h3>Založit nový stůl</h3><label>Název<input name="name" value="Ústav má službu" required maxlength="60"></label><div class="cards-form-row"><label>Místa<select name="capacity">'+[2,3,4,5,6,7].map(n=>'<option '+(n===7?'selected':'')+'>'+n+'</option>').join('')+'</select></label><label>Čas na tah<select name="seconds"><option value="60">60 sekund</option><option value="30">30 sekund</option></select></label></div><label><input name="uncensored" type="checkbox"> Ústav bez filtru · ostřejší hlášky</label><button class="web-button primary">Vytvořit stůl</button></form></div></section>';
+ const join=root.querySelector('.cards-join');join.onsubmit=async e=>{e.preventDefault();const code=join.elements.code.value.trim().toUpperCase().match(/UD-[A-Z2-9]{8}/)?.[0];if(!code){status('Kód má podobu UD-XXXXXXXX. Můžeš vložit i celou pozvánku.');return;}location.hash='#games/ustav/'+code;};
+ const create=root.querySelector('.cards-create');create.onsubmit=async e=>{e.preventDefault();if(busy)return;busy=true;create.querySelector('button').disabled=true;try{const s=await call('/rooms',{method:'POST',body:JSON.stringify({name:create.elements.name.value,seconds:+create.elements.seconds.value,capacity:+create.elements.capacity.value,uncensored:create.elements.uncensored.checked})});if(version===v)location.hash='#games/ustav/'+s.code;}catch(error){if(v===version){status(error.message);try{const c=await call('/current');if(c.code){const a=document.createElement('a');a.href='#games/ustav/'+c.code;a.textContent='Vrátit se k vytvořenému stolu';root.querySelector('.cards-resume').replaceChildren(a);}}catch{}}}finally{if(v===version){busy=false;create.querySelector('button').disabled=false;}}};
+ try{const current=await call('/current');if(v!==version)return;create.hidden=!current.canCreate;if(current.code){const a=document.createElement('a');a.href='#games/ustav/'+current.code;a.className='web-button';a.textContent='Pokračovat u mého stolu ↗';root.querySelector('.cards-resume').append(a);}if(!current.canCreate)status('Zkušební stoly zakládá kubiasofficial. Vyžádej si pozvánku a můžeš hrát také.');}catch(e){if(v===version)status(e.message);}
+ }
+ const CARD_CAST=['daniel','nathaniel','vincent','elijah','katie','scarlett','sophie'];
+ async function load(code,v=version,initial=false){if(v!==version||!root||document.hidden)return;try{const s=await call('/rooms/'+code);if(v!==version)return;accept(s);errors=0;}catch(e){if(v!==version)return;if(e.status===403&&initial){root.querySelector('.cards-view').innerHTML='<section class="cards-invite"><span class="eyebrow">MÁŠ POZVÁNKU</span><h2>U stolu je místo i pro tebe.</h2><p>Stůl '+esc(code)+'. Přisedni a potvrď připravenost.</p></section>';root.querySelector('.cards-invite').append(button('Přisednout',()=>join(code)));return;}errors++;status(e.message+' '+(state?'Spojení zkusím obnovit.':''));if(e.status===401||e.status===403||e.status===404)return;}schedule(code,v);}
+ async function join(code){if(busy)return;busy=true;const v=version;try{const s=await call('/rooms/'+code+'/join',{method:'POST',body:JSON.stringify({requestId:crypto.randomUUID()})});if(v===version){busy=false;accept(s);schedule(code,v);}}catch(e){if(v===version)status(e.message);}finally{if(v===version)busy=false;}}
+ function schedule(code,v){clearTimeout(timer);if(root&&!document.hidden)timer=setTimeout(()=>load(code,v),errors?Math.min(15000,3000*errors):state?.status==='playing'?1800:4000);}
+ function accept(s){if(state?.code===s.code&&s.revision<state.revision)return;if(s.viewer!==me()){refreshSession(true);return;}offset=s.serverTime*1000-Date.now();const changed=state?.revision!==s.revision||state?.code!==s.code;const prior=state;state=s;if(changed){root.querySelector('.cards-colors')?.close();if(prior&&s.event?.seq!==lastSeq){sound(s.event?.kind);if(s.turn===me()&&s.turn!==prior.turn&&s.status==='playing')sound('turn');}lastSeq=s.event?.seq;selected=null;pendingCard=null;announce=false;render(prior);}tick();}
+ async function act(action,extra={}){if(busy||!state)return;const v=version,code=state.code;busy=true;const requestId=crypto.randomUUID(),payload={action,revision:state.revision,requestId,...extra};root.querySelectorAll('[data-action],.ud-hand button').forEach(b=>b.disabled=true);try{const s=await call('/rooms/'+code+'/action',{method:'POST',body:JSON.stringify(payload)});if(v!==version)return;if(s.left){location.hash='#games';return;}status('');busy=false;accept(s);}catch(e){if(v!==version)return;status(e.message);busy=false;await load(code,v);if(v===version&&state)render();}finally{if(v===version)busy=false;}}
+ function card(c,interactive=false){const b=document.createElement(interactive?'button':'div');if(interactive)b.type='button';b.className='ud-card ud-'+c.color;b.dataset.card=c.id;const label=({skip:'⊘',reverse:'↶',wild:'✧'}[c.value]||labels[c.value]||c.value);b.setAttribute('aria-label',names[c.color]+' · '+(labels[c.value]||c.value)+' · '+(catalog[c.person]?.name||''));const file=portraits[c.person]||c.person+'.png';b.innerHTML='<span class="ud-corner">'+esc(label)+'<small>'+symbols[c.color]+'</small></span><img draggable="false" alt="" src="'+mediaURL(file,320)+'"><span class="ud-card-name">'+esc(catalog[c.person]?.name?.split(' ').at(-1)||c.person)+'</span><span class="ud-corner ud-bottom">'+esc(label)+'<small>'+symbols[c.color]+'</small></span>';return b;}
+ function render(prior){if(!root||!state)return;const s=state,my=s.players.find(p=>p.id===me()),isTurn=s.turn===me(),opponents=s.players.filter(p=>p.id!==me());
+ const view=root.querySelector('.cards-view');view.innerHTML='<div class="cards-room-bar"><div><span class="eyebrow">SOUKROMÝ STŮL · KOLO '+s.round+'</span><h2>'+esc(s.name)+'</h2><span class="cards-room-code">'+esc(s.code)+'</span></div><div class="cards-room-actions"></div></div><div class="cards-table"><div class="cards-opponents"></div><div class="cards-center"></div><p class="cards-event" role="status" aria-live="polite">'+esc(s.event?.text||'Připravte se. Ústav čeká.')+'</p><div class="cards-own"></div></div><details class="cards-log"><summary>Průběh partie</summary><ol>'+s.log.map(t=>'<li>'+esc(t)+'</li>').join('')+'</ol></details>';
+ const actions=view.querySelector('.cards-room-actions');actions.append(button('Kopírovat pozvánku',async()=>{const link=location.origin+location.pathname+'#games/ustav/'+s.code;try{await navigator.clipboard.writeText(link);status('Pozvánka zkopírována.');}catch{status('Pozvánka: '+link);}}),button('Opustit stůl',async()=>{if(await PortalPolish.confirm('Opustit herní stůl?','Ve hře tě vyřadíme. Přechod do jiné části webu tě pouze dočasně vzdálí.','Opustit stůl'))act('leave');}));
+ const opp=view.querySelector('.cards-opponents');for(const p of opponents){const e=document.createElement('div');e.dataset.player=p.id;e.className='cards-player'+(s.turn===p.id?' is-turn':'')+(p.left?' has-left':'');e.innerHTML='<img alt="" src="'+esc(p.avatar||mediaURL('icon-'+p.person+'.png',320))+'"><strong>'+esc(p.name)+'</strong><span>'+(p.left?'Odešel':s.status==='lobby'?(p.ready?'✓ Připraven':'Čeká…'):p.count+' karet')+'</span><div class="ud-mini-backs" aria-hidden="true">▥ ▥ ▥</div>';opp.append(e);}
+ const center=view.querySelector('.cards-center'),own=view.querySelector('.cards-own');
+ if(s.status==='lobby'){
+  center.innerHTML='<div class="cards-lobby-mark">✦</div><h3>Ústav má službu.</h3><p>'+s.players.length+' / '+s.capacity+' hráčů · '+s.seconds+' s na tah<br>'+(s.uncensored?'Ústav bez filtru':'Decentní hlášky')+'</p><p>Všichni potvrďte připravenost.<br>Domluva probíhá přes Discord.</p>';
+  own.innerHTML='<strong>'+esc(my.name)+'</strong>';own.append(button(my.ready?'✓ Připraven · zrušit':'Jsem připraven',()=>act('ready'),'primary'));
+  if(s.host===me()){const b=button('Rozdat karty',()=>{musicStart();act('start');},'primary');b.disabled=s.players.length<2||!s.players.every(p=>p.ready)||busy;own.append(b);}
+ }else if(s.status==='finished'){
+  const winner=s.players.find(p=>p.id===s.winner);center.innerHTML='<div class="cards-victory"><span>✦</span><span class="eyebrow">ÚSTAV MÁ VÍTĚZE</span><h3>'+esc(winner?.name||'Partie skončila')+'</h3><p>Zbytek ústavu může dál míchat.</p></div>';
+  if(s.host===me())own.append(button('Odveta · zpět do čekárny',()=>act('rematch'),'primary'));
+ }else{
+  const turn=s.players.find(p=>p.id===s.turn);center.innerHTML='<p class="cards-turn-label">'+(isTurn?'Jsi na tahu':('Na tahu: '+esc(turn?.name)))+' <span class="cards-clock" role="timer"></span></p><div class="cards-piles"><button type="button" class="ud-back" data-action="draw" aria-label="Dobrat jednu kartu"><span>ÚSTAV<br><b>ROZDÁVÁ</b><small>✦ NEW HORIZON ✦</small></span></button><div class="cards-discard"></div></div><div class="cards-color ud-'+s.color+'">'+symbols[s.color]+' '+names[s.color]+' <span aria-label="Směr hraní">'+(s.direction===1?'↻':'↺')+'</span></div>';
+  const top=card(s.top);if(prior?.top?.id!==s.top.id&&prior)top.classList.add('ud-play-flight');center.querySelector('.cards-discard').append(top);center.querySelector('[data-action=draw]').disabled=!isTurn||!!s.drawn||busy;center.querySelector('[data-action=draw]').onclick=()=>act('draw');
+  own.innerHTML='<div class="cards-own-heading"><strong>'+esc(my.name)+' · '+s.hand.length+' karet</strong><span>'+(isTurn?'Vyber kartu nebo dober.':'Čekáš na svůj tah.')+'</span></div><div class="ud-hand" aria-label="Tvoje karty"></div><div class="cards-hand-actions"></div>';
+  const hand=own.querySelector('.ud-hand');for(const c of s.hand){const b=card(c,true),playable=s.playable.includes(c.id);b.classList.toggle('is-playable',playable);b.disabled=!playable||busy;b.onclick=()=>{selected=c.id;hand.querySelectorAll('button').forEach(x=>x.classList.toggle('is-selected',x.dataset.card===c.id));const play=own.querySelector('[data-play]');play.disabled=false;play.textContent='Zahrát '+(labels[c.value]||c.value);sound('tap');};if(prior&&!prior.hand.some(x=>x.id===c.id))b.classList.add('ud-draw-flight');if(!prior||prior.status==='lobby'){b.classList.add('ud-draw-flight');b.style.animationDelay=(hand.children.length*.035)+'s';}hand.append(b);}
+  const controls=own.querySelector('.cards-hand-actions');const label=document.createElement('label');label.className='cards-last';label.innerHTML='<input type="checkbox" '+(announce?'checked':'')+'> Poslední, pacienti!';label.querySelector('input').disabled=!isTurn||s.hand.length!==2;label.querySelector('input').onchange=e=>announce=e.target.checked;controls.append(label);
+  const play=button('Vyber kartu',()=>{const c=s.hand.find(c=>c.id===selected);if(!c)return;if(c.color==='wild')chooseColor(c);else act('play',{cardId:c.id,announce});},'primary');play.dataset.play='';play.disabled=true;controls.append(play);
+  if(s.drawn&&isTurn)controls.append(button('Konec tahu',()=>act('pass')));
+  if(s.catchTarget&&s.catchTarget!==me()){const b=button('Napráskat! +2',()=>act('catch'),'cards-catch');controls.append(b);}
+ }
+ if(prior)requestAnimationFrame(()=>animateTurn(prior,s));tick();
+ }
+
+ function fly(from,to,face=false,delay=0){
+  if(!from||!to||!root||matchMedia('(prefers-reduced-motion: reduce)').matches)return;
+  const a=from.getBoundingClientRect(),b=to.getBoundingClientRect();if(!a.width||!b.width)return;
+  const element=face?card(state.top):document.createElement('div');if(!face){element.className='ud-back';element.innerHTML='<span>ÚSTAV<br>ROZDÁVÁ</span>';}
+  element.setAttribute('aria-hidden','true');Object.assign(element.style,{position:'fixed',left:'0',top:'0',width:'65px',height:'95px',zIndex:'95',pointerEvents:'none'});document.body.append(element);
+  const animation=element.animate([{transform:'translate('+(a.x+a.width/2-32)+'px,'+(a.y+a.height/2-47)+'px) rotate(-12deg)',opacity:.9},{transform:'translate('+(b.x+b.width/2-32)+'px,'+(b.y+b.height/2-47)+'px) rotate(8deg)',opacity:0}],{duration:360,delay,easing:'ease-in-out',fill:'both'}),item={animation,element};flights.add(item);animation.finished.catch(()=>{}).finally(()=>{element.remove();flights.delete(item);});
+ }
+ function animateTurn(prior,next){
+  if(!root||state!==next||document.hidden)return;
+  const deck=root.querySelector('.ud-back'),discard=root.querySelector('.cards-discard');
+  for(const p of next.players){if(p.id===me()||p.left)continue;const old=prior.players.find(x=>x.id===p.id),target=root.querySelector('[data-player="'+p.id+'"]');const count=Math.min(4,Math.max(0,p.count-(old?.count||0)));for(let i=0;i<count;i++)fly(deck,target,false,i*65);}
+  if(prior.status==='playing'&&prior.top?.id!==next.top?.id&&prior.turn!==me())fly(root.querySelector('[data-player="'+prior.turn+'"]'),discard,true);
+ }
+ function chooseColor(c){if(pendingCard)return;pendingCard=c.id;const d=document.createElement('dialog');d.className='cards-dialog cards-colors';d.innerHTML='<h2>Vyber barvu</h2><div></div>';root.append(d);for(const color of Object.keys(names).filter(c=>c!=='wild')){const b=button(symbols[color]+' '+names[color],()=>{d.close();act('play',{cardId:c.id,color,announce});},'ud-'+color);d.querySelector('div').append(b);}d.append(button('Zrušit',()=>d.close()));d.onclose=()=>{pendingCard=null;d.remove();};d.showModal();}
+ let lastTick=-1;
+ function tick(){if(!root||!state)return;const e=root.querySelector('.cards-clock');if(!e)return;const left=Math.max(0,Math.ceil((state.deadline*1000-Date.now()-offset)/1000));e.textContent=left+' s';e.classList.toggle('is-urgent',left<=5);if(state.turn===me()&&left>0&&left<=5&&lastTick!==left){sound('tick');}lastTick=left;}
+ document.addEventListener('pointerdown',()=>{if(root&&music&&!musicTimer)musicStart();},{passive:true});
+ return{open,dispose:stop};
+})();
+
 const Community=(()=>{
  let page,nav,generation=0,loadedHash='',view='',editorState=null,suspended=null,mailRequest=null,mailDraft=null;
  const labels={given:'Jméno',surname:'Příjmení',nickname:'Přezdívka',age:'Věk v lore',birth:'Datum narození',occupation:'Povolání',relatives:'Rodina a blízcí',kicker:'Motto',description:'Úvodní charakteristika',quote:'Osobní citát',closing:'Závěrečná slova',origin:'Původ',familyTitle:'Nadpis vztahů',familyDescription:'Úvod ke vztahům',chapters:'Kapitoly lore',family:'Vztahy'};
@@ -660,7 +740,7 @@ const Community=(()=>{
  const icon=name=>'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="'+icons[name]+'"/></svg>';
  const stamp=state=>({pending:'Čeká na schválení',approved:'Schváleno',rejected:'Zamítnuto'}[state]||state);
  const date=t=>t?new Intl.DateTimeFormat('cs-CZ',{dateStyle:'medium',timeStyle:'short',timeZone:'Europe/Prague'}).format(new Date(t*1000)):'Zatím nezaznamenáno';
- const routeMatch=()=>/^#(?:manage|edit|telegrams|gramophone|seasons|atlas)(?:\/|$)/.test(location.hash);
+ const routeMatch=()=>/^#(?:manage|edit|telegrams|gramophone|seasons|atlas|games)(?:\/|$)/.test(location.hash);
  const has=permission=>identity?.admin?.permissions.includes(permission);
  const text=data=>escapeHTML(data);
  function setStatus(message){page.querySelector('.community-status').textContent=message;}
@@ -674,6 +754,7 @@ const Community=(()=>{
   const music=document.createElement('a');music.href='#gramophone';music.className='nav-gramophone';music.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 19h16v3H4zM7 19v-4h10v4M12 15V7l8-4v9l-8-5M7 15a3 3 0 1 1 0-6"/></svg>Gramofon';nav.append(music);
   const seasons=document.createElement('a');seasons.href='#seasons';seasons.className='nav-seasons';seasons.innerHTML=icon('clock')+'Roční období';nav.append(seasons);
   const atlas=document.createElement('a');atlas.href='#atlas';atlas.className='nav-atlas';atlas.innerHTML=AtlasIcons.svg('pin')+'Atlas';nav.append(atlas);
+  const games=document.createElement('a');games.href='#games';games.className='nav-games';games.innerHTML=icon('users')+'Hry';nav.append(games);
   const admin=document.createElement('a');admin.href='#manage';admin.className='nav-manage';admin.innerHTML=icon('admin')+'Pro správu webu <span class="web-badge review-badge" hidden></span>';nav.append(admin);
   window.addEventListener('beforeunload',event=>{if(dirty()){event.preventDefault();event.returnValue='';}});
  }
@@ -685,6 +766,7 @@ const Community=(()=>{
   nav.querySelector('.nav-gramophone').hidden=!identity||!!identity.restricted;
   nav.querySelector('.nav-seasons').hidden=!identity||!!identity.restricted;
   nav.querySelector('.nav-atlas').hidden=!identity||!!identity.restricted;
+  nav.querySelector('.nav-games').hidden=!identity||!!identity.restricted;
   for(const [selector,count]of [['.nav-mail',identity?.unread||0],['.nav-manage',identity?.pending||0]]){const badge=nav.querySelector(selector+' .web-badge');badge.hidden=!count;badge.textContent=String(count);}
  }
  function values(){
@@ -702,7 +784,7 @@ const Community=(()=>{
   if(loadedHash!==location.hash&&dirty()&&!await PortalPolish.confirm(view==='mail'?'Zahodit rozepsaný telegram?':'Opustit rozepsanou postavu?',view==='mail'?'Neodeslaný text telegramu se zahodí.':'Neuložené změny se zahodí. Koncept uložený na serveru zůstane zachovaný.',view==='mail'?'Zahodit telegram':'Opustit editor')){history.replaceState(null,'',loadedHash);return false;}return true;
  }
  function purge({preserveDraft=false}={}){
-  Atlas.dispose({preserveDraft});SeasonLab.dispose();Gramophone.detach();
+  Cards.dispose();Atlas.dispose({preserveDraft});SeasonLab.dispose();Gramophone.detach();
   if(preserveDraft&&view==='mail'&&mailValues())mailDraft={user:identity?.user.id,hash:loadedHash,data:mailValues(),requestId:mailRequest};else if(!preserveDraft)mailDraft=null;
   if(preserveDraft&&view==='edit'&&editorState)suspended={user:identity?.user.id,data:values(),state:editorState};else if(!preserveDraft)suspended=null;
   generation++;page.hidden=true;page.replaceChildren();document.body.classList.remove('community-view');view='';editorState=null;loadedHash='';mailRequest=null;
@@ -717,7 +799,8 @@ const Community=(()=>{
   purge({preserveDraft:!!suspended||!!mailDraft||Atlas.pendingDraft});const version=++generation,user=identity?.user.id;loadedHash=location.hash;
   if(!identity){shell('Vstup do svého archivu','Pro správu postavy a telegramy se přihlas přes Discord.');content().innerHTML='<a class="web-button" href="'+loginHref+'">Přihlásit přes Discord</a>';return;}
   try{
-   if(loadedHash.startsWith('#edit')){view='edit';shell('Tvůj příběh. Tvými slovy.','Uprav svou postavu. Zveřejní se až po schválení správou.','editor');menu([['#','Můj archiv','home'],['#edit','Upravit postavu','edit'],['#telegrams','Telegramy','mail']]);await editor(version,user);}
+   if(loadedHash.startsWith('#games')){view='games';shell('Hry','Společný stůl pro naši partu.','games');await Cards.open(content());}
+   else if(loadedHash.startsWith('#edit')){view='edit';shell('Tvůj příběh. Tvými slovy.','Uprav svou postavu. Zveřejní se až po schválení správou.','editor');menu([['#','Můj archiv','home'],['#edit','Upravit postavu','edit'],['#telegrams','Telegramy','mail']]);await editor(version,user);}
    else if(loadedHash.startsWith('#gramophone')){view='gramophone';shell('Gramofon','Desky, které dávají příběhům vlastní hlas.','gramophone');menu([['#','Můj archiv','home'],['#gramophone','Gramofon','home'],['#seasons','Roční období','clock']]);await Gramophone.open(content());}
    else if(loadedHash.startsWith('#seasons')){view='seasons';shell('Roční období','Atmosféra kroniky podle tebe.','seasons');menu([['#','Můj archiv','home'],['#gramophone','Gramofon','home'],['#seasons','Roční období','clock']]);await SeasonLab.open(content());}
    else if(loadedHash.startsWith('#atlas')){view='atlas';shell('Atlas pohraničí','Vlastní místa. Vlastní cesty. Stejný horizont.','atlas');menu([['#','Můj archiv','home'],['#atlas','Atlas','home'],['#telegrams','Telegramy','mail']]);await Atlas.open(content());}
@@ -852,7 +935,7 @@ const Community=(()=>{
   if(!ids.length||!await PortalPolish.confirm(ids.length===1?'Smazat tento telegram?':'Smazat vybrané telegramy?','Zmizí pouze z tvé příchozí schránky. Odesílateli zůstane jeho kopie. Smazání nelze vrátit.','Smazat'))return;
   const user=identity?.user.id,version=generation;try{await api('/telegrams',{method:'DELETE',body:JSON.stringify({ids})});if(!valid(version,user))return;await refreshSession();if(location.hash==='#telegrams')await open();else location.hash='#telegrams';}catch(error){if(valid(version,user))setStatus(error.message);}
  }
- function allowed(){if(/^#(?:gramophone|seasons|atlas)(?:\/|$)/.test(location.hash))return !!identity&&!identity.restricted;const path=location.hash.split('/')[1];if(path==='admins'||path==='seasons')return !!identity?.admin?.owner;const permission={requests:'review',audit:'review',users:'activity',mail:'official',blacklist:'blacklist'}[path];return permission?has(permission):!!identity?.admin?.owner||!!identity?.admin?.permissions.length;}
+ function allowed(){if(/^#(?:gramophone|seasons|atlas|games)(?:\/|$)/.test(location.hash))return !!identity&&!identity.restricted;const path=location.hash.split('/')[1];if(path==='admins'||path==='seasons')return !!identity?.admin?.owner;const permission={requests:'review',audit:'review',users:'activity',mail:'official',blacklist:'blacklist'}[path];return permission?has(permission):!!identity?.admin?.owner||!!identity?.admin?.permissions.length;}
  return {init,sync,open,purge,beforeRoute,beforeLogout,get matches(){return routeMatch();},get active(){return view;},allowed};
 })();
 

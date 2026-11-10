@@ -52,6 +52,7 @@ const SeasonLab=(()=>{
 // intercepts input. Only this browser's preference is saved, not other players'.
 const SeasonAtmosphere=(()=>{
  const modes=['auto','off','spring','summer','autumn','winter'];
+ let suspended=false;
  let host,canvas,ctx,ice,frame=0,lastFrame=0,holes=[],mode='auto',strength=45,season='off',reduced;
  const current=()=>{const m=Number(new Intl.DateTimeFormat('en',{month:'numeric',timeZone:'Europe/Prague'}).format(new Date()));return m>=3&&m<=5?'spring':m>=6&&m<=8?'summer':m>=9&&m<=11?'autumn':'winter';};
  const noise=i=>{const n=Math.sin(i*83.71+9)*43758.54;return n-Math.floor(n);};
@@ -76,7 +77,7 @@ const SeasonAtmosphere=(()=>{
   if(!reduced.matches&&(season!=='winter'||holes.length))schedule();
  }
  function schedule(){if(frame||document.hidden||season==='off')return;frame=requestAnimationFrame(t=>{frame=0;if(t-lastFrame<40){schedule();return;}lastFrame=t;paint(t);});}
- function apply(){if(!host)return;season=identity?.restricted?'off':mode==='auto'?current():mode;host.dataset.season=season;document.documentElement.dataset.season=season;holes=[];frost();paint(performance.now());}
+ function apply(){if(!host)return;season=(suspended||identity?.restricted)?'off':mode==='auto'?current():mode;host.dataset.season=season;document.documentElement.dataset.season=season;holes=[];frost();paint(performance.now());}
  function configure(next,level){mode=modes.includes(next)?next:'auto';strength=Math.min(100,Math.max(10,Number(level)||45));try{localStorage.setItem('nh-season',JSON.stringify({mode,strength}));}catch{}apply();}
  function init(){
   if(host)return;try{const saved=JSON.parse(localStorage.getItem('nh-season'));if(saved&&modes.includes(saved.mode)){mode=saved.mode;strength=Math.min(100,Math.max(10,Number(saved.strength)||45));}}catch{}
@@ -85,6 +86,6 @@ const SeasonAtmosphere=(()=>{
   window.addEventListener('pointermove',melt,{passive:true});window.addEventListener('pointerdown',melt,{passive:true});window.addEventListener('resize',fit,{passive:true});
   document.addEventListener('visibilitychange',()=>document.hidden?stop():apply());reduced.addEventListener('change',()=>paint(performance.now()));fit();apply();
  }
- function syncSession(){const next=identity?.restricted?'off':mode==='auto'?current():mode;if(host&&season!==next)apply();}
- return{init,configure,syncSession,get mode(){return mode;},get strength(){return strength;}};
+ function syncSession(){const next=(suspended||identity?.restricted)?'off':mode==='auto'?current():mode;if(host&&season!==next)apply();}
+ return{init,configure,syncSession,suspend(value){suspended=!!value;apply();},get mode(){return mode;},get strength(){return strength;}};
 })();
