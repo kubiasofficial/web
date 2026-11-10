@@ -75,3 +75,12 @@ https://web-mocha-seven-71.vercel.app/#games
 - Efekty neblokují ovládání a respektují nastavení omezeného pohybu. Hudební podkres se nevrací.
 - Ověřeno přes skutečný prohlížeč → Worker → SQLite: sedm hráčů, vlastní ruce, výběr barvy, efekt +4, obnova stránky, poslední karta před/po zahrání, mobil/tablet a reduced motion.
 - Jde o změnu webu. Pro nasazení stačí push složky web, bez nové databázové migrace či změny Workeru.
+
+## Otevření zakládání stolů všem hráčům
+
+- Každý přihlášený a neblokovaný hráč může založit vlastní stůl. Oprávnění se kontroluje na serveru.
+- Odstraněny texty zkušebního režimu; čekárna, pozvánky a oprávnění zakladatele zůstávají soukromé pro daný stůl.
+- Každý hráč může založit nový stůl až po opuštění svého aktuálního. Limit současných stolů již nezapočítává opuštěné zavřené stoly.
+- Aktualizované testy ověřují zakládání běžnými účty, izolaci stolů, přihlášení, CSRF a blacklist.
+- Nasazení: nový `bot/worker.js` → Deploy a push složky web. Databázové schéma se nemění.
+- Připravený text Discord oznámení je v `ANNOUNCEMENT-USTAV-ROZDAVA.md`; zveřejnit až po nasazení.
