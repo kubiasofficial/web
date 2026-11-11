@@ -132,7 +132,7 @@ async function route(){
  if(denial.open)denial.close();
  if(Community.matches){purgeProfile();Journal.purge();PortalPolish.closeCast();selection.hidden=true;portal.hidden=true;await Community.open();return;}
  Community.purge();
- if(!key){purgeProfile();Journal.purge();PortalPolish.loading('',false);PortalPolish.active(null);selection.hidden=!!identity;portal.hidden=!identity;document.title='New Horizon RP · Sedm osudů, jeden horizont';window.scrollTo({top:0,behavior:'instant'});return;}
+ if(!key){purgeProfile();Journal.purge();PortalPolish.loading('',false);PortalPolish.active(null);selection.hidden=!!identity;portal.hidden=!identity;document.title='New Horizon RP · Šest osudů, jeden horizont';window.scrollTo({top:0,behavior:'instant'});return;}
  if(!Object.hasOwn(catalog,key)){location.hash='';return;}
  if(!identity){deny(key);return;}
  if(journalMatch){if(!identity.journalAccess?.includes(key)){deny(key,deniedText,'journal');return;}purgeProfile();selection.hidden=true;portal.hidden=true;await Journal.open(key,journalMatch[2]);return;}

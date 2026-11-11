@@ -19,7 +19,6 @@
 .chronicle-profile.katie-profile .chronicle-fog{inset:25% -35% -5%;background:radial-gradient(ellipse at 60% 75%,#b3d5df27,transparent 55%);animation-duration:32s}
 .chronicle-profile.katie-profile .chronicle-atmosphere i{opacity:0;animation:none}
 .chronicle-profile.scarlett-profile .chronicle-atmosphere i{background:#8eafff;box-shadow:0 0 11px 2px #5f8fff77;animation-name:letter-motes;animation-duration:18s}
-.chronicle-profile.sophie-profile .chronicle-atmosphere i{width:9px;height:5px;border-radius:0 75% 0 75%;background:#a58e65;box-shadow:none;bottom:auto;top:-15px;animation-name:woodland-leaves;animation-duration:24s}
 .chronicle-profile.vincent-profile .chronicle-fog{background:radial-gradient(ellipse at 75% 70%,#5b9dd72a,transparent 45%),radial-gradient(ellipse at 45% 90%,#7a9bc31c,transparent 50%);animation:merchant-smoke 24s ease-in-out infinite alternate}
 .chronicle-profile.vincent-profile .chronicle-atmosphere i{animation-duration:26s;box-shadow:0 0 7px #4b9eec55}
 @keyframes frontier-logo-enter{from{opacity:0;transform:translateY(12px);filter:blur(5px)}to{opacity:1;transform:none;filter:blur(0)}}

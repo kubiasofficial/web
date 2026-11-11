@@ -1,6 +1,6 @@
 const PortalPolish = (() => {
  let loader, confirmation, resolveConfirmation=null, browser, castToggle, castNavigation, returnFocus=null;
- const playerNames={daniel:'Eidík',nathaniel:'kubiasofficial',vincent:'BuFu',elijah:'mata20_official',katie:'Safík Alex',scarlett:'Graciie04',sophie:'🐭Myška🐭'};
+ const playerNames={daniel:'Eidík',nathaniel:'kubiasofficial',vincent:'BuFu',elijah:'mata20_official',katie:'Safík Alex',scarlett:'Graciie04'};
  const names=new Map(), pendingNames=new Map(), avatars=new Map();
  let playerObserver;
  function closeCast(){

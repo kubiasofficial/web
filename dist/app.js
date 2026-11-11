@@ -13,7 +13,6 @@ function renderProfile(key){
  profile.classList.toggle('scarlett-profile',key==='scarlett');
  profile.classList.toggle('daniel-profile',key==='daniel');
  profile.classList.toggle('katie-profile',key==='katie');
- profile.classList.toggle('sophie-profile',key==='sophie');
  profile.classList.toggle('vincent-profile',key==='vincent');
  profile.classList.toggle('elijah-profile',key==='elijah');
  profile.querySelector('.profile-heading>.eyebrow').textContent='OSOBNÍ SPIS № '+person.number+' · NEW HORIZON, 1897';
@@ -48,7 +47,7 @@ function renderProfile(key){
 const profileTemplate=profile.innerHTML;
 const PortalPolish = (() => {
  let loader, confirmation, resolveConfirmation=null, browser, castToggle, castNavigation, returnFocus=null;
- const playerNames={daniel:'Eidík',nathaniel:'kubiasofficial',vincent:'BuFu',elijah:'mata20_official',katie:'Safík Alex',scarlett:'Graciie04',sophie:'🐭Myška🐭'};
+ const playerNames={daniel:'Eidík',nathaniel:'kubiasofficial',vincent:'BuFu',elijah:'mata20_official',katie:'Safík Alex',scarlett:'Graciie04'};
  const names=new Map(), pendingNames=new Map(), avatars=new Map();
  let playerObserver;
  function closeCast(){
@@ -387,17 +386,60 @@ const MusicCommunity=(()=>{
  return{attach,dispose};
 })();
 
+const MusicPlaylists=(()=>{
+ let root=null,library=[],lists=[],active='',queue=[],mode='off',owner=null,playTrack=null,generation=0,pending=false,loadError='',dialog=null;
+ const esc=escapeHTML;
+ const selected=()=>lists.find(p=>p.id===active);
+ function reset(){pending=false;generation++;root=null;library=[];lists=[];active='';queue=[];owner=null;mode='off';dialog?.remove();dialog=null;}
+ function clearQueue(){queue=[];}
+ function pick(track){const p=selected();queue=(p?p.tracks.map(id=>library.find(t=>t.id===id)).filter(Boolean):[track]);if(!queue.some(t=>t.id===track.id))queue=[track];}
+ function next(track){if(mode==='track')return track;const index=queue.findIndex(t=>t.id===track.id);return queue[index+1]||(mode==='playlist'?queue[0]||track:null);}
+ function detach(){pending=false;root=null;dialog?.remove();dialog=null;generation++;}
+ async function request(path='',options={}){return api('/gramophone/playlists'+path,options);}
+ async function load(){const g=generation;try{const result=await request();if(g!==generation)return;lists=result.playlists;loadError='';if(active&&!selected())active='';}catch(e){if(g!==generation)return;loadError=e.message;}paint();}
+ async function save(p,patch){if(pending)return;pending=true;const g=generation;try{const result=await request('/'+p.id,{method:'PUT',body:JSON.stringify({...p,...patch})});if(g!==generation)return;lists=lists.map(x=>x.id===p.id?result.playlist:x);syncQueue(result.playlist);}catch(e){if(g===generation){loadError=e.message;await load();loadError=e.message;}}finally{if(g===generation){pending=false;paint();}}}
+ function syncQueue(p){if(active===p.id&&queue.length)queue=p.tracks.map(id=>library.find(t=>t.id===id)).filter(Boolean);}
+ function button(text,handler){const b=document.createElement('button');b.type='button';b.className='web-button';b.textContent=text;b.onclick=handler;return b;}
+ function paint(){
+  if(!root?.isConnected)return;const panel=root.querySelector('.playlist-panel');if(!panel)return;const p=selected();
+  panel.innerHTML='<div class="playlist-tabs"><button type="button" class="web-button" data-all>Všechny skladby</button><label>Moje playlisty<select aria-label="Vybrat playlist"><option value="">Vyber svůj playlist</option>'+lists.map(x=>'<option value="'+esc(x.id)+'"'+(x.id===active?' selected':'')+'>'+esc(x.name)+'</option>').join('')+'</select></label><button type="button" class="web-button" data-new>＋ Nový playlist</button></div><p class="playlist-notice" role="status">'+esc(loadError||'Tvoje soukromá sbírka. Playlisty se ukládají k Discord účtu.')+'</p><div class="playlist-editor"></div>';
+  panel.querySelector('[data-all]').onclick=()=>{active='';paint();};panel.querySelector('select').onchange=e=>{active=e.target.value;paint();};panel.querySelector('[data-new]').onclick=()=>editDialog();
+  const editor=panel.querySelector('.playlist-editor');if(p){editor.innerHTML='<header><div><span class="eyebrow">OSOBNÍ VÝBĚR</span><h3>'+esc(p.name)+'</h3></div><div class="playlist-actions"></div></header><p>'+p.tracks.length+' / 100 skladeb</p><ol></ol>';const actions=editor.querySelector('.playlist-actions');actions.append(button('▶ Přehrát playlist',()=>{const first=p.tracks.map(id=>library.find(t=>t.id===id)).find(Boolean);if(first)playTrack(first);}),button('Přejmenovat',()=>editDialog(p)),button('Smazat',async()=>{if(!await PortalPolish.confirmAction('Smazat playlist?', 'Zmizí pouze tento playlist. Písničky ve sbírce zůstanou.','Smazat'))return;const g=generation;try{await request('/'+p.id,{method:'DELETE',body:JSON.stringify({revision:p.revision})});if(g===generation){lists=lists.filter(x=>x.id!==p.id);active='';paint();}}catch(e){if(g===generation){loadError=e.message;paint();}}}));
+   actions.firstChild.disabled=!p.tracks.some(id=>library.some(t=>t.id===id));
+   p.tracks.forEach((id,i)=>{const t=library.find(t=>t.id===id),row=document.createElement('li'),title=document.createElement('span');title.textContent=t?.title||'Skladba už není ve sbírce';row.append(title);for(const [text,label,to]of [['↑','Posunout výš',i-1],['↓','Posunout níž',i+1],['×','Odebrat z playlistu',-1]]){const b=button(text,()=>{const tracks=[...p.tracks];if(text==='×')tracks.splice(i,1);else [tracks[i],tracks[to]]=[tracks[to],tracks[i]];save(p,{tracks});});b.setAttribute('aria-label',label+': '+(t?.title||''));b.disabled=pending||(text!=='×'&&(to<0||to>=p.tracks.length));row.append(b);}editor.querySelector('ol').append(row);});
+   const add=document.createElement('select');add.setAttribute('aria-label','Přidat skladbu do playlistu');add.innerHTML='<option value="">＋ Přidat skladbu…</option>'+library.filter(t=>!p.tracks.includes(t.id)).map(t=>'<option value="'+esc(t.id)+'">'+esc(t.title)+'</option>').join('');add.disabled=pending||p.tracks.length>=100;add.onchange=e=>{if(e.target.value)save(p,{tracks:[...p.tracks,e.target.value]});};editor.append(add);
+  }
+  root.querySelectorAll('.record-card').forEach(card=>card.hidden=!!p&&!p.tracks.includes(card.dataset.id));
+  root.querySelector('.gramophone-count').textContent=p?p.tracks.length+' skladeb v playlistu':library.length+' desek';
+ }
+ function editDialog(p=null,track=null){
+  dialog?.remove();const d=document.createElement('dialog');dialog=d;d.className='playlist-dialog';d.innerHTML='<form><span class="eyebrow">TVOJE HUDEBNÍ POLIČKA</span><h2>'+esc(track?'Přidat do playlistu':p?'Přejmenovat playlist':'Nový playlist')+'</h2>'+(track?'<label>Playlist<select name="target"><option value="">＋ Vytvořit nový</option>'+lists.map(x=>'<option value="'+esc(x.id)+'">'+esc(x.name)+'</option>').join('')+'</select></label>':'')+'<label class="playlist-name-label">Název<input name="title" maxlength="60" required value="'+esc(p?.name||'')+'" placeholder="Třeba Večer na ranči"></label><p role="status"></p><div><button type="button" class="web-button" data-cancel>Zpět</button><button class="web-button primary">Uložit</button></div></form>';
+  root.append(d);d.onclose=()=>{d.remove();if(dialog===d)dialog=null;};d.querySelector('[data-cancel]').onclick=()=>d.close();const form=d.querySelector('form');if(track)form.elements.target.onchange=()=>{form.elements.title.required=!form.elements.target.value;d.querySelector('.playlist-name-label').hidden=!!form.elements.target.value;};
+  form.onsubmit=async e=>{e.preventDefault();const submit=form.querySelector('button.primary');if(submit.disabled)return;submit.disabled=true;const g=generation;try{const target=track&&lists.find(x=>x.id===form.elements.target.value);if(target){if(target.tracks.includes(track.id))throw Error('Tahle deska už v playlistu je.');const result=await request('/'+target.id,{method:'PUT',body:JSON.stringify({...target,tracks:[...target.tracks,track.id]})});if(g===generation){lists=lists.map(x=>x.id===target.id?result.playlist:x);syncQueue(result.playlist);}}else if(p){const result=await request('/'+p.id,{method:'PUT',body:JSON.stringify({...p,name:form.elements.title.value})});if(g===generation)lists=lists.map(x=>x.id===p.id?result.playlist:x);}else{const result=await request('',{method:'POST',body:JSON.stringify({requestId:crypto.randomUUID(),name:form.elements.title.value,tracks:track?[track.id]:[]})});if(g===generation){lists.push(result.playlist);active=result.playlist.id;}}if(g===generation){d.close();paint();}}catch(error){if(g===generation){form.querySelector('[role=status]').textContent=error.message;submit.disabled=false;}}};d.showModal();form.elements.title.focus();
+ }
+ async function attach(host,tracks,play){
+  if(owner!==identity.user.id){reset();owner=identity.user.id;try{const saved=localStorage.getItem('nh-repeat:'+owner);mode=['off','track','playlist'].includes(saved)?saved:'off';}catch{}}
+  root=host;library=tracks;playTrack=play;const panel=document.createElement('section');panel.className='playlist-panel';panel.setAttribute('aria-label','Moje playlisty');host.querySelector('.section-heading').before(panel);
+  const label=document.createElement('label');label.className='gramophone-repeat';label.innerHTML='↻ Opakování<select aria-label="Opakování hudby"><option value="off">Bez opakování</option><option value="track">Opakovat skladbu</option><option value="playlist">Opakovat playlist</option></select>';const select=label.querySelector('select');select.value=mode;select.onchange=e=>{mode=e.target.value;try{localStorage.setItem('nh-repeat:'+owner,mode);}catch{}};host.querySelector('.gramophone-controls').append(label);
+  for(const t of tracks){const card=host.querySelector('.record-card[data-id="'+t.id+'"]');card.append(button('＋ Do playlistu',()=>editDialog(null,t)));}
+  paint();await load();
+ }
+ return{attach,detach,reset,pick,next,clearQueue};
+})();
+
 // Audio belongs to the application, never to a route's DOM tree.
 const Gramophone=(()=>{
  let root=null,audio=null,dock=null,tracks=[],selected=null,busy=false,volume=.65,viewVersion=0,action=0,message='',owner=null;
  const flights=new Set(),authorized=()=>!!identity&&!identity.restricted;
+ let pendingEnd=false;
+ function advance(){if(!selected||!authorized())return;if(busy){pendingEnd=true;return;}pendingEnd=false;const next=MusicPlaylists.next(selected);if(next){if(next.id===selected.id){audio.currentTime=0;const t=action;audio.play().catch(()=>{if(t===action)status('Pro pokračování klikni na Přehrát.');});}else select(next,true);}else if(root?.isConnected)putAway();else stop();}
  const label=track=>'<span class="vinyl"><span class="vinyl-label"><b>'+escapeHTML(track.title)+'</b></span></span>';
  const time=value=>Number.isFinite(value)?Math.floor(value/60)+':'+String(Math.floor(value%60)).padStart(2,'0'):'0:00';
  function status(text){message=text;update();}
  function cancelFlights(){for(const animation of flights)animation.cancel();flights.clear();document.querySelectorAll('.record-flight').forEach(e=>e.remove());}
- function detach(){MusicCommunity.dispose();viewVersion++;cancelFlights();root=null;update();}
- function stop(){action++;busy=false;selected=null;message='Deska je zpátky ve sbírce.';if(audio){audio.pause();audio.removeAttribute('src');audio.load();}update();}
- function dispose(){detach();stop();audio?.remove();audio=null;dock?.remove();dock=null;owner=null;tracks=[];if('mediaSession' in navigator){navigator.mediaSession.metadata=null;navigator.mediaSession.playbackState='none';}}
+ function detach(){MusicPlaylists.detach();MusicCommunity.dispose();viewVersion++;cancelFlights();root=null;update();}
+ function stop(){pendingEnd=false;MusicPlaylists.clearQueue();action++;busy=false;selected=null;message='Deska je zpátky ve sbírce.';if(audio){audio.pause();audio.removeAttribute('src');audio.load();}update();}
+ function dispose(){detach();stop();MusicPlaylists.reset();audio?.remove();audio=null;dock?.remove();dock=null;owner=null;tracks=[];if('mediaSession' in navigator){navigator.mediaSession.metadata=null;navigator.mediaSession.playbackState='none';}}
  function syncSession(){if(!authorized()||owner&&owner!==identity.user.id)dispose();}
  function initAudio(){
   if(audio)return;owner=identity.user.id;audio=document.createElement('audio');audio.preload='metadata';audio.hidden=true;audio.className='gramophone-audio';audio.volume=volume;document.body.append(audio);
@@ -405,7 +447,7 @@ const Gramophone=(()=>{
   dock.innerHTML='<a href="#gramophone" class="dock-open"><span aria-hidden="true">♫</span><span class="dock-title"></span></a><button type="button" class="dock-pause" aria-label="Pozastavit hudbu">Ⅱ</button><button type="button" class="dock-stop" aria-label="Vypnout hudbu">×</button>';
   document.body.append(dock);dock.querySelector('.dock-pause').onclick=playPause;dock.querySelector('.dock-stop').onclick=stop;
   for(const event of ['loadedmetadata','durationchange','timeupdate','play','pause','playing','waiting'])audio.addEventListener(event,update);
-  audio.addEventListener('ended',()=>{if(root?.isConnected)putAway();else stop();});
+  audio.addEventListener('ended',advance);
   audio.addEventListener('error',()=>{if(selected)status('Skladbu se nepodařilo přehrát. Zkus ji spustit znovu.');});
   if('mediaSession' in navigator){for(const [name,handler]of [['play',()=>{if(audio?.paused)playPause();}],['pause',()=>audio?.pause()],['stop',stop],['seekto',event=>{if(audio&&Number.isFinite(audio.duration)&&Number.isFinite(event.seekTime))audio.currentTime=Math.min(audio.duration,Math.max(0,event.seekTime));}]])try{navigator.mediaSession.setActionHandler(name,handler);}catch{}}
  }
@@ -431,14 +473,14 @@ const Gramophone=(()=>{
   const start=transform(shelf,token.width/size,token.height/size),end=transform(deck,1,.28),flight=document.createElement('div');flight.className='record-flight';flight.style.width=size+'px';flight.innerHTML=label(track);document.body.append(flight);
   const animation=flight.animate(toDeck?[{transform:start,opacity:1},{transform:end,opacity:1}]:[{transform:end,opacity:1},{transform:start,opacity:1}],{duration:720,easing:'cubic-bezier(.22,.68,.25,1)',fill:'both'});flights.add(animation);try{await animation.finished;}catch{}finally{flights.delete(animation);flight.remove();}
  }
- async function select(track){
-  if(busy||!authorized())return;if(selected?.id===track.id){await playPause();return;}
+ async function select(track,fromQueue=false){
+  if(busy||!authorized())return;if(!fromQueue)MusicPlaylists.pick(track);if(selected?.id===track.id){await playPause();return;}
   initAudio();const t=++action;busy=true;selected=track;message='Pokládám desku na gramofon…';audio.src=track.url;audio.load();
   if('mediaSession' in navigator&&typeof MediaMetadata!=='undefined')navigator.mediaSession.metadata=new MediaMetadata({title:track.title,artist:track.artist,album:'New Horizon RP'});
   // play() runs in the click gesture, before asynchronous animation work.
   const playback=audio.play().then(()=>{if(t===action)status('Právě hraje · '+track.title);},error=>{if(t===action)status(error.name==='NotAllowedError'?'Deska je připravená. Klikni na Přehrát.':'Zvuk není dostupný. Zkus skladbu spustit znovu.');});
   update();if(root){const stage=root.querySelector('.gramophone-stage'),r=stage.getBoundingClientRect();if(r.top<0||r.bottom>innerHeight)stage.scrollIntoView({block:'center',behavior:'instant'});}
-  await fly(track,true);if(t===action){busy=false;update();}await playback;
+  await fly(track,true);if(t===action){busy=false;update();if(pendingEnd)advance();}await playback;
  }
  async function playPause(){
   if(!audio||!selected||busy||!authorized())return;if(!audio.paused){audio.pause();status('Pozastaveno · '+selected.title);return;}
@@ -456,7 +498,7 @@ const Gramophone=(()=>{
   root.querySelector('.gramophone-count').textContent=tracks.length+' '+(tracks.length===1?'deska':tracks.length>=2&&tracks.length<=4?'desky':'desek');
   const shelf=root.querySelector('.record-shelf');if(!tracks.length)shelf.innerHTML='<p class="gramophone-empty">První desky už jsou na cestě.</p>';
   for(const track of tracks){const card=document.createElement('article');card.className='record-card';card.dataset.id=track.id;card.innerHTML='<button type="button" class="record-pick" aria-label="Přehrát: '+escapeHTML(track.title)+'"><span class="record-token">'+label(track)+'</span><span class="record-title">'+escapeHTML(track.title)+'</span></button><p class="record-author">'+escapeHTML(track.artist||'New Horizon RP')+'</p>';card.querySelector('button').onclick=()=>select(track);shelf.append(card);}
-  MusicCommunity.attach(root,tracks);
+  MusicCommunity.attach(root,tracks);MusicPlaylists.attach(root,tracks,select);
   root.querySelector('.gramophone-play').onclick=playPause;root.querySelector('.gramophone-stop').onclick=putAway;
   root.querySelector('.gramophone-position').oninput=event=>{if(Number.isFinite(audio.duration)){audio.currentTime=Number(event.target.value)/1000*audio.duration;update();}};
   root.querySelector('.gramophone-volume input').oninput=event=>{volume=Number(event.target.value)/100;audio.volume=volume;};update();
@@ -679,12 +721,12 @@ const Cards=(()=>{
  async function call(path,options={}){if(state&&social.revision>=0&&!options.method&&path==='/rooms/'+state.code)options={...options,headers:{...options.headers,'X-Card-Social-Revision':String(social.revision)}};return api('/cards'+path,options);}
  async function open(host){stop();root=host;root.classList.add('cards-root');SeasonAtmosphere.suspend(true);frame();const v=version;const match=/^#games\/ustav\/(UD-[A-Z2-9]{8})$/.exec(location.hash);
  if(match){await load(match[1],v,true);return;}
- root.querySelector('.cards-view').innerHTML='<section class="cards-landing"><div><span class="eyebrow">NOVÁ HRA ÚSTAVU</span><h2>Ústav<br><em>rozdává.</em></h2><p>Sedm postav. Jeden stůl.<br>Léčba dobráním.</p><div class="cards-portrait-line">'+CARD_CAST.map(k=>'<img alt="'+esc(catalog[k].name)+'" src="'+mediaURL('icon-'+k+'.png',320)+'">').join('')+'</div><p class="cards-access">Soukromé stoly pro přátele. Tvůj nick a profilku převezmeme z Discordu.</p></div><div class="cards-entry"><h3>Přisedneš?</h3><div class="cards-resume"></div><form class="cards-join"><label>Kód stolu<input name="code" placeholder="UD-XXXXXXXX" maxlength="100" required autocomplete="off"></label><button class="web-button primary">Připojit se</button></form><form class="cards-create" hidden><h3>Založit nový stůl</h3><label>Název<input name="name" value="Ústav má službu" required maxlength="60"></label><div class="cards-form-row"><label>Místa<select name="capacity">'+[2,3,4,5,6,7].map(n=>'<option '+(n===7?'selected':'')+'>'+n+'</option>').join('')+'</select></label><label>Čas na tah<select name="seconds"><option value="60">60 sekund</option><option value="30">30 sekund</option></select></label></div><label><input name="uncensored" type="checkbox"> Ústav bez filtru · ostřejší hlášky</label><button class="web-button primary">Vytvořit stůl</button></form></div></section>';
+ root.querySelector('.cards-view').innerHTML='<section class="cards-landing"><div><span class="eyebrow">NOVÁ HRA ÚSTAVU</span><h2>Ústav<br><em>rozdává.</em></h2><p>Šest postav. Jeden stůl.<br>Léčba dobráním.</p><div class="cards-portrait-line">'+CARD_CAST.map(k=>'<img alt="'+esc(catalog[k].name)+'" src="'+mediaURL('icon-'+k+'.png',320)+'">').join('')+'</div><p class="cards-access">Soukromé stoly pro přátele. Tvůj nick a profilku převezmeme z Discordu.</p></div><div class="cards-entry"><h3>Přisedneš?</h3><div class="cards-resume"></div><form class="cards-join"><label>Kód stolu<input name="code" placeholder="UD-XXXXXXXX" maxlength="100" required autocomplete="off"></label><button class="web-button primary">Připojit se</button></form><form class="cards-create" hidden><h3>Založit nový stůl</h3><label>Název<input name="name" value="Ústav má službu" required maxlength="60"></label><div class="cards-form-row"><label>Místa<select name="capacity">'+[2,3,4,5,6,7].map(n=>'<option '+(n===7?'selected':'')+'>'+n+'</option>').join('')+'</select></label><label>Čas na tah<select name="seconds"><option value="60">60 sekund</option><option value="30">30 sekund</option></select></label></div><label><input name="uncensored" type="checkbox"> Ústav bez filtru · ostřejší hlášky</label><button class="web-button primary">Vytvořit stůl</button></form></div></section>';
  const join=root.querySelector('.cards-join');join.onsubmit=async e=>{e.preventDefault();const code=join.elements.code.value.trim().toUpperCase().match(/UD-[A-Z2-9]{8}/)?.[0];if(!code){status('Kód má podobu UD-XXXXXXXX. Můžeš vložit i celou pozvánku.');return;}location.hash='#games/ustav/'+code;};
  const create=root.querySelector('.cards-create');create.onsubmit=async e=>{e.preventDefault();if(busy)return;busy=true;create.querySelector('button').disabled=true;try{const s=await call('/rooms',{method:'POST',body:JSON.stringify({name:create.elements.name.value,seconds:+create.elements.seconds.value,capacity:+create.elements.capacity.value,uncensored:create.elements.uncensored.checked})});if(version===v)location.hash='#games/ustav/'+s.code;}catch(error){if(v===version){status(error.message);try{const c=await call('/current');if(c.code){const a=document.createElement('a');a.href='#games/ustav/'+c.code;a.textContent='Vrátit se k vytvořenému stolu';root.querySelector('.cards-resume').replaceChildren(a);}}catch{}}}finally{if(v===version){busy=false;create.querySelector('button').disabled=false;}}};
  try{const current=await call('/current');if(v!==version)return;create.hidden=!current.canCreate;if(current.code){const a=document.createElement('a');a.href='#games/ustav/'+current.code;a.className='web-button';a.textContent='Pokračovat u mého stolu ↗';root.querySelector('.cards-resume').append(a);}}catch(e){if(v===version)status(e.message);}
  }
- const CARD_CAST=['daniel','nathaniel','vincent','elijah','katie','scarlett','sophie'];
+ const CARD_CAST=['daniel','nathaniel','vincent','elijah','katie','scarlett'];
  async function load(code,v=version,initial=false){if(v!==version||!root||document.hidden)return;try{const s=await call('/rooms/'+code);if(v!==version)return;accept(s);errors=0;}catch(e){if(v!==version)return;if(e.status===403&&initial){root.querySelector('.cards-view').innerHTML='<section class="cards-invite"><span class="eyebrow">MÁŠ POZVÁNKU</span><h2>U stolu je místo i pro tebe.</h2><p>Stůl '+esc(code)+'. Přisedni a potvrď připravenost.</p></section>';root.querySelector('.cards-invite').append(button('Přisednout',()=>join(code)));return;}connectionStatus(false);errors++;status(e.message+' '+(state?'Spojení zkusím obnovit.':''));if(e.status===401||e.status===403||e.status===404)return;}schedule(code,v);}
  async function join(code){if(busy)return;busy=true;const v=version;try{const s=await call('/rooms/'+code+'/join',{method:'POST',body:JSON.stringify({requestId:crypto.randomUUID()})});if(v===version){busy=false;accept(s);schedule(code,v);}}catch(e){if(v===version)status(e.message);}finally{if(v===version)busy=false;}}
  function schedule(code,v){clearTimeout(timer);if(root&&!document.hidden)timer=setTimeout(()=>load(code,v),errors?Math.min(15000,3000*errors):state?.status==='playing'?1800:4000);}
@@ -1262,7 +1304,7 @@ async function route(){
  if(denial.open)denial.close();
  if(Community.matches){purgeProfile();Journal.purge();PortalPolish.closeCast();selection.hidden=true;portal.hidden=true;await Community.open();return;}
  Community.purge();
- if(!key){purgeProfile();Journal.purge();PortalPolish.loading('',false);PortalPolish.active(null);selection.hidden=!!identity;portal.hidden=!identity;document.title='New Horizon RP · Sedm osudů, jeden horizont';window.scrollTo({top:0,behavior:'instant'});return;}
+ if(!key){purgeProfile();Journal.purge();PortalPolish.loading('',false);PortalPolish.active(null);selection.hidden=!!identity;portal.hidden=!identity;document.title='New Horizon RP · Šest osudů, jeden horizont';window.scrollTo({top:0,behavior:'instant'});return;}
  if(!Object.hasOwn(catalog,key)){location.hash='';return;}
  if(!identity){deny(key);return;}
  if(journalMatch){if(!identity.journalAccess?.includes(key)){deny(key,deniedText,'journal');return;}purgeProfile();selection.hidden=true;portal.hidden=true;await Journal.open(key,journalMatch[2]);return;}

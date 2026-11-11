@@ -23,7 +23,11 @@
     },
     {
       "source": "/assets/postavy.png",
-      "destination": "/assets/postavy-annie-v2.png"
+      "destination": "/assets/station-six-v3.png"
+    },
+    {
+      "source": "/assets/postavy-annie-v2.png",
+      "destination": "/assets/station-six-v3.png"
     }
   ],
   "headers": [
@@ -46,7 +50,7 @@
       ]
     },
     {
-      "source": "/site.1876b7bd9db0.css",
+      "source": "/site.19d364ff1783.css",
       "headers": [
         {
           "key": "Cache-Control",
@@ -73,7 +77,7 @@
       ]
     },
     {
-      "source": "/media.514d66fb1b60.js",
+      "source": "/media.39b07d86dc2f.js",
       "headers": [
         {
           "key": "Cache-Control",
@@ -91,7 +95,7 @@
       ]
     },
     {
-      "source": "/public-people.9da5f01e1f26.js",
+      "source": "/public-people.b73668872e2d.js",
       "headers": [
         {
           "key": "Cache-Control",
@@ -100,7 +104,7 @@
       ]
     },
     {
-      "source": "/app.40c77cc542b9.js",
+      "source": "/app.9b5eb79c86ec.js",
       "headers": [
         {
           "key": "Cache-Control",

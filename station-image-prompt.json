@@ -1,0 +1,6 @@
+{
+  "tool": "image_gen",
+  "asset": "dist/assets/station-six-v3.png",
+  "references": ["nathaniel.png", "vincent.png", "elijah.png", "katie.png", "annie-v2.png"],
+  "prompt": "Premium cinematic wide frontier railway station at blue hour in 1897. Exactly six adult protagonists: Nathaniel in black hat and long coat, elegant Vincent in patterned vest, young Elijah in dark hat, Katie with dark braid and scarf without hat, Annie in black hat with blue flowers and blue scarf, plus hatless rugged Daniel with brown hair, short beard, duster and suspenders. Two groups of three at opposite sides. Steam locomotive left, receding tracks, amber oil lamps and wooden station right. Dark central negative space for the real website logo. Moody blue-black shadows, rich amber lamplight, realistic western game key art. Four men, two women, no seventh character. No text, logos, collage or UI."
+}
