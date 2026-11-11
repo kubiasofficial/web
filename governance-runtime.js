@@ -6,7 +6,7 @@ const Community=(()=>{
  const icon=name=>'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="'+icons[name]+'"/></svg>';
  const stamp=state=>({pending:'Čeká na schválení',approved:'Schváleno',rejected:'Zamítnuto'}[state]||state);
  const date=t=>t?new Intl.DateTimeFormat('cs-CZ',{dateStyle:'medium',timeStyle:'short',timeZone:'Europe/Prague'}).format(new Date(t*1000)):'Zatím nezaznamenáno';
- const routeMatch=()=>/^#(?:manage|edit|telegrams|gramophone|seasons|atlas|games)(?:\/|$)/.test(location.hash);
+ const routeMatch=()=>/^#(?:manage|edit|telegrams|gramophone|seasons|atlas|games|shop|calendar|player)(?:\/|$)/.test(location.hash);
  const has=permission=>identity?.admin?.permissions.includes(permission);
  const text=data=>escapeHTML(data);
  function setStatus(message){page.querySelector('.community-status').textContent=message;}
@@ -50,7 +50,7 @@ const Community=(()=>{
   if(loadedHash!==location.hash&&dirty()&&!await PortalPolish.confirm(view==='mail'?'Zahodit rozepsaný telegram?':'Opustit rozepsanou postavu?',view==='mail'?'Neodeslaný text telegramu se zahodí.':'Neuložené změny se zahodí. Koncept uložený na serveru zůstane zachovaný.',view==='mail'?'Zahodit telegram':'Opustit editor')){history.replaceState(null,'',loadedHash);return false;}return true;
  }
  function purge({preserveDraft=false}={}){
-  Cards.dispose();Atlas.dispose({preserveDraft});SeasonLab.dispose();Gramophone.detach();
+  PlayerHub.dispose();Cards.dispose();Atlas.dispose({preserveDraft});SeasonLab.dispose();Gramophone.detach();
   if(preserveDraft&&view==='mail'&&mailValues())mailDraft={user:identity?.user.id,hash:loadedHash,data:mailValues(),requestId:mailRequest};else if(!preserveDraft)mailDraft=null;
   if(preserveDraft&&view==='edit'&&editorState)suspended={user:identity?.user.id,data:values(),state:editorState};else if(!preserveDraft)suspended=null;
   generation++;page.hidden=true;page.replaceChildren();document.body.classList.remove('community-view');view='';editorState=null;loadedHash='';mailRequest=null;
@@ -65,7 +65,8 @@ const Community=(()=>{
   purge({preserveDraft:!!suspended||!!mailDraft||Atlas.pendingDraft});const version=++generation,user=identity?.user.id;loadedHash=location.hash;
   if(!identity){shell('Vstup do svého archivu','Pro správu postavy a telegramy se přihlas přes Discord.');content().innerHTML='<a class="web-button" href="'+loginHref+'">Přihlásit přes Discord</a>';return;}
   try{
-   if(loadedHash.startsWith('#games')){view='games';shell('Hry','Společný stůl pro naši partu.','games');await Cards.open(content());}
+   if(/^#(?:shop|calendar|player)(?:\/|$)/.test(loadedHash)||loadedHash.startsWith('#manage/economy')){view='player-hub';const title=loadedHash.startsWith('#shop')?'Ústavní krámek':loadedHash.startsWith('#calendar')?'Prosincová pošta':loadedHash.startsWith('#manage')?'Ústavní pokladna':'Moje vizitka';shell(title,'Tvůj příběh, tvoje výbava.','player-hub');menu([['#','Můj archiv','home'],['#player','Moje vizitka','users'],['#shop','Ústavní krámek','home'],['#calendar','Prosincová pošta','mail'],...(identity.admin?.owner?[['#manage/economy','Správa měny','admin']]:[])]);await PlayerHub.open(content(),loadedHash);}
+   else if(loadedHash.startsWith('#games')){view='games';shell('Hry','Společný stůl pro naši partu.','games');await Cards.open(content());}
    else if(loadedHash.startsWith('#edit')){view='edit';shell('Tvůj příběh. Tvými slovy.','Uprav svou postavu. Zveřejní se až po schválení správou.','editor');menu([['#','Můj archiv','home'],['#edit','Upravit postavu','edit'],['#telegrams','Telegramy','mail']]);await editor(version,user);}
    else if(loadedHash.startsWith('#gramophone')){view='gramophone';shell('Gramofon','Desky, které dávají příběhům vlastní hlas.','gramophone');menu([['#','Můj archiv','home'],['#gramophone','Gramofon','home'],['#seasons','Roční období','clock']]);await Gramophone.open(content());}
    else if(loadedHash.startsWith('#seasons')){view='seasons';shell('Roční období','Atmosféra kroniky podle tebe.','seasons');menu([['#','Můj archiv','home'],['#gramophone','Gramofon','home'],['#seasons','Roční období','clock']]);await SeasonLab.open(content());}
@@ -114,7 +115,7 @@ const Community=(()=>{
   const overview=await api('/manage/overview');if(!valid(version,user))return;
   const own=overview.admin.owner,permissions=overview.admin.permissions;
   const items=[['#manage','Přehled','admin']];if(permissions.includes('review'))items.push(['#manage/requests','Změny','edit']);if(permissions.includes('activity'))items.push(['#manage/users','Uživatelé a přihlášení','users']);if(own)items.push(['#manage/admins','Správci a oprávnění','admin']);if(permissions.includes('blacklist'))items.push(['#manage/blacklist','Blacklist','admin']);if(permissions.includes('official'))items.push(['#manage/mail','Telegramy správy','mail']);if(permissions.includes('review'))items.push(['#manage/audit','Historie rozhodnutí','clock']);menu(items);
-  if(own){items.push(['#manage/atlas','Atlas · náhled','home'],['#seasons','Roční období','clock'],['#gramophone','Gramofon','home']);menu(items);}
+  if(own){items.push(['#manage/economy','Ústavní pokladna','admin'],['#calendar/preview/24','Náhled kalendáře','mail'],['#manage/atlas','Atlas · náhled','home'],['#seasons','Roční období','clock'],['#gramophone','Gramofon','home']);menu(items);}
   const changes=page.querySelector('.community-menu a[href="#manage/requests"]');if(changes&&overview.pending){changes.classList.add('has-pending');changes.dataset.count=overview.pending;}
   const path=loadedHash.split('/');
   if(path[1]==='requests'){

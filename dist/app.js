@@ -214,7 +214,7 @@ window.Journal = (() => {
    canEdit=result.canEdit;
    if(result.entries){entries=new Map(result.entries.map(item=>[item.id,item]));nextCursor=result.nextCursor;if(entryId&&!entries.has(entryId)){const detail=await api('/journal/entries/'+key+'/'+entryId);if(version!==requestVersion||user!==identity?.user.id||document.hidden)return;entries.set(detail.entry.id,detail.entry);}}
    else if(entry)entries.set(entry.id,entry);
-   const person=catalog[key];page.style.setProperty('--aura',person.color);page.dataset.character=key;
+   const person=catalog[key];page.style.setProperty('--aura',person.color);page.dataset.character=key;PlayerHub.apply();
    page.querySelector('.journal-book-emblem').innerHTML=PortalPolish.book(key);page.querySelector('.journal-owner').textContent=person.name;
    page.querySelector('.journal-owner-signature').textContent=person.nickname;page.querySelector('.journal-back').href='#'+key;
    page.querySelector('.journal-new').hidden=!canEdit;page.querySelector('.journal-permission').textContent=canEdit?'TVŮJ SOUKROMÝ ZÁPISNÍK':'SDÍLENÝ DENÍK · JEN PRO ČTENÍ';
@@ -291,7 +291,7 @@ const SeasonLab=(()=>{
  async function open(container){
   dispose();if(!identity||!container.isConnected||identity.restricted)return;
   disposed=false;season='off';strength=65;visible=true;reduced=matchMedia('(prefers-reduced-motion: reduce)');
-  container.innerHTML='<div class="section-heading"><h2>Sezónní laboratoř</h2><span class="status-pill">JEN TVŮJ NÁHLED</span></div><p class="web-muted">Zkoušej atmosféru přímo na skle kroniky. Ostatním hráčům se vzhled nemění.</p><div class="season-controls"><label>Roční období<select class="season-choice"><option value="off">Bez efektu</option><option value="auto">Podle aktuálního období</option><option value="spring">Jaro</option><option value="summer">Léto</option><option value="autumn">Podzim</option><option value="winter">Zima · zamrzlé sklo</option></select></label><label>Síla efektu <output class="season-level">65 %</output><input class="season-strength" type="range" min="10" max="100" value="65"></label><button class="web-button frost-reset" type="button">Obnovit námrazu</button><button class="web-button season-off" type="button">Vypnout náhled</button></div><section class="season-stage" data-season="off" aria-label="Náhled sezónní atmosféry"><div class="season-landscape" aria-hidden="true"></div><div class="season-sunlight" aria-hidden="true"></div><div class="season-preview-copy"><span class="eyebrow">SEDM OSUDŮ · JEDEN HORIZONT</span><h3>Příběhy pod<br>stejným nebem.</h3><p class="season-greeting">Tvoje kronika. Tvoje atmosféra.</p><button type="button" class="web-button season-click-test">Zkusit tlačítko ↗</button><span class="season-click-result" role="status"></span></div><canvas class="season-canvas" aria-hidden="true"></canvas></section><p class="season-feedback" role="status"></p>';
+  container.innerHTML='<div class="section-heading"><h2>Sezónní laboratoř</h2><span class="status-pill">JEN TVŮJ NÁHLED</span></div><p class="web-muted">Zkoušej atmosféru přímo na skle kroniky. Ostatním hráčům se vzhled nemění.</p><div class="season-controls"><label>Roční období<select class="season-choice"><option value="off">Bez efektu</option><option value="auto">Podle aktuálního období</option><option value="spring">Jaro</option><option value="summer">Léto</option><option value="autumn">Podzim</option><option value="winter">Zima · zamrzlé sklo</option></select></label><label>Síla efektu <output class="season-level">65 %</output><input class="season-strength" type="range" min="10" max="100" value="65"></label><button class="web-button frost-reset" type="button">Obnovit námrazu</button><button class="web-button season-off" type="button">Vypnout náhled</button></div><section class="season-stage" data-season="off" aria-label="Náhled sezónní atmosféry"><div class="season-landscape" aria-hidden="true"></div><div class="season-sunlight" aria-hidden="true"></div><div class="season-preview-copy"><span class="eyebrow">ŠEST OSUDŮ · JEDEN HORIZONT</span><h3>Příběhy pod<br>stejným nebem.</h3><p class="season-greeting">Tvoje kronika. Tvoje atmosféra.</p><button type="button" class="web-button season-click-test">Zkusit tlačítko ↗</button><span class="season-click-result" role="status"></span></div><canvas class="season-canvas" aria-hidden="true"></canvas></section><p class="season-feedback" role="status"></p>';
   container.querySelector('h2').textContent='Tvoje roční období';container.querySelector('.status-pill').textContent='VZHLED PRO TEBE';container.querySelector('.web-muted').textContent='Období se mění automaticky podle kalendáře. Tady si můžeš zvolit vlastní atmosféru, její sílu nebo efekty vypnout. Volba platí pro celý web v tomto prohlížeči.';
   stage=container.querySelector('.season-stage');canvas=stage.querySelector('canvas');ctx=canvas.getContext('2d');feedback=container.querySelector('.season-feedback');
   const greetings={spring:'Ráno voní novým začátkem.',summer:'Slunce zlátne nad cestami kroniky.',autumn:'Za okny padá listí. Tvůj příběh pokračuje.',winter:'Za zamrzlým sklem příběhy neutichají.',off:'Tvoje kronika. Tvoje atmosféra.'};
@@ -304,14 +304,14 @@ const SeasonLab=(()=>{
   observer=new IntersectionObserver(entries=>{visible=entries[0].isIntersecting;if(visible)paint(performance.now());else stop();});observer.observe(stage);resize=new ResizeObserver(fit);resize.observe(stage);watchVisibility=()=>{if(document.hidden)stop();else if(visible)paint(performance.now());};document.addEventListener('visibilitychange',watchVisibility);watchReduced=()=>{stop();paint(performance.now());};reduced.addEventListener('change',watchReduced);
   strength=SeasonAtmosphere.strength;container.querySelector('.season-strength').value=strength;container.querySelector('output').textContent=strength+' %';fit();choose(SeasonAtmosphere.mode);
  }
- return{open,dispose};
+ return{open:async(container)=>{await open(container);Holiday.controls(container);},dispose};
 })();
 
 // Public, viewport-sized atmosphere. It contains no account data and never
 // intercepts input. Only this browser's preference is saved, not other players'.
 const SeasonAtmosphere=(()=>{
  const modes=['auto','off','spring','summer','autumn','winter'];
- let suspended=false;
+ let suspended=false,festive=false;
  let host,canvas,ctx,ice,frame=0,lastFrame=0,holes=[],mode='auto',strength=45,season='off',reduced;
  const current=()=>{const m=Number(new Intl.DateTimeFormat('en',{month:'numeric',timeZone:'Europe/Prague'}).format(new Date()));return m>=3&&m<=5?'spring':m>=6&&m<=8?'summer':m>=9&&m<=11?'autumn':'winter';};
  const noise=i=>{const n=Math.sin(i*83.71+9)*43758.54;return n-Math.floor(n);};
@@ -336,8 +336,8 @@ const SeasonAtmosphere=(()=>{
   if(!reduced.matches&&(season!=='winter'||holes.length))schedule();
  }
  function schedule(){if(frame||document.hidden||season==='off')return;frame=requestAnimationFrame(t=>{frame=0;if(t-lastFrame<40){schedule();return;}lastFrame=t;paint(t);});}
- function apply(){if(!host)return;season=(suspended||identity?.restricted)?'off':mode==='auto'?current():mode;host.dataset.season=season;document.documentElement.dataset.season=season;holes=[];frost();paint(performance.now());}
- function configure(next,level){mode=modes.includes(next)?next:'auto';strength=Math.min(100,Math.max(10,Number(level)||45));try{localStorage.setItem('nh-season',JSON.stringify({mode,strength}));}catch{}apply();}
+ function apply(){if(!host)return;season=(suspended||festive||identity?.restricted)?'off':mode==='auto'?current():mode;host.dataset.season=season;document.documentElement.dataset.season=season;holes=[];frost();paint(performance.now());}
+ function configure(next,level){mode=modes.includes(next)?next:'auto';strength=Math.min(100,Math.max(10,Number(level)||45));try{localStorage.setItem('nh-season',JSON.stringify({mode,strength}));}catch{}apply();Holiday.update();}
  function init(){
   if(host)return;try{const saved=JSON.parse(localStorage.getItem('nh-season'));if(saved&&modes.includes(saved.mode)){mode=saved.mode;strength=Math.min(100,Math.max(10,Number(saved.strength)||45));}}catch{}
   reduced=matchMedia('(prefers-reduced-motion: reduce)');host=document.createElement('div');host.className='season-global';host.setAttribute('aria-hidden','true');host.innerHTML='<span class="season-global-light"></span><canvas></canvas>';document.body.append(host);canvas=host.querySelector('canvas');ctx=canvas.getContext('2d');
@@ -345,8 +345,8 @@ const SeasonAtmosphere=(()=>{
   window.addEventListener('pointermove',melt,{passive:true});window.addEventListener('pointerdown',melt,{passive:true});window.addEventListener('resize',fit,{passive:true});
   document.addEventListener('visibilitychange',()=>document.hidden?stop():apply());reduced.addEventListener('change',()=>paint(performance.now()));fit();apply();
  }
- function syncSession(){const next=(suspended||identity?.restricted)?'off':mode==='auto'?current():mode;if(host&&season!==next)apply();}
- return{init,configure,syncSession,suspend(value){suspended=!!value;apply();},get mode(){return mode;},get strength(){return strength;}};
+ function syncSession(){const next=(suspended||festive||identity?.restricted)?'off':mode==='auto'?current():mode;if(host&&season!==next)apply();}
+ return{init,configure,syncSession,festive(value){if(festive===!!value)return;festive=!!value;apply();},suspend(value){suspended=!!value;apply();},get mode(){return mode;},get strength(){return strength;}};
 })();
 
 // Shared voting and discussions. Playback remains owned by Gramophone.
@@ -404,7 +404,7 @@ const MusicPlaylists=(()=>{
   if(!root?.isConnected)return;const panel=root.querySelector('.playlist-panel');if(!panel)return;const p=selected();
   panel.innerHTML='<div class="playlist-tabs"><button type="button" class="web-button" data-all>Všechny skladby</button><label>Moje playlisty<select aria-label="Vybrat playlist"><option value="">Vyber svůj playlist</option>'+lists.map(x=>'<option value="'+esc(x.id)+'"'+(x.id===active?' selected':'')+'>'+esc(x.name)+'</option>').join('')+'</select></label><button type="button" class="web-button" data-new>＋ Nový playlist</button></div><p class="playlist-notice" role="status">'+esc(loadError||'Tvoje soukromá sbírka. Playlisty se ukládají k Discord účtu.')+'</p><div class="playlist-editor"></div>';
   panel.querySelector('[data-all]').onclick=()=>{active='';paint();};panel.querySelector('select').onchange=e=>{active=e.target.value;paint();};panel.querySelector('[data-new]').onclick=()=>editDialog();
-  const editor=panel.querySelector('.playlist-editor');if(p){editor.innerHTML='<header><div><span class="eyebrow">OSOBNÍ VÝBĚR</span><h3>'+esc(p.name)+'</h3></div><div class="playlist-actions"></div></header><p>'+p.tracks.length+' / 100 skladeb</p><ol></ol>';const actions=editor.querySelector('.playlist-actions');actions.append(button('▶ Přehrát playlist',()=>{const first=p.tracks.map(id=>library.find(t=>t.id===id)).find(Boolean);if(first)playTrack(first);}),button('Přejmenovat',()=>editDialog(p)),button('Smazat',async()=>{if(!await PortalPolish.confirmAction('Smazat playlist?', 'Zmizí pouze tento playlist. Písničky ve sbírce zůstanou.','Smazat'))return;const g=generation;try{await request('/'+p.id,{method:'DELETE',body:JSON.stringify({revision:p.revision})});if(g===generation){lists=lists.filter(x=>x.id!==p.id);active='';paint();}}catch(e){if(g===generation){loadError=e.message;paint();}}}));
+  const editor=panel.querySelector('.playlist-editor');if(p){editor.innerHTML='<header><div><span class="eyebrow">OSOBNÍ VÝBĚR</span><h3>'+esc(p.name)+'</h3></div><div class="playlist-actions"></div></header><p>'+p.tracks.length+' / 100 skladeb</p><ol></ol>';const actions=editor.querySelector('.playlist-actions');actions.append(button('▶ Přehrát playlist',()=>{const first=p.tracks.map(id=>library.find(t=>t.id===id)).find(Boolean);if(first)playTrack(first);}),button('Přejmenovat',()=>editDialog(p)),button('Smazat',async()=>{if(!await PortalPolish.confirm('Smazat playlist?', 'Zmizí pouze tento playlist. Písničky ve sbírce zůstanou.','Smazat'))return;const g=generation;try{await request('/'+p.id,{method:'DELETE',body:JSON.stringify({revision:p.revision})});if(g===generation){lists=lists.filter(x=>x.id!==p.id);active='';paint();}}catch(e){if(g===generation){loadError=e.message;paint();}}}));
    actions.firstChild.disabled=!p.tracks.some(id=>library.some(t=>t.id===id));
    p.tracks.forEach((id,i)=>{const t=library.find(t=>t.id===id),row=document.createElement('li'),title=document.createElement('span');title.textContent=t?.title||'Skladba už není ve sbírce';row.append(title);for(const [text,label,to]of [['↑','Posunout výš',i-1],['↓','Posunout níž',i+1],['×','Odebrat z playlistu',-1]]){const b=button(text,()=>{const tracks=[...p.tracks];if(text==='×')tracks.splice(i,1);else [tracks[i],tracks[to]]=[tracks[to],tracks[i]];save(p,{tracks});});b.setAttribute('aria-label',label+': '+(t?.title||''));b.disabled=pending||(text!=='×'&&(to<0||to>=p.tracks.length));row.append(b);}editor.querySelector('ol').append(row);});
    const add=document.createElement('select');add.setAttribute('aria-label','Přidat skladbu do playlistu');add.innerHTML='<option value="">＋ Přidat skladbu…</option>'+library.filter(t=>!p.tracks.includes(t.id)).map(t=>'<option value="'+esc(t.id)+'">'+esc(t.title)+'</option>').join('');add.disabled=pending||p.tracks.length>=100;add.onchange=e=>{if(e.target.value)save(p,{tracks:[...p.tracks,e.target.value]});};editor.append(add);
@@ -730,7 +730,7 @@ const Cards=(()=>{
  async function load(code,v=version,initial=false){if(v!==version||!root||document.hidden)return;try{const s=await call('/rooms/'+code);if(v!==version)return;accept(s);errors=0;}catch(e){if(v!==version)return;if(e.status===403&&initial){root.querySelector('.cards-view').innerHTML='<section class="cards-invite"><span class="eyebrow">MÁŠ POZVÁNKU</span><h2>U stolu je místo i pro tebe.</h2><p>Stůl '+esc(code)+'. Přisedni a potvrď připravenost.</p></section>';root.querySelector('.cards-invite').append(button('Přisednout',()=>join(code)));return;}connectionStatus(false);errors++;status(e.message+' '+(state?'Spojení zkusím obnovit.':''));if(e.status===401||e.status===403||e.status===404)return;}schedule(code,v);}
  async function join(code){if(busy)return;busy=true;const v=version;try{const s=await call('/rooms/'+code+'/join',{method:'POST',body:JSON.stringify({requestId:crypto.randomUUID()})});if(v===version){busy=false;accept(s);schedule(code,v);}}catch(e){if(v===version)status(e.message);}finally{if(v===version)busy=false;}}
  function schedule(code,v){clearTimeout(timer);if(root&&!document.hidden)timer=setTimeout(()=>load(code,v),errors?Math.min(15000,3000*errors):state?.status==='playing'?1800:4000);}
- function accept(s){if(state?.code===s.code&&s.revision<state.revision)return;if(s.viewer!==me()){refreshSession(true);return;}offset=s.serverTime*1000-Date.now();const changed=state?.revision!==s.revision||state?.code!==s.code;const prior=state;state=s;if(changed){root.querySelector('.cards-colors')?.close();root.querySelector('.cards-card-preview')?.close();if(prior&&s.event?.seq!==lastSeq){sound(s.event?.kind);if(s.turn===me()&&s.turn!==prior.turn&&s.status==='playing')sound('turn');}lastSeq=s.event?.seq;const sameHand=prior?.turn===me()&&s.turn===me()&&JSON.stringify(prior.hand.map(c=>c.id))===JSON.stringify(s.hand.map(c=>c.id));if(!sameHand){selected=null;announce=false;}pendingCard=null;render(prior);}applySocial(s.social);startSocial();connectionStatus(true);tick();}
+ function accept(s){if(state?.code===s.code&&s.revision<state.revision)return;if(s.viewer!==me()){refreshSession(true);return;}offset=s.serverTime*1000-Date.now();const changed=state?.revision!==s.revision||state?.code!==s.code;const prior=state;state=s;if(changed){root.querySelector('.cards-colors')?.close();root.querySelector('.cards-card-preview')?.close();if(prior&&s.event?.seq!==lastSeq){sound(s.event?.kind);if(s.turn===me()&&s.turn!==prior.turn&&s.status==='playing')sound('turn');}lastSeq=s.event?.seq;const sameHand=prior?.turn===me()&&s.turn===me()&&JSON.stringify(prior.hand.map(c=>c.id))===JSON.stringify(s.hand.map(c=>c.id));if(!sameHand){selected=null;announce=false;}pendingCard=null;render(prior);}PlayerHub.cards(s,root);applySocial(s.social);startSocial();connectionStatus(true);tick();}
  async function act(action,extra={}){if(busy||!state)return;const v=version,code=state.code;busy=true;const requestId=crypto.randomUUID(),payload={action,revision:state.revision,requestId,...extra};root.querySelectorAll('[data-action],.ud-hand button').forEach(b=>b.disabled=true);try{const s=await call('/rooms/'+code+'/action',{method:'POST',body:JSON.stringify(payload)});if(v!==version)return;if(s.left){location.hash='#games';return;}status('');busy=false;accept(s);}catch(e){if(v!==version)return;status(e.message);busy=false;await load(code,v);if(v===version&&state)render();}finally{if(v===version)busy=false;}}
  function card(c,interactive=false){
   const b=document.createElement(interactive?'button':'div');if(interactive)b.type='button';
@@ -874,6 +874,146 @@ const Cards=(()=>{
  return{open,dispose:stop};
 })();
 
+const SHOP_ITEMS=[
+ {"id":"frame-brass","kind":"frame","name":"Mosazný kruh","price":100,"color":"#d3af69","style":"brass"},
+ {"id":"frame-raven","kind":"frame","name":"Havraní peří","price":175,"color":"#ac91d5","style":"raven"},
+ {"id":"frame-blue","kind":"frame","name":"Modrý plamen","price":250,"color":"#60b6ff","style":"blue"},
+ {"id":"frame-frost","kind":"frame","name":"Námraza","price":200,"color":"#b7e4ff","style":"frost"},
+ {"id":"bg-station","kind":"background","name":"Noční nádraží","price":200,"color":"#374d6d","style":"station"},
+ {"id":"bg-forest","kind":"background","name":"Ticho lesa","price":220,"color":"#32634e","style":"forest"},
+ {"id":"bg-saloon","kind":"background","name":"Poslední saloon","price":250,"color":"#8c5031","style":"saloon"},
+ {"id":"bg-mountain","kind":"background","name":"Pod horami","price":300,"color":"#758ea1","style":"mountain"},
+ {"id":"title-escape","kind":"title","name":"Pacient na útěku","price":75,"color":"#d0a661"},
+ {"id":"title-saloon","kind":"title","name":"Saloonový inventář","price":100,"color":"#e0bc83"},
+ {"id":"title-chaos","kind":"title","name":"Poštmistr chaosu","price":125,"color":"#d28d80"},
+ {"id":"title-holiday","kind":"title","name":"Vánoční pacient","price":150,"color":"#d2e1b0"},
+ {"id":"effect-embers","kind":"effect","name":"Poslední jiskry","price":300,"color":"#f1a348","style":"embers"},
+ {"id":"effect-mist","kind":"effect","name":"Půlnoční mlha","price":350,"color":"#a4c0d3","style":"mist"},
+ {"id":"back-velvet","kind":"back","name":"Bordó samet","price":180,"color":"#943d4b","style":"velvet"},
+ {"id":"back-winter","kind":"back","name":"Zimní partička","price":300,"color":"#8bcbe3","style":"winter"},
+ {"id":"journal-leather","kind":"journal","name":"Sedlářská kůže","price":120,"color":"#b97a43","style":"leather"},
+ {"id":"journal-midnight","kind":"journal","name":"Půlnoční zápisník","price":200,"color":"#707cae","style":"midnight"},
+ {"id":"frame-holiday","kind":"frame","name":"Štědrovečerní věnec","giftOnly":true,"color":"#d9b16e","style":"holiday"},
+ {"id":"journal-holiday","kind":"journal","name":"Vánoční kronika","giftOnly":true,"color":"#9ba85b","style":"holiday"},
+ {"id":"back-fireworks","kind":"back","name":"Poslední noc roku","giftOnly":true,"color":"#e2b3ff","style":"fireworks"},
+ {"id":"collect-nathaniel","kind":"collectible","name":"Havran na kolejích","giftOnly":true,"image":"icon-nathaniel.png","color":"#e44b3e"},
+ {"id":"collect-daniel","kind":"collectible","name":"Síla v sedle","giftOnly":true,"image":"icon-daniel.png","color":"#f38a32"},
+ {"id":"collect-katie","kind":"collectible","name":"Pevná vůle","giftOnly":true,"image":"icon-katie.png","color":"#76bcfa"},
+ {"id":"collect-scarlett","kind":"collectible","name":"Modré květy","giftOnly":true,"image":"icon-annie-v2.png","color":"#3979fa"},
+ {"id":"collect-vincent","kind":"collectible","name":"Dračí obchod","giftOnly":true,"image":"icon-vincent.png","color":"#4eacff"},
+ {"id":"collect-elijah","kind":"collectible","name":"Druhá šance","giftOnly":true,"image":"icon-elijah.png","color":"#ef913c"},
+ {"id":"collect-station","kind":"collectible","name":"Odjezd za obzor","giftOnly":true,"scene":"station","color":"#cbaa6e"},
+ {"id":"collect-forest","kind":"collectible","name":"Tajemství lesa","giftOnly":true,"scene":"forest","color":"#83a38c"},
+ {"id":"collect-saloon","kind":"collectible","name":"Ještě jednu partii","giftOnly":true,"scene":"saloon","color":"#bd8261"},
+ {"id":"collect-mountain","kind":"collectible","name":"Hory mlčí","giftOnly":true,"scene":"mountain","color":"#9abed4"}
+]
+;
+const PlayerHub=(()=>{
+ let host=null,version=0,wallet=null,owner=null,stamp=0,pending=null,items=SHOP_ITEMS,filter='all',profileDialog=null;
+ const esc=escapeHTML,labels={frame:'Rámečky',background:'Pozadí',title:'Tituly',effect:'Efekty',back:'Karty',journal:'Deník',collectible:'Sbírka'};
+ const item=id=>items.find(i=>i.id===id),asset=style=>({station:'station-empty-v4.png',forest:'shop-forest.png',saloon:'shop-saloon.png',mountain:'shop-mountain.png'}[style]||'station-empty-v4.png');
+ const button=(text,fn,kind='')=>{const b=document.createElement('button');b.type='button';b.className='web-button '+kind;b.textContent=text;b.onclick=fn;return b;};
+ function valid(v){return v===version&&host?.isConnected&&identity?.user.id===owner;}
+ function dispose(){version++;host=null;profileDialog?.remove();profileDialog=null;}
+ function sync(force=false){
+  if(!identity||identity.restricted){wallet=null;owner=null;stamp=0;document.documentElement.removeAttribute('data-journal-skin');return Promise.resolve();}
+  if(owner!==identity.user.id){owner=identity.user.id;wallet=null;stamp=0;pending=null;}
+  const user=owner;if(!force&&wallet&&Date.now()-stamp<30000){apply();return Promise.resolve(wallet);}if(pending)return force?pending.then(()=>sync(true)):pending;
+  const request=api('/economy/me').then(w=>{if(identity?.user.id!==user||identity.restricted)return;wallet=w;stamp=Date.now();apply();return w;}).catch(()=>{}).finally(()=>{if(pending===request)pending=null;});pending=request;return request;
+ }
+ function apply(){
+  if(!wallet||identity?.user.id!==owner)return;const trigger=document.querySelector('.user-trigger');if(trigger){let summary=trigger.querySelector('.player-wallet');if(!summary){summary=document.createElement('span');summary.className='player-wallet';trigger.append(summary);}summary.textContent='LV '+wallet.level+' · '+wallet.coins+' ÚC';}
+  for(const e of document.querySelectorAll('.user-trigger-portrait,.welcome-avatar')){e.classList.add('custom-avatar');e.dataset.frame=item(wallet.equipped.frame)?.style||'';e.dataset.effect=item(wallet.equipped.effect)?.style||'';}
+  const own=identity.owned[0],scene=document.querySelector('.personal-scene[data-character="'+own+'"]'),background=item(wallet.equipped.background);if(scene){scene.dataset.customBackground=background?'true':'false';if(background)scene.style.setProperty('--custom-world',mediaBackground(asset(background.style)));}
+  document.documentElement.dataset.journalSkin=item(wallet.equipped.journal)?.style||'';document.documentElement.dataset.journalOwner=own||'';const journal=document.querySelector('#journal-page');if(journal)journal.dataset.skin=journal.dataset.character===own?item(wallet.equipped.journal)?.style||'':'';
+  const blurb=document.querySelector('.welcome-identity');if(blurb){let level=document.querySelector('.welcome-level');if(!level){level=document.createElement('a');level.className='welcome-level';level.href='#player';blurb.after(level);}level.textContent='Level '+wallet.level+' · '+(item(wallet.equipped.title)?.name||'Obyvatel Ústavu')+' · '+wallet.coins+' ÚC';}
+ }
+ function tile(i){
+  if(i.image)return '<img class="collectible-art" alt="" src="'+mediaURL(i.image,320)+'">';
+  if(i.kind==='background'||i.scene)return '<span class="product-landscape" style="background-image:'+esc(mediaBackground(asset(i.style||i.scene)))+'"></span>';
+  if(i.kind==='frame'||i.kind==='effect')return '<span class="custom-avatar product-avatar" data-frame="'+esc(i.kind==='frame'?i.style:'brass')+'" data-effect="'+esc(i.kind==='effect'?i.style:'')+'"><img alt="" src="'+esc(identity.user.avatar||mediaURL('NH.png',160))+'"></span>';
+  if(i.kind==='back')return '<span class="cosmetic-cardback" data-skin="'+esc(i.style)+'"><b>✦</b><small>ÚSTAV<br>ROZDÁVÁ</small></span>';
+  if(i.kind==='journal')return '<span class="cosmetic-journal" data-skin="'+esc(i.style)+'"><b>✦</b><small>Moje kronika</small></span>';
+  return '<span class="cosmetic-title" style="--item-color:'+esc(i.color)+'">'+esc(i.name)+'</span>';
+ }
+ function profileHTML(p,equipped=p.equipped){
+  const bg=item(equipped.background),title=item(equipped.title),frame=item(equipped.frame),effect=item(equipped.effect);return '<article class="player-visiting-card" style="--visiting-scene:'+esc(mediaBackground(asset(bg?.style)))+'"><div class="player-visiting-overlay"></div><span class="eyebrow">OBYVATEL ÚSTAVU</span><span class="custom-avatar visiting-avatar" data-frame="'+esc(frame?.style||'')+'" data-effect="'+esc(effect?.style||'')+'"><img alt="" src="'+esc(p.avatar||mediaURL('NH.png',160))+'"></span><h2>'+esc(p.name)+'</h2><p class="player-title">'+esc(title?.name||'Každý má svůj příběh.')+'</p><span class="player-level-medal">LV '+p.level+'</span><div class="player-stat-line"><span><b>'+p.wins+'</b> výher</span><span><b>'+p.games+'</b> dokončených her</span></div></article>';
+ }
+ async function showProfile(id){
+  if(!identity||identity.restricted)return;profileDialog?.remove();const d=document.createElement('dialog');profileDialog=d;d.className='player-profile-dialog';d.innerHTML='<p role="status">Otevírám vizitku…</p>';document.body.append(d);d.showModal();d.onclose=()=>{d.remove();if(profileDialog===d)profileDialog=null;};
+  try{const p=await api('/economy/profile/'+id);if(!d.isConnected)return;d.innerHTML=profileHTML(p);const close=button('Zavřít',()=>d.close());d.append(close);if(id!==identity.user.id){const link=document.createElement('a');link.className='web-button';link.href='#telegrams/compose/'+id;link.textContent='Poslat telegram';link.onclick=()=>d.close();d.append(link);}close.focus();}catch(e){if(d.isConnected){d.textContent=e.message;d.append(button('Zavřít',()=>d.close()));}}
+ }
+ async function open(container,route){
+  dispose();host=container;owner=identity.user.id;const v=version;host.innerHTML='<p role="status">Otevírám ústavní pokladnu…</p>';
+  try{const [w,shop]=await Promise.all([api('/economy/me'),api('/economy/shop')]);if(!valid(v))return;wallet=w;items=shop.items;stamp=Date.now();apply();
+   if(route.startsWith('#manage/economy'))await admin(v);else if(route.startsWith('#calendar'))await calendar(route,v);else if(route.startsWith('#shop'))shopPage();else await profilePage(v);
+  }catch(e){if(valid(v))host.innerHTML='<div class="web-callout"><p>'+esc(e.message)+'</p></div>';}
+ }
+ function balances(){return '<div class="wallet-summary"><span class="coin-emblem">Ú</span><div><small>ÚSTAVNÍ COINY</small><strong>'+wallet.coins+' <small>ÚC</small></strong></div><a href="#player">Level '+wallet.level+' · '+wallet.progress+' / '+wallet.required+' XP ↗</a></div>';}
+ function shopPage(){
+  const owned=new Set(wallet.inventory.map(i=>i.item_id));host.innerHTML='<section class="shop-intro"><span class="eyebrow">DOPLŇKY S PŘÍBĚHEM</span><h2>Ústavní krámek</h2><p>Výhry přináší Coiny. Tady jim dáš vlastní podobu.</p>'+balances()+'</section><nav class="shop-filters" aria-label="Kategorie krámku"></nav><div class="shop-grid"></div><p class="web-muted">Výhra: 100 XP a 30 ÚC. Dokončená prohra: 25 XP a 5 ÚC. Opuštěná nebo nedohraná partie odměnu nepřináší. Doplňky mění vzhled.</p>';
+  const filters=host.querySelector('.shop-filters');for(const[k,label]of [['all','Všechno'],...Object.entries(labels).filter(([k])=>k!=='collectible'),['owned','Moje výbava']]){const b=button(label,()=>{filter=k;shopPage();});b.setAttribute('aria-pressed',String(filter===k));filters.append(b);}
+  const visible=items.filter(i=>filter==='owned'?owned.has(i.id):!i.giftOnly&&(filter==='all'||i.kind===filter)),grid=host.querySelector('.shop-grid');if(!visible.length)grid.innerHTML='<p class="web-muted">Tahle polička zatím čeká na první úlovek.</p>';
+  for(const i of visible){const card=document.createElement('article');card.className='shop-product';card.style.setProperty('--item-color',i.color);card.innerHTML='<div class="product-stage">'+tile(i)+'</div><span class="eyebrow">'+esc(labels[i.kind])+'</span><h3>'+esc(i.name)+'</h3><p>'+(owned.has(i.id)?'Ve tvé sbírce':i.price+' ÚC')+'</p>';card.append(button(owned.has(i.id)?'Prohlédnout a nasadit':'Vyzkoušet',()=>preview(i)));grid.append(card);}
+ }
+ function preview(i){
+  const d=document.createElement('dialog');d.className='product-dialog';host.append(d);const equipped={...wallet.equipped,...(i.kind!=='collectible'?{[i.kind]:i.id}:{})},owned=wallet.inventory.some(x=>x.item_id===i.id),p={...identity.user,level:wallet.level,wins:wallet.wins,games:wallet.games,equipped};
+  d.innerHTML='<span class="eyebrow">NÁHLED NA TVÉM PROFILU</span><h2>'+esc(i.name)+'</h2>'+(i.kind==='back'||i.kind==='journal'||i.kind==='collectible'?'<div class="product-stage">'+tile(i)+'</div>':profileHTML(p,equipped))+'<p class="product-status" role="status">'+(owned?'Předmět už vlastníš.':i.price+' ÚC · tvůj zůstatek '+wallet.coins+' ÚC')+'</p><div class="product-actions"></div>';const actions=d.querySelector('.product-actions');actions.append(button('Zpět',()=>d.close()));
+  if(i.kind!=='collectible'){
+   const action=button(owned?'Nasadit':wallet.coins>=i.price?'Koupit za '+i.price+' ÚC':'Chybí '+(i.price-wallet.coins)+' ÚC',async()=>{if(action.disabled)return;action.disabled=true;try{if(owned){await api('/economy/equip',{method:'PUT',body:JSON.stringify({revision:wallet.revision,equipped})});}else{await api('/economy/buy',{method:'POST',body:JSON.stringify({item:i.id,requestId:crypto.randomUUID()})});}await sync(true);if(!d.isConnected)return;d.close();if(location.hash.startsWith('#shop'))shopPage();else await profilePage(version);if(!owned&&host?.isConnected)preview(i);}catch(e){if(d.isConnected){d.querySelector('.product-status').textContent=e.message;action.disabled=false;}}},'primary');action.disabled=!owned&&wallet.coins<i.price;actions.append(action);
+  }d.onclose=()=>d.remove();d.showModal();
+ }
+ async function profilePage(v){
+  const p=await api('/economy/profile/'+owner);if(!valid(v))return;host.innerHTML='<div class="player-profile-layout">'+profileHTML(p)+'<section class="player-wardrobe"><span class="eyebrow">TVOJE JMÉNO, TVŮJ STYL</span><h2>Moje výbava</h2>'+balances()+'<p>'+wallet.xp+' XP celkem · další level za '+(wallet.required-wallet.progress)+' XP</p><progress max="'+wallet.required+'" value="'+wallet.progress+'" aria-label="Postup na další level"></progress><form class="wardrobe-form"></form><a href="#shop" class="web-button">Navštívit krámek ↗</a></section></div><section class="player-collection"><h2>Moje sbírka</h2><div class="shop-grid"></div></section><h2>Pohyby v peněžence</h2><div class="wallet-history"></div>';
+  const form=host.querySelector('form');for(const[k,label]of Object.entries(labels).filter(([k])=>k!=='collectible')){const row=document.createElement('label');row.textContent=label;const select=document.createElement('select');select.name=k;select.innerHTML='<option value="">Původní vzhled</option>'+wallet.inventory.map(x=>item(x.item_id)).filter(i=>i?.kind===k).map(i=>'<option value="'+i.id+'"'+(wallet.equipped[k]===i.id?' selected':'')+'>'+esc(i.name)+'</option>').join('');row.append(select);form.append(row);}const status=document.createElement('p');status.setAttribute('role','status');const save=button('Uložit vzhled',async()=>{save.disabled=true;try{await api('/economy/equip',{method:'PUT',body:JSON.stringify({revision:wallet.revision,equipped:Object.fromEntries([...form.elements].filter(e=>e.tagName==='SELECT').map(e=>[e.name,e.value||null]))})});await sync(true);if(valid(v))await profilePage(v);}catch(e){status.textContent=e.message;save.disabled=false;}},'primary');form.append(save,status);
+  const grid=host.querySelector('.player-collection .shop-grid');for(const own of wallet.inventory){const i=item(own.item_id);if(!i)continue;const card=document.createElement('article');card.className='shop-product';card.innerHTML='<div class="product-stage">'+tile(i)+'</div><h3>'+esc(i.name)+'</h3>';card.append(button('Prohlédnout',()=>preview(i)));grid.append(card);}if(!wallet.inventory.length)grid.textContent='První doplňky získáš v krámku nebo v prosincové poště.';
+  host.querySelector('.wallet-history').innerHTML=wallet.history.map(t=>'<article><span>'+esc(t.note)+'</span><b>'+(t.coins>=0?'+':'')+t.coins+' ÚC'+(t.xp?' · +'+t.xp+' XP':'')+'</b><time>'+new Date(t.created_at*1000).toLocaleString('cs-CZ')+'</time></article>').join('')||'<p class="web-muted">Tvoje peněženka čeká na první dohranou partii.</p>';
+ }
+ async function calendar(route,v){
+  const match=/^#calendar\/preview\/(\d+)$/.exec(route),result=await api('/economy/calendar'+(match?'?preview='+match[1]:''));if(!valid(v))return;
+  host.innerHTML='<section class="calendar-intro"><span class="eyebrow">JEDEN DEN. JEDNA OBÁLKA. TVOJE ODMĚNA.</span><h2>Prosincová pošta Ústavu</h2><p>31 přihrádek na cestě do nového roku. Otevři dnešní i zmeškané dopisy; budoucí počkají.</p>'+balances()+(result.preview?'<p class="preview-warning">NÁHLED · prohlížíš '+result.day+'. prosinec. Odměny se v náhledu nepřipisují.</p>':!result.active?'<p>Pošta se otevře 1. prosince '+result.year+'.</p>':'')+'</section><div class="calendar-preview-controls"></div><section class="calendar-cabinet" aria-label="31 prosincových okének"><header>NEW HORIZON · POŠTOVNÍ ÚŘAD <b>'+result.year+'</b></header><div class="calendar-grid"></div></section>';
+  if(identity.admin?.owner){const controls=host.querySelector('.calendar-preview-controls'),label=document.createElement('label');label.textContent='Správcovský náhled dne';const select=document.createElement('select');select.innerHTML='<option value="">Skutečný kalendář</option>'+Array.from({length:31},(_,i)=>'<option value="'+(i+1)+'"'+(result.preview&&result.day===i+1?' selected':'')+'>'+(i+1)+'. prosince</option>').join('');select.onchange=()=>location.hash=select.value?'#calendar/preview/'+select.value:'#calendar';label.append(select);controls.append(label,button('Vyzkoušet vánoční výzdobu',()=>Holiday.preview(true)));}
+  const grid=host.querySelector('.calendar-grid');for(const gift of result.gifts){const claimed=result.claimed.find(x=>x.day===gift.day),available=gift.day<=result.day;const b=button('',()=>openGift(gift,claimed,result,b));b.className='calendar-door'+(claimed?' is-opened':'')+(gift.day===result.day?' is-today':'');b.disabled=!available&&!claimed;b.setAttribute('aria-label',gift.day+'. prosince · '+(claimed?'získáno':available?'otevřít':'zamčeno'));b.innerHTML='<span class="door-front"><small>PROSINEC</small><b>'+gift.day+'</b><i aria-hidden="true">✉</i></span><span class="door-state">'+(claimed?'✓ Vyzvednuto':available?'Otevřít':'Ještě počkej')+'</span>';grid.append(b);}
+ }
+ function openGift(gift,claimed,result,door){
+  door.classList.add('is-unsealing');const d=document.createElement('dialog');d.className='calendar-gift-dialog';host.append(d);const names=gift.items.map(id=>item(id)?.name||id);d.innerHTML='<span class="eyebrow">'+gift.day+'. PROSINCE · PRO TEBE</span><h2>'+esc(gift.coins?gift.coins+' Ústavních Coinů':names.join(' + '))+'</h2><div class="gift-reveal">'+(gift.items[0]?tile(item(gift.items[0])):'<span class="coin-emblem">Ú</span>')+'</div><p role="status">'+(claimed?'Tento dárek už máš ve své sbírce.':result.preview?'Ukázka dárku. V náhledu jej nelze vyzvednout.':'Odměna zůstane u tvého Discord účtu. Za každý již vlastněný předmět dostaneš náhradních 50 ÚC.')+'</p><div class="product-actions"></div>';const actions=d.querySelector('.product-actions');actions.append(button('Zavřít',()=>d.close()));
+  if(!claimed&&!result.preview){const take=button('Vyzvednout dárek',async()=>{take.disabled=true;try{const data=await api('/economy/calendar/claim',{method:'POST',body:JSON.stringify({day:gift.day,requestId:crypto.randomUUID()})});await sync(true);if(!d.isConnected)return;d.querySelector('[role=status]').textContent='Dárek je tvůj!'+(data.coins?' Připsáno '+data.coins+' ÚC.':'');door.classList.add('is-opened');door.querySelector('.door-state').textContent='✓ Vyzvednuto';claimed=data;door.onclick=()=>openGift(gift,data,result,door);}catch(e){if(d.isConnected){d.querySelector('[role=status]').textContent=e.message;take.disabled=false;}}},'primary');actions.append(take);}
+  d.onclose=()=>{d.remove();door.classList.remove('is-unsealing');};d.showModal();
+ }
+ async function admin(v){
+  const result=await api('/economy/admin');if(!valid(v))return;host.innerHTML='<h2>Ústavní pokladna</h2><p>Opravy zůstatku vyžadují důvod a zůstávají v historii. Ceny mění pouze vlastník webu.</p><form class="economy-adjust"><label>Hráč<select name="userId">'+result.wallets.map(w=>'<option value="'+w.id+'">'+esc(w.name)+' · '+w.coins+' ÚC</option>').join('')+'</select></label><label>Změna Coinů<input type="number" name="coins" min="-100000" max="100000" required></label><label>Důvod<textarea name="reason" maxlength="500" required></textarea></label><button class="web-button primary">Zapsat opravu</button><p role="status"></p></form><h2>Ceník</h2><div class="economy-prices"></div><h2>Posledních 100 pohybů</h2><div class="wallet-history">'+result.ledger.map(l=>'<article><span>'+esc(l.user_id)+' · '+esc(l.note)+'</span><b>'+l.coins+' ÚC · '+l.xp+' XP</b><small>'+esc(l.kind)+(l.actor_id?' · správce '+esc(l.actor_id):'')+'</small></article>').join('')+'</div>';
+  const f=host.querySelector('form');f.onsubmit=async e=>{e.preventDefault();const submit=f.querySelector('button');submit.disabled=true;try{await api('/economy/admin/adjust',{method:'POST',body:JSON.stringify({userId:f.elements.userId.value,coins:Number(f.elements.coins.value),reason:f.elements.reason.value,requestId:crypto.randomUUID()})});await sync(true);if(valid(v))await admin(v);}catch(error){f.querySelector('[role=status]').textContent=error.message;submit.disabled=false;}};
+  for(const i of result.items.filter(i=>!i.giftOnly)){const row=document.createElement('form');row.innerHTML='<label>'+esc(i.name)+'<input name="price" type="number" min="0" max="10000" required value="'+i.price+'"></label><button class="web-button">Uložit cenu</button><span role="status"></span>';row.onsubmit=async e=>{e.preventDefault();const b=row.querySelector('button');b.disabled=true;try{await api('/economy/admin/price',{method:'PUT',body:JSON.stringify({item:i.id,price:Number(row.elements.price.value)})});row.querySelector('[role=status]').textContent='Uloženo';}catch(error){row.querySelector('[role=status]').textContent=error.message;}finally{b.disabled=false;}};host.querySelector('.economy-prices').append(row);}
+ }
+ function cards(s,container){
+  for(const seat of container.querySelectorAll('[data-player]')){const p=s.players.find(p=>p.id===seat.dataset.player);if(!p)continue;const e=p.equipped||{};seat.dataset.frame=item(e.frame)?.style||'';const picture=seat.querySelector('img');if(picture&&!picture.closest('button')){const b=button('',()=>showProfile(p.id));b.className='seat-profile';b.setAttribute('aria-label','Vizitka: '+p.name);picture.replaceWith(b);b.append(picture);b.dataset.frame=item(e.frame)?.style||'';b.classList.add('custom-avatar');}const avatar=seat.querySelector('.seat-profile');if(avatar){avatar.dataset.frame=item(e.frame)?.style||'';avatar.dataset.effect=item(e.effect)?.style||'';}const backs=seat.querySelector('.ud-mini-backs');if(backs){backs.dataset.skin=item(e.back)?.style||'';backs.innerHTML=Array.from({length:Math.min(7,p.count)},()=>'<i aria-hidden="true"></i>').join('');}}
+  if(s.reward&&!container.querySelector('.game-reward')){const banner=document.createElement('aside');banner.className='game-reward';banner.innerHTML='<span class="coin-emblem">Ú</span><div><strong>+'+s.reward.coins+' ÚC · +'+s.reward.xp+' XP</strong><p>Odměna za tuto partii je připsaná.</p></div><a href="#shop" class="web-button">Do krámku ↗</a>';container.querySelector('.cards-results')?.before(banner);sync(true);}
+ }
+ return{open,dispose,sync,showProfile,cards,apply};
+})();
+
+const Holiday=(()=>{
+ let root=null,enabled=true,previewing=false,active=false;
+ function update(){
+  const parts=Object.fromEntries(new Intl.DateTimeFormat('en',{month:'numeric',day:'numeric',timeZone:'Europe/Prague'}).formatToParts(new Date()).map(p=>[p.type,p.value]));
+  if(!identity?.admin?.owner)previewing=false;
+  active=enabled&&SeasonAtmosphere.mode!=='off'&&!identity?.restricted&&(previewing||(Number(parts.month)===12&&Number(parts.day)>=20&&Number(parts.day)<=26));
+  document.body.classList.toggle('christmas-week',active);if(root){root.hidden=!active;root.classList.toggle('holiday-paused',document.hidden);}
+  SeasonAtmosphere.festive(active);
+ }
+ function init(){
+  if(root)return;try{enabled=localStorage.getItem('nh-holiday')!=='off';}catch{}
+  root=document.createElement('div');root.className='holiday-decoration';root.setAttribute('aria-hidden','true');root.innerHTML='<div class="holiday-garland">'+Array.from({length:12},(_,i)=>'<i class="holiday-bulb" style="--n:'+i+'"></i>').join('')+'</div>'+[0,1,2].map(i=>'<span class="holiday-bauble bauble-'+i+'"><b>✦</b></span>').join('')+'<div class="holiday-flakes">'+Array.from({length:14},(_,i)=>'<i style="--n:'+i+'">✧</i>').join('')+'</div><span class="holiday-frost"></span>';document.body.append(root);document.addEventListener('visibilitychange',update);window.addEventListener('hashchange',update);setInterval(update,60000);update();
+ }
+ function controls(host){
+  const section=document.createElement('section');section.className='holiday-settings';section.innerHTML='<span class="eyebrow">20.–26. PROSINCE · EVROPA / PRAHA</span><h2>Vánoce na horizontu</h2><p>Jehličí, teplá světýlka, ozdoby a jemný sníh. Výzdoba se objeví automaticky na vánoční týden.</p><label><input type="checkbox" '+(enabled?'checked':'')+'> Povolit vánoční výzdobu</label><div class="holiday-preview-actions"></div><a href="#calendar" class="web-button">Prosincová pošta ↗</a>';
+  section.querySelector('input').onchange=e=>{enabled=e.target.checked;try{localStorage.setItem('nh-holiday',enabled?'on':'off');}catch{}update();};
+  if(identity?.admin?.owner){const b=document.createElement('button');b.type='button';b.className='web-button';b.textContent='Přepnout správcovský náhled Vánoc';b.onclick=()=>preview(!previewing);section.querySelector('.holiday-preview-actions').append(b);const hint=document.createElement('p');hint.className='web-muted';hint.textContent='Náhled mění vzhled pouze tobě. Neposouvá datum ani nepřipisuje dárky.';section.append(hint);}host.append(section);
+ }
+ function preview(value){if(!identity?.admin?.owner)return;previewing=!!value;if(value)enabled=true;update();}
+ return{init,update,controls,preview,get active(){return active;}};
+})();
+
 const Community=(()=>{
  let page,nav,generation=0,loadedHash='',view='',editorState=null,suspended=null,mailRequest=null,mailDraft=null;
  const labels={given:'Jméno',surname:'Příjmení',nickname:'Přezdívka',age:'Věk v lore',birth:'Datum narození',occupation:'Povolání',relatives:'Rodina a blízcí',kicker:'Motto',description:'Úvodní charakteristika',quote:'Osobní citát',closing:'Závěrečná slova',origin:'Původ',familyTitle:'Nadpis vztahů',familyDescription:'Úvod ke vztahům',chapters:'Kapitoly lore',family:'Vztahy'};
@@ -882,7 +1022,7 @@ const Community=(()=>{
  const icon=name=>'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="'+icons[name]+'"/></svg>';
  const stamp=state=>({pending:'Čeká na schválení',approved:'Schváleno',rejected:'Zamítnuto'}[state]||state);
  const date=t=>t?new Intl.DateTimeFormat('cs-CZ',{dateStyle:'medium',timeStyle:'short',timeZone:'Europe/Prague'}).format(new Date(t*1000)):'Zatím nezaznamenáno';
- const routeMatch=()=>/^#(?:manage|edit|telegrams|gramophone|seasons|atlas|games)(?:\/|$)/.test(location.hash);
+ const routeMatch=()=>/^#(?:manage|edit|telegrams|gramophone|seasons|atlas|games|shop|calendar|player)(?:\/|$)/.test(location.hash);
  const has=permission=>identity?.admin?.permissions.includes(permission);
  const text=data=>escapeHTML(data);
  function setStatus(message){page.querySelector('.community-status').textContent=message;}
@@ -926,7 +1066,7 @@ const Community=(()=>{
   if(loadedHash!==location.hash&&dirty()&&!await PortalPolish.confirm(view==='mail'?'Zahodit rozepsaný telegram?':'Opustit rozepsanou postavu?',view==='mail'?'Neodeslaný text telegramu se zahodí.':'Neuložené změny se zahodí. Koncept uložený na serveru zůstane zachovaný.',view==='mail'?'Zahodit telegram':'Opustit editor')){history.replaceState(null,'',loadedHash);return false;}return true;
  }
  function purge({preserveDraft=false}={}){
-  Cards.dispose();Atlas.dispose({preserveDraft});SeasonLab.dispose();Gramophone.detach();
+  PlayerHub.dispose();Cards.dispose();Atlas.dispose({preserveDraft});SeasonLab.dispose();Gramophone.detach();
   if(preserveDraft&&view==='mail'&&mailValues())mailDraft={user:identity?.user.id,hash:loadedHash,data:mailValues(),requestId:mailRequest};else if(!preserveDraft)mailDraft=null;
   if(preserveDraft&&view==='edit'&&editorState)suspended={user:identity?.user.id,data:values(),state:editorState};else if(!preserveDraft)suspended=null;
   generation++;page.hidden=true;page.replaceChildren();document.body.classList.remove('community-view');view='';editorState=null;loadedHash='';mailRequest=null;
@@ -941,7 +1081,8 @@ const Community=(()=>{
   purge({preserveDraft:!!suspended||!!mailDraft||Atlas.pendingDraft});const version=++generation,user=identity?.user.id;loadedHash=location.hash;
   if(!identity){shell('Vstup do svého archivu','Pro správu postavy a telegramy se přihlas přes Discord.');content().innerHTML='<a class="web-button" href="'+loginHref+'">Přihlásit přes Discord</a>';return;}
   try{
-   if(loadedHash.startsWith('#games')){view='games';shell('Hry','Společný stůl pro naši partu.','games');await Cards.open(content());}
+   if(/^#(?:shop|calendar|player)(?:\/|$)/.test(loadedHash)||loadedHash.startsWith('#manage/economy')){view='player-hub';const title=loadedHash.startsWith('#shop')?'Ústavní krámek':loadedHash.startsWith('#calendar')?'Prosincová pošta':loadedHash.startsWith('#manage')?'Ústavní pokladna':'Moje vizitka';shell(title,'Tvůj příběh, tvoje výbava.','player-hub');menu([['#','Můj archiv','home'],['#player','Moje vizitka','users'],['#shop','Ústavní krámek','home'],['#calendar','Prosincová pošta','mail'],...(identity.admin?.owner?[['#manage/economy','Správa měny','admin']]:[])]);await PlayerHub.open(content(),loadedHash);}
+   else if(loadedHash.startsWith('#games')){view='games';shell('Hry','Společný stůl pro naši partu.','games');await Cards.open(content());}
    else if(loadedHash.startsWith('#edit')){view='edit';shell('Tvůj příběh. Tvými slovy.','Uprav svou postavu. Zveřejní se až po schválení správou.','editor');menu([['#','Můj archiv','home'],['#edit','Upravit postavu','edit'],['#telegrams','Telegramy','mail']]);await editor(version,user);}
    else if(loadedHash.startsWith('#gramophone')){view='gramophone';shell('Gramofon','Desky, které dávají příběhům vlastní hlas.','gramophone');menu([['#','Můj archiv','home'],['#gramophone','Gramofon','home'],['#seasons','Roční období','clock']]);await Gramophone.open(content());}
    else if(loadedHash.startsWith('#seasons')){view='seasons';shell('Roční období','Atmosféra kroniky podle tebe.','seasons');menu([['#','Můj archiv','home'],['#gramophone','Gramofon','home'],['#seasons','Roční období','clock']]);await SeasonLab.open(content());}
@@ -990,7 +1131,7 @@ const Community=(()=>{
   const overview=await api('/manage/overview');if(!valid(version,user))return;
   const own=overview.admin.owner,permissions=overview.admin.permissions;
   const items=[['#manage','Přehled','admin']];if(permissions.includes('review'))items.push(['#manage/requests','Změny','edit']);if(permissions.includes('activity'))items.push(['#manage/users','Uživatelé a přihlášení','users']);if(own)items.push(['#manage/admins','Správci a oprávnění','admin']);if(permissions.includes('blacklist'))items.push(['#manage/blacklist','Blacklist','admin']);if(permissions.includes('official'))items.push(['#manage/mail','Telegramy správy','mail']);if(permissions.includes('review'))items.push(['#manage/audit','Historie rozhodnutí','clock']);menu(items);
-  if(own){items.push(['#manage/atlas','Atlas · náhled','home'],['#seasons','Roční období','clock'],['#gramophone','Gramofon','home']);menu(items);}
+  if(own){items.push(['#manage/economy','Ústavní pokladna','admin'],['#calendar/preview/24','Náhled kalendáře','mail'],['#manage/atlas','Atlas · náhled','home'],['#seasons','Roční období','clock'],['#gramophone','Gramofon','home']);menu(items);}
   const changes=page.querySelector('.community-menu a[href="#manage/requests"]');if(changes&&overview.pending){changes.classList.add('has-pending');changes.dataset.count=overview.pending;}
   const path=loadedHash.split('/');
   if(path[1]==='requests'){
@@ -1089,10 +1230,19 @@ const UserChrome=(()=>{
  function openMenu(focus=false){if(!identity||!trigger)return;host.classList.add('user-menu-open');nav.inert=false;nav.setAttribute('aria-hidden','false');trigger.setAttribute('aria-expanded','true');if(focus)nav.querySelector('a:not([hidden]),button:not([hidden])')?.focus();}
  function closeBirthday(){birthdayVersion++;birthdayKey=null;if(birthday?.open)birthday.close();birthday?.querySelector('.birthday-content').replaceChildren();restoreBirthdayFocus?.focus({preventScroll:true});restoreBirthdayFocus=null;}
  function clearPrivate(){closeBirthday();settingsVersion++;if(settings?.open)settings.close();settings?.querySelector('form').reset();}
+ function arrangeMenu(){
+  const own=identity?.owned[0];nav.querySelector('.nav-journal').href=own?'#journal-'+own:'#';nav.querySelector('.nav-journal').hidden=!own||!!identity?.restricted;nav.querySelector('.nav-trust').hidden=!own||!!identity?.restricted;
+  for(const selector of ['.nav-profile','.nav-shop','.nav-calendar'])nav.querySelector(selector).hidden=!!identity?.restricted;
+  const groups=[['Moje postava',['.nav-profile','.portal-home','.nav-journal','.nav-edit','.nav-trust']],['Náš svět',['.cast-toggle','.nav-mail','.nav-atlas']],['Volný čas',['.nav-gramophone','.nav-games','.nav-calendar','.nav-shop']],['Nastavení',['.nav-seasons','.notification-settings','.menu-logout']],['Správa',['.nav-manage']]];
+  const fresh=[];for(const[label,selectors]of groups){const section=document.createElement('section');section.className='account-menu-group';const title=document.createElement('h3');title.textContent=label;section.append(title);for(const selector of selectors){const e=nav.querySelector(selector);if(e)section.append(e);}fresh.push(section);}
+  nav.querySelectorAll('.account-menu-group').forEach(e=>e.remove());nav.append(...fresh);
+ }
  function init(){
   nav=document.querySelector('.portal-navigation');nav.id='user-navigation';nav.classList.add('profile-navigation');nav.inert=true;nav.setAttribute('aria-hidden','true');
   host=document.createElement('div');host.className='user-chrome';document.querySelector('.masthead').append(host);host.append(accountControls,nav);
   const preferenceButton=document.createElement('button');preferenceButton.type='button';preferenceButton.className='notification-settings';preferenceButton.innerHTML=bell+'Upozornění';preferenceButton.onclick=openSettings;nav.append(preferenceButton);
+  for(const[cls,href,label,symbol]of [['profile','#player','Moje vizitka','♙'],['journal','#','Můj deník','▤'],['calendar','#calendar','Prosincová pošta','✉'],['shop','#shop','Ústavní krámek','◈']]){const a=document.createElement('a');a.className='nav-'+cls;a.href=href;a.innerHTML='<span class="menu-symbol" aria-hidden="true">'+symbol+'</span>'+label;nav.append(a);}
+  const trust=document.createElement('button');trust.type='button';trust.className='nav-trust';trust.innerHTML='<span class="menu-symbol" aria-hidden="true">♧</span>Komu důvěřuji';trust.onclick=()=>document.querySelector('.trust-open')?.click();nav.append(trust);
   nav.addEventListener('click',event=>{if(event.target.closest('a,button'))closeMenu(true);});
   host.addEventListener('keydown',event=>{if(event.key==='Escape'&&host.classList.contains('user-menu-open')){event.preventDefault();event.stopPropagation();closeMenu(true);}else if(event.target===trigger&&event.key==='ArrowDown'){event.preventDefault();openMenu(true);}});
   document.addEventListener('pointerdown',event=>{if(!host.contains(event.target))closeMenu();});
@@ -1117,12 +1267,13 @@ const UserChrome=(()=>{
   trigger=document.createElement('button');trigger.type='button';trigger.className='user-trigger';trigger.setAttribute('aria-controls',nav.id);trigger.setAttribute('aria-expanded','false');trigger.setAttribute('aria-label','Otevřít nabídku účtu '+identity.user.name);
   const portrait=document.createElement('span');portrait.className='user-trigger-portrait';portrait.append(avatar);trigger.append(portrait,name);const arrow=document.createElement('span');arrow.className='user-chevron';arrow.setAttribute('aria-hidden','true');arrow.textContent='⌄';trigger.append(arrow);
   const counters=document.createElement('span');counters.className='user-counters';counters.innerHTML='<span class="user-unread" hidden></span><span class="user-pending" hidden></span>';trigger.append(counters);accountControls.replaceChildren(trigger);
-  logout.classList.add('menu-logout');nav.append(logout);trigger.onclick=()=>host.classList.contains('user-menu-open')?closeMenu():openMenu();refresh();
+  logout.classList.add('menu-logout');nav.append(logout);arrangeMenu();trigger.onclick=()=>host.classList.contains('user-menu-open')?closeMenu():openMenu();refresh();
  }
  function refresh(){
   if(birthdayKey&&(!identity||!identity.access.includes(birthdayKey)))closeBirthday();
   if(!identity){closeMenu();return;}
   if(!trigger)return;
+  PlayerHub.sync();Holiday.update();
   for(const [selector,count,label]of [['.user-unread',identity.unread||0,'nepřečtených telegramů'],['.user-pending',identity.pending||0,'změn ke schválení']]){const counter=trigger.querySelector(selector);counter.hidden=!count;counter.textContent=String(count);counter.setAttribute('aria-label',count+' '+label);}
   for(const link of nav.querySelectorAll('a')){const hash=link.hash,active=hash===''||hash==='#'?!location.hash||location.hash==='#':location.hash.startsWith(hash);if(active)link.setAttribute('aria-current','page');else link.removeAttribute('aria-current');}
  }
@@ -1262,7 +1413,7 @@ function renderAccount(){
  document.body.classList.toggle('signed-in',!!identity);welcome.hidden=!identity;rail.hidden=!identity;
  document.body.classList.toggle('restricted-user',!!identity?.restricted);if(!identity?.restricted)RestrictedAccess.hide();
  accountControls.replaceChildren();
- if(!identity){Community.purge();PortalPolish.closeCast();rail.replaceChildren();portal.replaceChildren();const login=document.createElement('a');login.href=loginHref;login.className='discord-login';login.textContent='Přihlásit přes Discord';accountControls.append(login);UserChrome.account();return;}
+ if(!identity){Community.purge();PortalPolish.closeCast();rail.replaceChildren();portal.replaceChildren();const login=document.createElement('a');login.href=loginHref;login.className='discord-login';login.textContent='Přihlásit přes Discord';accountControls.append(login);UserChrome.account();PlayerHub.sync();Holiday.update();return;}
  const photo=new Image(34,34);photo.src=identity.user.avatar;photo.alt='';accountControls.append(photo);
  const name=document.createElement('span');name.textContent=identity.user.name;accountControls.append(name);
  const logout=document.createElement('button');logout.type='button';logout.textContent='Odhlásit';logout.onclick=async()=>{
@@ -1277,7 +1428,7 @@ function renderAccount(){
  document.body.style.setProperty('--account-aura',person?.color||'#c88e4a');
  welcome.querySelector('p').textContent=person?'Tvůj příběh čeká, '+person.nickname+'.':'Vítej mezi příběhy, do kterých ti jejich hráči dovolí nahlédnout.';
  welcome.querySelector('.trust-open').hidden=!own;
- rail.innerHTML='<header class="cast-heading"><div><span class="eyebrow">SEDM OSUDŮ. JEDEN HORIZONT.</span><h2>Příběhy kolem tebe<span aria-hidden="true">✦</span></h2><p>Známé tváře. Vlastní tajemství. Každý příběh otevírá důvěra.</p></div><span class="cast-count">'+String(Object.keys(catalog).length-(own?1:0)).padStart(2,'0')+'<small>DALŠÍCH PŘÍBĚHŮ</small></span></header><div class="cast-grid">'+Object.entries(catalog).filter(([key])=>key!==own).map(([key,p])=>'<a href="#'+key+'" class="private-medallion" style="--aura:'+p.color+'"><img src="'+mediaURL('icon-'+key+'.png',320)+'" alt="" width="180" height="180" loading="lazy" decoding="async"><span>'+escape(p.nickname)+'</span></a>').join('')+'</div><p class="cast-footnote">Příběh a deník mají vlastní povolení. O přístup můžeš požádat přímo hráče.</p>';
+ rail.innerHTML='<header class="cast-heading"><div><span class="eyebrow">ŠEST OSUDŮ. JEDEN HORIZONT.</span><h2>Příběhy kolem tebe<span aria-hidden="true">✦</span></h2><p>Známé tváře. Vlastní tajemství. Každý příběh otevírá důvěra.</p></div><span class="cast-count">'+String(Object.keys(catalog).length-(own?1:0)).padStart(2,'0')+'<small>DALŠÍCH PŘÍBĚHŮ</small></span></header><div class="cast-grid">'+Object.entries(catalog).filter(([key])=>key!==own).map(([key,p])=>'<a href="#'+key+'" class="private-medallion" style="--aura:'+p.color+'"><img src="'+mediaURL('icon-'+key+'.png',320)+'" alt="" width="180" height="180" loading="lazy" decoding="async"><span>'+escape(p.nickname)+'</span></a>').join('')+'</div><p class="cast-footnote">Příběh a deník mají vlastní povolení. O přístup můžeš požádat přímo hráče.</p>';
  portal.innerHTML='<section class="personal-scene" style="--aura:'+(person?.color||'#c88e4a')+'">'+(person?'<img class="personal-portrait" src="'+mediaURL(person.image,960)+'" sizes="(max-width:700px) 90vw, 52vw" srcset="'+mediaSrcset(person.image)+'" alt="'+escape(person.name)+'" width="1024" height="1536">':'<img class="personal-emblem" src="'+mediaURL('NH.png',320)+'" alt="New Horizon RP">')+'<div class="personal-copy"><span class="eyebrow">'+(person?'PŘÍBĚH, O KTERÉM ROZHODUJEŠ TY':'KAŽDÁ DŮVĚRA MÁ SVŮJ PŘÍBĚH')+'</span><h1>'+(person?escape(person.given)+'<strong>'+escape(person.surname)+'</strong>':'Vítej v archivu')+'</h1>'+(person?'<p class="personal-signature">'+escape(person.nickname)+'</p><p>'+escape(person.motto)+'</p><a class="story-button" href="#'+own+'">Otevřít můj příběh <span>↗</span></a>':'<p>Po straně najdeš všechny postavy. Jejich příběhy si přečteš, pokud ti je hráči zpřístupní.</p>')+'<p class="personal-privacy">'+(person?'Tvůj archiv je soukromý. Ostatní do něj vstoupí pouze s tvým svolením.':'Přihlášení samo o sobě cizí příběhy neodemyká.')+'</p></div></section>';
  PortalPolish.account(person,own);PortalPolish.active(Journal.key||activePerson,Journal.key?'journal':'lore');
  UserChrome.account();UserChrome.decorateBirthdays();
@@ -1374,7 +1525,7 @@ window.addEventListener('keydown',event=>{if(event.key==='Escape'&&!event.defaul
 document.addEventListener('visibilitychange',()=>{if(document.hidden){routeVersion++;purgeProfile();Journal.purge({preserveDraft:true});Community.purge({preserveDraft:true});UserChrome.clearPrivate();UserChrome.closeMenu();PortalPolish.loading('',false);}else refreshSession(true);});
 window.addEventListener('pageshow',event=>{if(event.persisted){routeVersion++;purgeProfile();Journal.purge();refreshSession(true);}});
 setInterval(()=>{if(!document.hidden&&identity)refreshSession();},15000);
-PortalPolish.init();Journal.init();Community.init();UserChrome.init();SeasonAtmosphere.init();renderAccount();
+PortalPolish.init();Journal.init();Community.init();UserChrome.init();SeasonAtmosphere.init();Holiday.init();renderAccount();
 const loginResult=new URLSearchParams(location.search).get('login');
 if(loginResult){setNotice(loginResult==='failed'?'Přihlášení se nepodařilo. Ověř, že jsi členem vašeho Discord serveru, a zkus to znovu.':'Přihlášení bylo zrušeno.');history.replaceState(null,'',location.pathname+location.hash);}
 refreshSession(true);

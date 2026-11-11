@@ -47,6 +47,15 @@
       "addedAt": "2026-11-08T15:06:28.496Z"
     },
     {
+      "id": "05a8a19d13d37faa17e3",
+      "title": "Couvám",
+      "artist": "New Horizon RP",
+      "url": "/music/05a8a19d13d37faa17e3.7ad183ee7340528d.mp3",
+      "type": "audio/mpeg",
+      "bytes": 4854998,
+      "addedAt": "2026-11-11T16:55:50.408Z"
+    },
+    {
       "id": "1d29c9c5a029c47ac4a7",
       "title": "ČTYŘI PACIENTI",
       "artist": "New Horizon RP",
@@ -54,6 +63,15 @@
       "type": "audio/mpeg",
       "bytes": 7052233,
       "addedAt": null
+    },
+    {
+      "id": "a4ac1e654da2154d0f7f",
+      "title": "Divadlo stínů",
+      "artist": "New Horizon RP",
+      "url": "/music/a4ac1e654da2154d0f7f.a2780b268bf5a64f.mp3",
+      "type": "audio/mpeg",
+      "bytes": 6246153,
+      "addedAt": "2026-11-11T16:55:50.408Z"
     },
     {
       "id": "1097dce02a85bbe535a1",
@@ -90,6 +108,15 @@
       "type": "audio/mpeg",
       "bytes": 6609603,
       "addedAt": null
+    },
+    {
+      "id": "2e88b7a97532504aeb19",
+      "title": "ÚSTAV BEZ DOZORU – ČTYŘI HLASY, JEDEN CHAOS",
+      "artist": "New Horizon RP",
+      "url": "/music/2e88b7a97532504aeb19.6bb0ac6e428bfe1f.mp3",
+      "type": "audio/mpeg",
+      "bytes": 5670919,
+      "addedAt": "2026-11-11T16:55:50.408Z"
     },
     {
       "id": "78815546f53e32a0f11e",

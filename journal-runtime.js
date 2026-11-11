@@ -58,7 +58,7 @@ window.Journal = (() => {
    canEdit=result.canEdit;
    if(result.entries){entries=new Map(result.entries.map(item=>[item.id,item]));nextCursor=result.nextCursor;if(entryId&&!entries.has(entryId)){const detail=await api('/journal/entries/'+key+'/'+entryId);if(version!==requestVersion||user!==identity?.user.id||document.hidden)return;entries.set(detail.entry.id,detail.entry);}}
    else if(entry)entries.set(entry.id,entry);
-   const person=catalog[key];page.style.setProperty('--aura',person.color);page.dataset.character=key;
+   const person=catalog[key];page.style.setProperty('--aura',person.color);page.dataset.character=key;PlayerHub.apply();
    page.querySelector('.journal-book-emblem').innerHTML=PortalPolish.book(key);page.querySelector('.journal-owner').textContent=person.name;
    page.querySelector('.journal-owner-signature').textContent=person.nickname;page.querySelector('.journal-back').href='#'+key;
    page.querySelector('.journal-new').hidden=!canEdit;page.querySelector('.journal-permission').textContent=canEdit?'TVŮJ SOUKROMÝ ZÁPISNÍK':'SDÍLENÝ DENÍK · JEN PRO ČTENÍ';

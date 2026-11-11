@@ -32,7 +32,7 @@ const SeasonLab=(()=>{
  async function open(container){
   dispose();if(!identity||!container.isConnected||identity.restricted)return;
   disposed=false;season='off';strength=65;visible=true;reduced=matchMedia('(prefers-reduced-motion: reduce)');
-  container.innerHTML='<div class="section-heading"><h2>Sezónní laboratoř</h2><span class="status-pill">JEN TVŮJ NÁHLED</span></div><p class="web-muted">Zkoušej atmosféru přímo na skle kroniky. Ostatním hráčům se vzhled nemění.</p><div class="season-controls"><label>Roční období<select class="season-choice"><option value="off">Bez efektu</option><option value="auto">Podle aktuálního období</option><option value="spring">Jaro</option><option value="summer">Léto</option><option value="autumn">Podzim</option><option value="winter">Zima · zamrzlé sklo</option></select></label><label>Síla efektu <output class="season-level">65 %</output><input class="season-strength" type="range" min="10" max="100" value="65"></label><button class="web-button frost-reset" type="button">Obnovit námrazu</button><button class="web-button season-off" type="button">Vypnout náhled</button></div><section class="season-stage" data-season="off" aria-label="Náhled sezónní atmosféry"><div class="season-landscape" aria-hidden="true"></div><div class="season-sunlight" aria-hidden="true"></div><div class="season-preview-copy"><span class="eyebrow">SEDM OSUDŮ · JEDEN HORIZONT</span><h3>Příběhy pod<br>stejným nebem.</h3><p class="season-greeting">Tvoje kronika. Tvoje atmosféra.</p><button type="button" class="web-button season-click-test">Zkusit tlačítko ↗</button><span class="season-click-result" role="status"></span></div><canvas class="season-canvas" aria-hidden="true"></canvas></section><p class="season-feedback" role="status"></p>';
+  container.innerHTML='<div class="section-heading"><h2>Sezónní laboratoř</h2><span class="status-pill">JEN TVŮJ NÁHLED</span></div><p class="web-muted">Zkoušej atmosféru přímo na skle kroniky. Ostatním hráčům se vzhled nemění.</p><div class="season-controls"><label>Roční období<select class="season-choice"><option value="off">Bez efektu</option><option value="auto">Podle aktuálního období</option><option value="spring">Jaro</option><option value="summer">Léto</option><option value="autumn">Podzim</option><option value="winter">Zima · zamrzlé sklo</option></select></label><label>Síla efektu <output class="season-level">65 %</output><input class="season-strength" type="range" min="10" max="100" value="65"></label><button class="web-button frost-reset" type="button">Obnovit námrazu</button><button class="web-button season-off" type="button">Vypnout náhled</button></div><section class="season-stage" data-season="off" aria-label="Náhled sezónní atmosféry"><div class="season-landscape" aria-hidden="true"></div><div class="season-sunlight" aria-hidden="true"></div><div class="season-preview-copy"><span class="eyebrow">ŠEST OSUDŮ · JEDEN HORIZONT</span><h3>Příběhy pod<br>stejným nebem.</h3><p class="season-greeting">Tvoje kronika. Tvoje atmosféra.</p><button type="button" class="web-button season-click-test">Zkusit tlačítko ↗</button><span class="season-click-result" role="status"></span></div><canvas class="season-canvas" aria-hidden="true"></canvas></section><p class="season-feedback" role="status"></p>';
   container.querySelector('h2').textContent='Tvoje roční období';container.querySelector('.status-pill').textContent='VZHLED PRO TEBE';container.querySelector('.web-muted').textContent='Období se mění automaticky podle kalendáře. Tady si můžeš zvolit vlastní atmosféru, její sílu nebo efekty vypnout. Volba platí pro celý web v tomto prohlížeči.';
   stage=container.querySelector('.season-stage');canvas=stage.querySelector('canvas');ctx=canvas.getContext('2d');feedback=container.querySelector('.season-feedback');
   const greetings={spring:'Ráno voní novým začátkem.',summer:'Slunce zlátne nad cestami kroniky.',autumn:'Za okny padá listí. Tvůj příběh pokračuje.',winter:'Za zamrzlým sklem příběhy neutichají.',off:'Tvoje kronika. Tvoje atmosféra.'};
@@ -45,14 +45,14 @@ const SeasonLab=(()=>{
   observer=new IntersectionObserver(entries=>{visible=entries[0].isIntersecting;if(visible)paint(performance.now());else stop();});observer.observe(stage);resize=new ResizeObserver(fit);resize.observe(stage);watchVisibility=()=>{if(document.hidden)stop();else if(visible)paint(performance.now());};document.addEventListener('visibilitychange',watchVisibility);watchReduced=()=>{stop();paint(performance.now());};reduced.addEventListener('change',watchReduced);
   strength=SeasonAtmosphere.strength;container.querySelector('.season-strength').value=strength;container.querySelector('output').textContent=strength+' %';fit();choose(SeasonAtmosphere.mode);
  }
- return{open,dispose};
+ return{open:async(container)=>{await open(container);Holiday.controls(container);},dispose};
 })();
 
 // Public, viewport-sized atmosphere. It contains no account data and never
 // intercepts input. Only this browser's preference is saved, not other players'.
 const SeasonAtmosphere=(()=>{
  const modes=['auto','off','spring','summer','autumn','winter'];
- let suspended=false;
+ let suspended=false,festive=false;
  let host,canvas,ctx,ice,frame=0,lastFrame=0,holes=[],mode='auto',strength=45,season='off',reduced;
  const current=()=>{const m=Number(new Intl.DateTimeFormat('en',{month:'numeric',timeZone:'Europe/Prague'}).format(new Date()));return m>=3&&m<=5?'spring':m>=6&&m<=8?'summer':m>=9&&m<=11?'autumn':'winter';};
  const noise=i=>{const n=Math.sin(i*83.71+9)*43758.54;return n-Math.floor(n);};
@@ -77,8 +77,8 @@ const SeasonAtmosphere=(()=>{
   if(!reduced.matches&&(season!=='winter'||holes.length))schedule();
  }
  function schedule(){if(frame||document.hidden||season==='off')return;frame=requestAnimationFrame(t=>{frame=0;if(t-lastFrame<40){schedule();return;}lastFrame=t;paint(t);});}
- function apply(){if(!host)return;season=(suspended||identity?.restricted)?'off':mode==='auto'?current():mode;host.dataset.season=season;document.documentElement.dataset.season=season;holes=[];frost();paint(performance.now());}
- function configure(next,level){mode=modes.includes(next)?next:'auto';strength=Math.min(100,Math.max(10,Number(level)||45));try{localStorage.setItem('nh-season',JSON.stringify({mode,strength}));}catch{}apply();}
+ function apply(){if(!host)return;season=(suspended||festive||identity?.restricted)?'off':mode==='auto'?current():mode;host.dataset.season=season;document.documentElement.dataset.season=season;holes=[];frost();paint(performance.now());}
+ function configure(next,level){mode=modes.includes(next)?next:'auto';strength=Math.min(100,Math.max(10,Number(level)||45));try{localStorage.setItem('nh-season',JSON.stringify({mode,strength}));}catch{}apply();Holiday.update();}
  function init(){
   if(host)return;try{const saved=JSON.parse(localStorage.getItem('nh-season'));if(saved&&modes.includes(saved.mode)){mode=saved.mode;strength=Math.min(100,Math.max(10,Number(saved.strength)||45));}}catch{}
   reduced=matchMedia('(prefers-reduced-motion: reduce)');host=document.createElement('div');host.className='season-global';host.setAttribute('aria-hidden','true');host.innerHTML='<span class="season-global-light"></span><canvas></canvas>';document.body.append(host);canvas=host.querySelector('canvas');ctx=canvas.getContext('2d');
@@ -86,6 +86,6 @@ const SeasonAtmosphere=(()=>{
   window.addEventListener('pointermove',melt,{passive:true});window.addEventListener('pointerdown',melt,{passive:true});window.addEventListener('resize',fit,{passive:true});
   document.addEventListener('visibilitychange',()=>document.hidden?stop():apply());reduced.addEventListener('change',()=>paint(performance.now()));fit();apply();
  }
- function syncSession(){const next=(suspended||identity?.restricted)?'off':mode==='auto'?current():mode;if(host&&season!==next)apply();}
- return{init,configure,syncSession,suspend(value){suspended=!!value;apply();},get mode(){return mode;},get strength(){return strength;}};
+ function syncSession(){const next=(suspended||festive||identity?.restricted)?'off':mode==='auto'?current():mode;if(host&&season!==next)apply();}
+ return{init,configure,syncSession,festive(value){if(festive===!!value)return;festive=!!value;apply();},suspend(value){suspended=!!value;apply();},get mode(){return mode;},get strength(){return strength;}};
 })();
