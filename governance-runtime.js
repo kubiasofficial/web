@@ -50,7 +50,7 @@ const Community=(()=>{
   if(loadedHash!==location.hash&&dirty()&&!await PortalPolish.confirm(view==='mail'?'Zahodit rozepsaný telegram?':'Opustit rozepsanou postavu?',view==='mail'?'Neodeslaný text telegramu se zahodí.':'Neuložené změny se zahodí. Koncept uložený na serveru zůstane zachovaný.',view==='mail'?'Zahodit telegram':'Opustit editor')){history.replaceState(null,'',loadedHash);return false;}return true;
  }
  function purge({preserveDraft=false}={}){
-  PlayerHub.dispose();Cards.dispose();Atlas.dispose({preserveDraft});SeasonLab.dispose();Gramophone.detach();
+  PlayerHub.dispose();Cards.dispose();Stable.dispose();Atlas.dispose({preserveDraft});SeasonLab.dispose();Gramophone.detach();
   if(preserveDraft&&view==='mail'&&mailValues())mailDraft={user:identity?.user.id,hash:loadedHash,data:mailValues(),requestId:mailRequest};else if(!preserveDraft)mailDraft=null;
   if(preserveDraft&&view==='edit'&&editorState)suspended={user:identity?.user.id,data:values(),state:editorState};else if(!preserveDraft)suspended=null;
   generation++;page.hidden=true;page.replaceChildren();document.body.classList.remove('community-view');view='';editorState=null;loadedHash='';mailRequest=null;
@@ -66,7 +66,7 @@ const Community=(()=>{
   if(!identity){shell('Vstup do svého archivu','Pro správu postavy a telegramy se přihlas přes Discord.');content().innerHTML='<a class="web-button" href="'+loginHref+'">Přihlásit přes Discord</a>';return;}
   try{
    if(/^#(?:shop|calendar|player)(?:\/|$)/.test(loadedHash)||loadedHash.startsWith('#manage/economy')){view='player-hub';const title=loadedHash.startsWith('#shop')?'Ústavní krámek':loadedHash.startsWith('#calendar')?'Prosincová pošta':loadedHash.startsWith('#manage')?'Ústavní pokladna':'Moje vizitka';shell(title,'Tvůj příběh, tvoje výbava.','player-hub');menu([['#','Můj archiv','home'],['#player','Moje vizitka','users'],['#shop','Ústavní krámek','home'],['#calendar','Prosincová pošta','mail'],...(identity.admin?.owner?[['#manage/economy','Správa měny','admin']]:[])]);await PlayerHub.open(content(),loadedHash);}
-   else if(loadedHash.startsWith('#games')){view='games';shell('Hry','Společný stůl pro naši partu.','games');await Cards.open(content());}
+   else if(loadedHash.startsWith('#games')){view='games';shell('Hry','Společný stůl pro naši partu.','games');if(loadedHash.startsWith('#games/stable'))await Stable.open(content());else if(loadedHash.startsWith('#games/ustav'))await Cards.open(content());else GamesHub.open(content());}
    else if(loadedHash.startsWith('#edit')){view='edit';shell('Tvůj příběh. Tvými slovy.','Uprav svou postavu. Zveřejní se až po schválení správou.','editor');menu([['#','Můj archiv','home'],['#edit','Upravit postavu','edit'],['#telegrams','Telegramy','mail']]);await editor(version,user);}
    else if(loadedHash.startsWith('#gramophone')){view='gramophone';shell('Gramofon','Desky, které dávají příběhům vlastní hlas.','gramophone');menu([['#','Můj archiv','home'],['#gramophone','Gramofon','home'],['#seasons','Roční období','clock']]);await Gramophone.open(content());}
    else if(loadedHash.startsWith('#seasons')){view='seasons';shell('Roční období','Atmosféra kroniky podle tebe.','seasons');menu([['#','Můj archiv','home'],['#gramophone','Gramofon','home'],['#seasons','Roční období','clock']]);await SeasonLab.open(content());}

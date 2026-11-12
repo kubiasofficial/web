@@ -2,7 +2,7 @@ const PersonalPointer=(()=>{
  const defaults={cursor:true,clicks:true,touch:false},inputSelector='input,textarea,select,[contenteditable]:not([contenteditable="false"]),[role="textbox"],[role="slider"],[draggable="true"],iframe';
  let initialized=false,account=null,key=null,theme=null,prefs={...defaults},dialog=null,overlay=null,opener=null,lastStamp=-1000,device='',storageKey='';
  const memory=new Map(),effects=new Set(),fine=matchMedia('(any-pointer: fine)'),reduced=matchMedia('(prefers-reduced-motion: reduce)'),down=new Map();
- const game=()=>/^#games\/ustav(?:\/|$)/.test(location.hash);
+ const game=()=>/^#games\/(?:ustav|stable)(?:\/|$)/.test(location.hash);
  const uri=url=>'url("'+url+'") 2 1';
  function clear(){for(const e of effects)e.remove();effects.clear();down.clear();}
  function load(){let value=memory.get(account);try{const saved=storageKey?JSON.parse(localStorage.getItem(storageKey)):null;if(saved&&typeof saved==='object')value=saved;}catch{}prefs={...defaults};for(const k of Object.keys(defaults))if(typeof value?.[k]==='boolean')prefs[k]=value[k];}
