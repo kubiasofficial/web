@@ -1222,6 +1222,71 @@ const Community=(()=>{
  return {init,sync,open,purge,beforeRoute,beforeLogout,get matches(){return routeMatch();},get active(){return view;},allowed};
 })();
 
+const PERSONAL_POINTERS={"scarlett":{"name":"Kočičí stopa","animal":"Kočka","color":"#6fa9ff","normal":"assets/pointers/scarlett-normal.2b4eead4b6d5.svg","link":"assets/pointers/scarlett-link.4df9eff1d7a0.svg","stamp":"assets/pointers/scarlett-stamp.c4003513c25d.svg"},"nathaniel":{"name":"Havraní podpis","animal":"Havran","color":"#d36b7c","normal":"assets/pointers/nathaniel-normal.0c7f1797eb69.svg","link":"assets/pointers/nathaniel-link.d987b5320d62.svg","stamp":"assets/pointers/nathaniel-stamp.bbf04dc3dec0.svg"},"daniel":{"name":"Jantarový panter","animal":"Panter","color":"#e7a052","normal":"assets/pointers/daniel-normal.03ce4c2006d3.svg","link":"assets/pointers/daniel-link.77734a92d6ec.svg","stamp":"assets/pointers/daniel-stamp.724579149632.svg"},"katie":{"name":"Vlčí přísaha","animal":"Vlk","color":"#a2d6f5","normal":"assets/pointers/katie-normal.406b470345bc.svg","link":"assets/pointers/katie-link.ee72601d8bdc.svg","stamp":"assets/pointers/katie-stamp.8b9e8905f649.svg"},"vincent":{"name":"Dračí dotek","animal":"Drak","color":"#6eafff","normal":"assets/pointers/vincent-normal.bd5425e5ed45.svg","link":"assets/pointers/vincent-link.35d109ace4d0.svg","stamp":"assets/pointers/vincent-stamp.ae64f42e9213.svg"},"elijah":{"name":"Věrný strážce","animal":"Ovčák","color":"#d5a05c","normal":"assets/pointers/elijah-normal.3adffcb4f881.svg","link":"assets/pointers/elijah-link.e8aa99987b89.svg","stamp":"assets/pointers/elijah-stamp.8bd8626894dc.svg"}};
+const PersonalPointer=(()=>{
+ const defaults={cursor:true,clicks:true,touch:false},inputSelector='input,textarea,select,[contenteditable]:not([contenteditable="false"]),[role="textbox"],[role="slider"],[draggable="true"],iframe';
+ let initialized=false,account=null,key=null,theme=null,prefs={...defaults},dialog=null,overlay=null,opener=null,lastStamp=-1000,device='',storageKey='';
+ const memory=new Map(),effects=new Set(),fine=matchMedia('(any-pointer: fine)'),reduced=matchMedia('(prefers-reduced-motion: reduce)'),down=new Map();
+ const game=()=>/^#games\/ustav(?:\/|$)/.test(location.hash);
+ const uri=url=>'url("'+url+'") 2 1';
+ function clear(){for(const e of effects)e.remove();effects.clear();down.clear();}
+ function load(){let value=memory.get(account);try{const saved=storageKey?JSON.parse(localStorage.getItem(storageKey)):null;if(saved&&typeof saved==='object')value=saved;}catch{}prefs={...defaults};for(const k of Object.keys(defaults))if(typeof value?.[k]==='boolean')prefs[k]=value[k];}
+ function apply(){
+  const html=document.documentElement;delete html.dataset.personalPointer;
+  html.style.removeProperty('--personal-cursor');html.style.removeProperty('--personal-link-cursor');
+  if(!theme||!prefs.cursor||!fine.matches||game())return;
+  html.style.setProperty('--personal-cursor',uri(theme.normal));html.style.setProperty('--personal-link-cursor',uri(theme.link));html.dataset.personalPointer=key;
+ }
+ function sync(){
+  const next=identity&&!identity.restricted?identity.user.id:null,nextKey=next?identity.owned.find(k=>Object.hasOwn(PERSONAL_POINTERS,k))||null:null;
+  if(next!==account||nextKey!==key){clear();close();account=next;key=nextKey;theme=key?PERSONAL_POINTERS[key]:null;storageKey=account?'nh-pointer-v1:'+account:'';load();lastStamp=-1000;if(theme){const image=new Image();image.src=theme.stamp;}}
+  apply();const control=document.querySelector('.pointer-settings-open');if(control)control.hidden=!theme;
+ }
+ function setDevice(type){const next=type==='mouse'?'mouse':'touch';if(device===next)return;device=next;document.documentElement.dataset.pointerDevice=next;}
+ function save(){memory.set(account,{...prefs});try{localStorage.setItem(storageKey,JSON.stringify(prefs));}catch{}clear();apply();}
+ function stamp(x,y,target,preview=false){
+  if(!theme||document.hidden||(!preview&&game()))return;const now=performance.now();if(now-lastStamp<75)return;lastStamp=now;
+  while(effects.size>=6){const old=effects.values().next().value;old.remove();effects.delete(old);}
+  const node=document.createElement('span');node.className='personal-click-stamp';node.setAttribute('aria-hidden','true');node.dataset.theme=key;node.style.setProperty('--stamp-color',theme.color);
+  const img=document.createElement('img');img.src=theme.stamp;img.alt='';img.width=44;img.height=44;img.draggable=false;node.append(img);
+  const layer=target instanceof Element?target.closest('dialog[open]'):null;
+  if(layer){const bounds=layer.getBoundingClientRect();node.style.left=(x-bounds.left+layer.scrollLeft)+'px';node.style.top=(y-bounds.top+layer.scrollTop)+'px';layer.append(node);}else{node.style.left=x+'px';node.style.top=y+'px';overlay.append(node);}
+  effects.add(node);const remove=()=>{node.remove();effects.delete(node);};
+  if(typeof node.animate==='function'){const motion=reduced.matches?[{opacity:.8},{opacity:0}]:[{opacity:0,transform:'translate(-50%,-50%) scale(.75)'},{opacity:1,transform:'translate(-50%,-50%) scale(1)',offset:.2},{opacity:0,transform:'translate(-50%,-50%) scale(1.08)'}];node.animate(motion,{duration:reduced.matches?260:520,easing:'ease-out'}).finished.then(remove,remove);}
+  setTimeout(remove,650);
+ }
+ function pointerDown(e){setDevice(e.pointerType);if(!theme||document.hidden||game()||e.button!==0||!e.isPrimary)return;down.set(e.pointerId,{x:e.clientX,y:e.clientY,target:e.target});}
+ function pointerUp(e){
+  const start=down.get(e.pointerId);down.delete(e.pointerId);if(!start||!theme||!e.isPrimary||e.button!==0||game()||document.hidden)return;
+  const touch=e.pointerType!=='mouse';if(touch?!prefs.touch:!prefs.clicks)return;
+  if(Math.hypot(e.clientX-start.x,e.clientY-start.y)>9)return;
+  for(const t of [start.target,e.target])if(t instanceof Element&&t.closest(inputSelector+',:disabled,[aria-disabled="true"],[data-pointer-preview]'))return;
+  stamp(e.clientX,e.clientY,e.target);
+ }
+ function close(){if(dialog?.open)dialog.close();}
+ function open(){
+  sync();if(!theme)return;opener=document.activeElement?.closest('.profile-navigation')?document.querySelector('.user-trigger'):document.activeElement;const d=dialog;
+  d.querySelector('.pointer-theme-name').textContent=theme.name;d.style.setProperty('--pointer-color',theme.color);
+  const art=d.querySelector('.pointer-preview-art');art.replaceChildren();for(const[type,label]of [['normal','Tvůj kurzor'],['stamp','Stopa kliknutí']]){const figure=document.createElement('figure'),img=new Image();img.src=theme[type];img.alt='';img.width=44;img.height=44;const caption=document.createElement('figcaption');caption.textContent=label;figure.append(img,caption);art.append(figure);}
+  for(const k of Object.keys(defaults))d.querySelector('[name='+k+']').checked=prefs[k];
+  d.querySelector('.pointer-settings-status').textContent='Změny se ukládají automaticky v tomto prohlížeči pro tvůj Discord účet.';
+  d.showModal();d.querySelector('.pointer-close').focus();
+ }
+ function init(){
+  if(initialized)return;initialized=true;overlay=document.createElement('div');overlay.className='personal-pointer-layer';overlay.setAttribute('aria-hidden','true');document.body.append(overlay);dialog=document.createElement('dialog');dialog.className='pointer-settings-dialog';dialog.setAttribute('aria-labelledby','pointer-settings-title');
+  dialog.innerHTML='<button type="button" class="pointer-close dialog-close" aria-label="Zavřít vzhled a efekty">×</button><span class="eyebrow">TVŮJ KURZOR. TVOJE STOPA.</span><h2 id="pointer-settings-title">Vzhled a efekty</h2><p class="pointer-theme-name"></p><div class="pointer-preview-art"></div><fieldset><legend>Osobní ovládání</legend><label><input type="checkbox" name="cursor"><span>Vlastní kurzor<small>Tvůj motiv při ovládání myší.</small></span></label><label><input type="checkbox" name="clicks"><span>Efekt kliknutí<small>Krátká stopa v místě kliknutí.</small></span></label><label><input type="checkbox" name="touch"><span>Efekty při dotyku<small>Volitelné pro telefon, tablet a pero. Posouvání stránky stopy nevytváří.</small></span></label></fieldset><div class="pointer-preview-zone"><button type="button" class="web-button" data-pointer-preview>Vyzkoušet stopu</button></div><p class="pointer-settings-note">Při psaní, přetahování a u karetního stolu zůstává běžné ovládání. Efekty jsou bez zvuku a respektují omezení pohybu.</p><p class="pointer-settings-status" role="status"></p>';
+  document.body.append(dialog);dialog.querySelector('.pointer-close').onclick=close;dialog.addEventListener('close',()=>{clear();if(opener?.isConnected)opener.focus({preventScroll:true});});
+  dialog.addEventListener('change',e=>{if(!theme||!Object.hasOwn(defaults,e.target.name))return;prefs[e.target.name]=e.target.checked;save();});
+  dialog.querySelector('[data-pointer-preview]').onclick=e=>{const r=e.currentTarget.getBoundingClientRect();stamp(e.detail?e.clientX:r.x+r.width/2,e.detail?e.clientY:r.y+r.height/2,e.currentTarget,true);};
+  dialog.addEventListener('click',e=>{if(e.target!==dialog)return;const r=dialog.getBoundingClientRect();if(e.clientX<r.left||e.clientX>r.right||e.clientY<r.top||e.clientY>r.bottom)close();});
+  document.addEventListener('pointerover',e=>setDevice(e.pointerType),{passive:true});document.addEventListener('pointerdown',pointerDown,{passive:true,capture:true});document.addEventListener('pointerup',pointerUp,{passive:true,capture:true});document.addEventListener('pointercancel',e=>down.delete(e.pointerId),{passive:true});
+  document.addEventListener('dragstart',()=>down.clear(),{passive:true});document.addEventListener('visibilitychange',()=>{if(document.hidden){clear();close();}});window.addEventListener('blur',()=>{clear();close();});
+  window.addEventListener('hashchange',()=>{if(game())clear();close();apply();});window.addEventListener('storage',e=>{if(storageKey&&e.key===storageKey){load();clear();apply();if(dialog.open)for(const k of Object.keys(defaults))dialog.querySelector('[name='+k+']').checked=prefs[k];}});
+  fine.addEventListener('change',apply);reduced.addEventListener('change',clear);sync();
+ }
+ return{init,sync,open,close};
+})();
+
 const UserChrome=(()=>{
  let host,nav,trigger,birthday,settings,birthdayKey=null,birthdayVersion=0,settingsVersion=0,restoreBirthdayFocus=null;
  const cake='<svg class="cake-icon" viewBox="0 0 48 48" aria-hidden="true"><path class="cake-flame" d="M24 3c-5 6-4 9 0 9s5-3 0-9Z"/><path d="M24 13v7M12 29v-7h24v7M8 29h32v14H8zM5 43h38M13 23c0 5 5 5 5 0 0 5 6 5 6 0 0 5 6 5 6 0 0 5 5 5 5 0M9 33c0 5 6 5 6 0 0 5 6 5 6 0 0 5 6 5 6 0 0 5 6 5 6 0 0 5 6 5 6 0"/></svg>';
@@ -1233,7 +1298,7 @@ const UserChrome=(()=>{
  function arrangeMenu(){
   const own=identity?.owned[0];nav.querySelector('.nav-journal').href=own?'#journal-'+own:'#';nav.querySelector('.nav-journal').hidden=!own||!!identity?.restricted;nav.querySelector('.nav-trust').hidden=!own||!!identity?.restricted;
   for(const selector of ['.nav-profile','.nav-shop','.nav-calendar'])nav.querySelector(selector).hidden=!!identity?.restricted;
-  const groups=[['Moje postava',['.nav-profile','.portal-home','.nav-journal','.nav-edit','.nav-trust']],['Náš svět',['.cast-toggle','.nav-mail','.nav-atlas']],['Volný čas',['.nav-gramophone','.nav-games','.nav-calendar','.nav-shop']],['Nastavení',['.nav-seasons','.notification-settings','.menu-logout']],['Správa',['.nav-manage']]];
+  const groups=[['Moje postava',['.nav-profile','.portal-home','.nav-journal','.nav-edit','.nav-trust']],['Náš svět',['.cast-toggle','.nav-mail','.nav-atlas']],['Volný čas',['.nav-gramophone','.nav-games','.nav-calendar','.nav-shop']],['Nastavení',['.nav-seasons','.pointer-settings-open','.notification-settings','.menu-logout']],['Správa',['.nav-manage']]];
   const fresh=[];for(const[label,selectors]of groups){const section=document.createElement('section');section.className='account-menu-group';const title=document.createElement('h3');title.textContent=label;section.append(title);for(const selector of selectors){const e=nav.querySelector(selector);if(e)section.append(e);}fresh.push(section);}
   nav.querySelectorAll('.account-menu-group').forEach(e=>e.remove());nav.append(...fresh);
  }
@@ -1241,6 +1306,7 @@ const UserChrome=(()=>{
   nav=document.querySelector('.portal-navigation');nav.id='user-navigation';nav.classList.add('profile-navigation');nav.inert=true;nav.setAttribute('aria-hidden','true');
   host=document.createElement('div');host.className='user-chrome';document.querySelector('.masthead').append(host);host.append(accountControls,nav);
   const preferenceButton=document.createElement('button');preferenceButton.type='button';preferenceButton.className='notification-settings';preferenceButton.innerHTML=bell+'Upozornění';preferenceButton.onclick=openSettings;nav.append(preferenceButton);
+  const pointerButton=document.createElement('button');pointerButton.type='button';pointerButton.className='pointer-settings-open';pointerButton.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 3v16l5-5 4 7 3-2-4-7h7Z"/></svg>Vzhled a efekty';pointerButton.onclick=()=>PersonalPointer.open();pointerButton.hidden=true;nav.append(pointerButton);
   for(const[cls,href,label,symbol]of [['profile','#player','Moje vizitka','♙'],['journal','#','Můj deník','▤'],['calendar','#calendar','Prosincová pošta','✉'],['shop','#shop','Ústavní krámek','◈']]){const a=document.createElement('a');a.className='nav-'+cls;a.href=href;a.innerHTML='<span class="menu-symbol" aria-hidden="true">'+symbol+'</span>'+label;nav.append(a);}
   const trust=document.createElement('button');trust.type='button';trust.className='nav-trust';trust.innerHTML='<span class="menu-symbol" aria-hidden="true">♧</span>Komu důvěřuji';trust.onclick=()=>document.querySelector('.trust-open')?.click();nav.append(trust);
   nav.addEventListener('click',event=>{if(event.target.closest('a,button'))closeMenu(true);});
@@ -1405,6 +1471,7 @@ function closeDenial(){denial.close();location.hash='';}
 denial.querySelector('.dialog-close').onclick=closeDenial;denial.querySelector('.denial-back').onclick=closeDenial;
 denial.addEventListener('cancel',event=>{event.preventDefault();closeDenial();});
 function renderAccount(){
+ PersonalPointer.sync();
  Gramophone.syncSession();SeasonAtmosphere.syncSession();
  Community.sync();
  UserChrome.refresh();
@@ -1525,7 +1592,7 @@ window.addEventListener('keydown',event=>{if(event.key==='Escape'&&!event.defaul
 document.addEventListener('visibilitychange',()=>{if(document.hidden){routeVersion++;purgeProfile();Journal.purge({preserveDraft:true});Community.purge({preserveDraft:true});UserChrome.clearPrivate();UserChrome.closeMenu();PortalPolish.loading('',false);}else refreshSession(true);});
 window.addEventListener('pageshow',event=>{if(event.persisted){routeVersion++;purgeProfile();Journal.purge();refreshSession(true);}});
 setInterval(()=>{if(!document.hidden&&identity)refreshSession();},15000);
-PortalPolish.init();Journal.init();Community.init();UserChrome.init();SeasonAtmosphere.init();Holiday.init();renderAccount();
+PortalPolish.init();Journal.init();Community.init();UserChrome.init();SeasonAtmosphere.init();Holiday.init();PersonalPointer.init();renderAccount();
 const loginResult=new URLSearchParams(location.search).get('login');
 if(loginResult){setNotice(loginResult==='failed'?'Přihlášení se nepodařilo. Ověř, že jsi členem vašeho Discord serveru, a zkus to znovu.':'Přihlášení bylo zrušeno.');history.replaceState(null,'',location.pathname+location.hash);}
 refreshSession(true);

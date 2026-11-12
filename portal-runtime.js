@@ -82,6 +82,7 @@ function closeDenial(){denial.close();location.hash='';}
 denial.querySelector('.dialog-close').onclick=closeDenial;denial.querySelector('.denial-back').onclick=closeDenial;
 denial.addEventListener('cancel',event=>{event.preventDefault();closeDenial();});
 function renderAccount(){
+ PersonalPointer.sync();
  Gramophone.syncSession();SeasonAtmosphere.syncSession();
  Community.sync();
  UserChrome.refresh();
@@ -202,7 +203,7 @@ window.addEventListener('keydown',event=>{if(event.key==='Escape'&&!event.defaul
 document.addEventListener('visibilitychange',()=>{if(document.hidden){routeVersion++;purgeProfile();Journal.purge({preserveDraft:true});Community.purge({preserveDraft:true});UserChrome.clearPrivate();UserChrome.closeMenu();PortalPolish.loading('',false);}else refreshSession(true);});
 window.addEventListener('pageshow',event=>{if(event.persisted){routeVersion++;purgeProfile();Journal.purge();refreshSession(true);}});
 setInterval(()=>{if(!document.hidden&&identity)refreshSession();},15000);
-PortalPolish.init();Journal.init();Community.init();UserChrome.init();SeasonAtmosphere.init();Holiday.init();renderAccount();
+PortalPolish.init();Journal.init();Community.init();UserChrome.init();SeasonAtmosphere.init();Holiday.init();PersonalPointer.init();renderAccount();
 const loginResult=new URLSearchParams(location.search).get('login');
 if(loginResult){setNotice(loginResult==='failed'?'Přihlášení se nepodařilo. Ověř, že jsi členem vašeho Discord serveru, a zkus to znovu.':'Přihlášení bylo zrušeno.');history.replaceState(null,'',location.pathname+location.hash);}
 refreshSession(true);
