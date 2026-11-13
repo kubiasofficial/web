@@ -31,7 +31,7 @@ const PlayerHub=(()=>{
  }
  async function showProfile(id){
   if(!identity||identity.restricted)return;profileDialog?.remove();const d=document.createElement('dialog');profileDialog=d;d.className='player-profile-dialog';d.innerHTML='<p role="status">Otevírám vizitku…</p>';document.body.append(d);d.showModal();d.onclose=()=>{d.remove();if(profileDialog===d)profileDialog=null;};
-  try{const p=await api('/economy/profile/'+id);if(!d.isConnected)return;d.innerHTML=profileHTML(p);const close=button('Zavřít',()=>d.close());d.append(close);if(id!==identity.user.id){const link=document.createElement('a');link.className='web-button';link.href='#telegrams/compose/'+id;link.textContent='Poslat telegram';link.onclick=()=>d.close();d.append(link);}close.focus();}catch(e){if(d.isConnected){d.textContent=e.message;d.append(button('Zavřít',()=>d.close()));}}
+  try{const p=await api('/economy/profile/'+id);if(!d.isConnected)return;d.innerHTML=profileHTML(p);const close=button('Zavřít',()=>d.close());d.append(close);close.focus();}catch(e){if(d.isConnected){d.textContent=e.message;d.append(button('Zavřít',()=>d.close()));}}
  }
  async function open(container,route){
   dispose();host=container;owner=identity.user.id;const v=version;host.innerHTML='<p role="status">Otevírám ústavní pokladnu…</p>';

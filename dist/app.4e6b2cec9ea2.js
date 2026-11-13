@@ -1044,7 +1044,7 @@ const PlayerHub=(()=>{
  }
  async function showProfile(id){
   if(!identity||identity.restricted)return;profileDialog?.remove();const d=document.createElement('dialog');profileDialog=d;d.className='player-profile-dialog';d.innerHTML='<p role="status">Otevírám vizitku…</p>';document.body.append(d);d.showModal();d.onclose=()=>{d.remove();if(profileDialog===d)profileDialog=null;};
-  try{const p=await api('/economy/profile/'+id);if(!d.isConnected)return;d.innerHTML=profileHTML(p);const close=button('Zavřít',()=>d.close());d.append(close);if(id!==identity.user.id){const link=document.createElement('a');link.className='web-button';link.href='#telegrams/compose/'+id;link.textContent='Poslat telegram';link.onclick=()=>d.close();d.append(link);}close.focus();}catch(e){if(d.isConnected){d.textContent=e.message;d.append(button('Zavřít',()=>d.close()));}}
+  try{const p=await api('/economy/profile/'+id);if(!d.isConnected)return;d.innerHTML=profileHTML(p);const close=button('Zavřít',()=>d.close());d.append(close);close.focus();}catch(e){if(d.isConnected){d.textContent=e.message;d.append(button('Zavřít',()=>d.close()));}}
  }
  async function open(container,route){
   dispose();host=container;owner=identity.user.id;const v=version;host.innerHTML='<p role="status">Otevírám ústavní pokladnu…</p>';
@@ -1118,9 +1118,9 @@ const Holiday=(()=>{
 })();
 
 const Community=(()=>{
- let page,nav,generation=0,loadedHash='',view='',editorState=null,suspended=null,mailRequest=null,mailDraft=null;
+ let page,nav,generation=0,loadedHash='',view='',editorState=null,suspended=null;
  const labels={given:'Jméno',surname:'Příjmení',nickname:'Přezdívka',age:'Věk v lore',birth:'Datum narození',occupation:'Povolání',relatives:'Rodina a blízcí',kicker:'Motto',description:'Úvodní charakteristika',quote:'Osobní citát',closing:'Závěrečná slova',origin:'Původ',familyTitle:'Nadpis vztahů',familyDescription:'Úvod ke vztahům',chapters:'Kapitoly lore',family:'Vztahy'};
- const permissionLabels={review:'Schvalování změn',activity:'Přehled přihlášení',official:'Telegramy za správu',blacklist:'Správa blacklistu'};
+ const permissionLabels={review:'Schvalování změn',activity:'Přehled přihlášení',blacklist:'Správa blacklistu'};
  const icons={edit:'M5 19l4-1L20 7l-3-3L6 15zM14 7l3 3',mail:'M3 6h18v13H3zM3 6l9 7 9-7',admin:'M12 2l8 4v6c0 5-8 10-8 10S4 17 4 12V6zM8 12l3 3 5-6',home:'M3 11l9-8 9 8M6 9v12h12V9',users:'M15 21v-3c0-5-12-5-12 0v3M9 4a4 4 0 1 0 0 8 4 4 0 0 0 0-8M17 5c5 0 5 7 0 7M18 15c3 0 3 3 3 6',clock:'M12 8v5l3 2M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18',check:'M4 12l5 5L20 6'};
  const icon=name=>'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="'+icons[name]+'"/></svg>';
  const stamp=state=>({pending:'Čeká na schválení',approved:'Schváleno',rejected:'Zamítnuto'}[state]||state);
@@ -1135,7 +1135,6 @@ const Community=(()=>{
   nav=document.querySelector('.portal-navigation');
   nav.querySelector('.portal-home').innerHTML=icon('home')+'Můj archiv';
   const edit=document.createElement('a');edit.href='#edit';edit.className='nav-edit';edit.innerHTML=icon('edit')+'Upravit postavu';nav.append(edit);
-  const mail=document.createElement('a');mail.href='#telegrams';mail.className='nav-mail';mail.innerHTML=icon('mail')+'Telegramy <span class="web-badge" hidden></span>';nav.append(mail);
   const music=document.createElement('a');music.href='#gramophone';music.className='nav-gramophone';music.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 19h16v3H4zM7 19v-4h10v4M12 15V7l8-4v9l-8-5M7 15a3 3 0 1 1 0-6"/></svg>Gramofon';nav.append(music);
   const seasons=document.createElement('a');seasons.href='#seasons';seasons.className='nav-seasons';seasons.innerHTML=icon('clock')+'Roční období';nav.append(seasons);
   const atlas=document.createElement('a');atlas.href='#atlas';atlas.className='nav-atlas';atlas.innerHTML=AtlasIcons.svg('pin')+'Atlas';nav.append(atlas);
@@ -1147,12 +1146,11 @@ const Community=(()=>{
   if(!nav)return;
   nav.querySelector('.nav-edit').hidden=!identity?.owned.length;
   nav.querySelector('.nav-manage').hidden=!identity?.admin?.owner&&!identity?.admin?.permissions.length;
-  nav.querySelector('.nav-mail').hidden=!!identity?.restricted;
   nav.querySelector('.nav-gramophone').hidden=!identity||!!identity.restricted;
   nav.querySelector('.nav-seasons').hidden=!identity||!!identity.restricted;
   nav.querySelector('.nav-atlas').hidden=!identity||!!identity.restricted;
   nav.querySelector('.nav-games').hidden=!identity||!!identity.restricted;
-  for(const [selector,count]of [['.nav-mail',identity?.unread||0],['.nav-manage',identity?.pending||0]]){const badge=nav.querySelector(selector+' .web-badge');badge.hidden=!count;badge.textContent=String(count);}
+  for(const [selector,count]of [['.nav-manage',identity?.pending||0]]){const badge=nav.querySelector(selector+' .web-badge');badge.hidden=!count;badge.textContent=String(count);}
  }
  function values(){
   const form=page.querySelector('.character-form');if(!form||!editorState)return null;
@@ -1161,18 +1159,16 @@ const Community=(()=>{
   data.family=[...form.querySelectorAll('.edit-relation')].map(row=>Object.fromEntries(['label','name','text','status'].map(key=>[key,row.querySelector('[data-relation='+key+']').value])));
   return data;
  }
- function mailValues(){const f=page.querySelector('.telegram-compose');return f?{recipient:f.elements.recipient.value,subject:f.elements.subject.value,body:f.elements.body.value}:null;}
- function dirty(){if(Atlas.dirty())return true;if(view==='mail'){const v=mailValues();return !!v&&(!!v.subject||!!v.body);}return view==='edit'&&editorState&&JSON.stringify(values())!==editorState.baseline;}
- async function beforeLogout(){return !dirty()||await PortalPolish.confirm('Odhlásit a zahodit rozepsané změny?',view==='mail'?'Rozepsaný telegram nebyl odeslán.':'Neuložené změny postavy se zahodí. Uložený koncept zůstane zachovaný.','Odhlásit');}
+ function dirty(){if(Atlas.dirty())return true;return view==='edit'&&editorState&&JSON.stringify(values())!==editorState.baseline;}
+ async function beforeLogout(){return !dirty()||await PortalPolish.confirm('Odhlásit a zahodit rozepsané změny?','Neuložené změny postavy se zahodí. Uložený koncept zůstane zachovaný.','Odhlásit');}
  async function beforeRoute(){
   if(loadedHash!==location.hash&&Atlas.dirty()){if(!await PortalPolish.confirm('Opustit rozepsané místo?','Neuložené úpravy místa v atlasu se zahodí.','Opustit atlas')){history.replaceState(null,'',loadedHash);return false;}Atlas.dispose();}
-  if(loadedHash!==location.hash&&dirty()&&!await PortalPolish.confirm(view==='mail'?'Zahodit rozepsaný telegram?':'Opustit rozepsanou postavu?',view==='mail'?'Neodeslaný text telegramu se zahodí.':'Neuložené změny se zahodí. Koncept uložený na serveru zůstane zachovaný.',view==='mail'?'Zahodit telegram':'Opustit editor')){history.replaceState(null,'',loadedHash);return false;}return true;
+  if(loadedHash!==location.hash&&dirty()&&!await PortalPolish.confirm('Opustit rozepsanou postavu?','Neuložené změny se zahodí. Koncept uložený na serveru zůstane zachovaný.','Opustit editor')){history.replaceState(null,'',loadedHash);return false;}return true;
  }
  function purge({preserveDraft=false}={}){
   PlayerHub.dispose();Cards.dispose();Stable.dispose();Atlas.dispose({preserveDraft});SeasonLab.dispose();Gramophone.detach();
-  if(preserveDraft&&view==='mail'&&mailValues())mailDraft={user:identity?.user.id,hash:loadedHash,data:mailValues(),requestId:mailRequest};else if(!preserveDraft)mailDraft=null;
   if(preserveDraft&&view==='edit'&&editorState)suspended={user:identity?.user.id,data:values(),state:editorState};else if(!preserveDraft)suspended=null;
-  generation++;page.hidden=true;page.replaceChildren();document.body.classList.remove('community-view');view='';editorState=null;loadedHash='';mailRequest=null;
+  generation++;page.hidden=true;page.replaceChildren();document.body.classList.remove('community-view');view='';editorState=null;loadedHash='';
  }
  function shell(title,subtitle,type='archive'){
   document.body.classList.add('community-view');
@@ -1181,17 +1177,18 @@ const Community=(()=>{
  function content(){return page.querySelector('.community-content');}
  function menu(items){page.querySelector('.community-menu').innerHTML=items.map(([hash,label,kind])=>'<a href="'+hash+'"'+(location.hash===hash?' aria-current="page"':'')+'>'+icon(kind)+'<span>'+text(label)+'</span></a>').join('');}
  async function open(){
-  purge({preserveDraft:!!suspended||!!mailDraft||Atlas.pendingDraft});const version=++generation,user=identity?.user.id;loadedHash=location.hash;
-  if(!identity){shell('Vstup do svého archivu','Pro správu postavy a telegramy se přihlas přes Discord.');content().innerHTML='<a class="web-button" href="'+loginHref+'">Přihlásit přes Discord</a>';return;}
+  purge({preserveDraft:!!suspended||Atlas.pendingDraft});const version=++generation,user=identity?.user.id;loadedHash=location.hash;
+  if(!identity){shell('Vstup do svého archivu','Pro správu postavy a osobního archivu se přihlas přes Discord.');content().innerHTML='<a class="web-button" href="'+loginHref+'">Přihlásit přes Discord</a>';return;}
   try{
-   if(/^#(?:shop|calendar|player)(?:\/|$)/.test(loadedHash)||loadedHash.startsWith('#manage/economy')){view='player-hub';const title=loadedHash.startsWith('#shop')?'Ústavní krámek':loadedHash.startsWith('#calendar')?'Prosincová pošta':loadedHash.startsWith('#manage')?'Ústavní pokladna':'Moje vizitka';shell(title,'Tvůj příběh, tvoje výbava.','player-hub');menu([['#','Můj archiv','home'],['#player','Moje vizitka','users'],['#shop','Ústavní krámek','home'],['#calendar','Prosincová pošta','mail'],...(identity.admin?.owner?[['#manage/economy','Správa měny','admin']]:[])]);await PlayerHub.open(content(),loadedHash);}
+   if(loadedHash.startsWith('#telegrams')||loadedHash==='#manage/mail'){view='removed';shell('Telegramy se zavřely','Soukromá schránka už není součástí webu.');content().innerHTML='<div class="web-empty"><h2>Rozhodnutí najdeš u své žádosti.</h2><p>Stav úprav postavy a vyjádření správy jsou dostupné v Moje žádosti. Upozornění na Discordu fungují dál.</p><a class="web-button" href="#edit/requests">Moje žádosti</a><a class="web-button" href="#">Můj archiv</a></div>'; }
+   else if(/^#(?:shop|calendar|player)(?:\/|$)/.test(loadedHash)||loadedHash.startsWith('#manage/economy')){view='player-hub';const title=loadedHash.startsWith('#shop')?'Ústavní krámek':loadedHash.startsWith('#calendar')?'Prosincová pošta':loadedHash.startsWith('#manage')?'Ústavní pokladna':'Moje vizitka';shell(title,'Tvůj příběh, tvoje výbava.','player-hub');menu([['#','Můj archiv','home'],['#player','Moje vizitka','users'],['#shop','Ústavní krámek','home'],['#calendar','Prosincová pošta','mail'],...(identity.admin?.owner?[['#manage/economy','Správa měny','admin']]:[])]);await PlayerHub.open(content(),loadedHash);}
    else if(loadedHash.startsWith('#games')){view='games';shell('Hry','Společný stůl pro naši partu.','games');if(loadedHash.startsWith('#games/stable'))await Stable.open(content());else if(loadedHash.startsWith('#games/ustav'))await Cards.open(content());else GamesHub.open(content());}
-   else if(loadedHash.startsWith('#edit')){view='edit';shell('Tvůj příběh. Tvými slovy.','Uprav svou postavu. Zveřejní se až po schválení správou.','editor');menu([['#','Můj archiv','home'],['#edit','Upravit postavu','edit'],['#telegrams','Telegramy','mail']]);await editor(version,user);}
+   else if(loadedHash.startsWith('#edit')){view='edit';shell('Tvůj příběh. Tvými slovy.','Uprav svou postavu. Zveřejní se až po schválení správou.','editor');menu([['#','Můj archiv','home'],['#edit','Upravit postavu','edit'],['#edit/requests','Moje žádosti','check']]);if(loadedHash.startsWith('#edit/requests'))await ownRequests(version,user);else await editor(version,user);}
    else if(loadedHash.startsWith('#gramophone')){view='gramophone';shell('Gramofon','Desky, které dávají příběhům vlastní hlas.','gramophone');menu([['#','Můj archiv','home'],['#gramophone','Gramofon','home'],['#seasons','Roční období','clock']]);await Gramophone.open(content());}
    else if(loadedHash.startsWith('#seasons')){view='seasons';shell('Roční období','Atmosféra kroniky podle tebe.','seasons');menu([['#','Můj archiv','home'],['#gramophone','Gramofon','home'],['#seasons','Roční období','clock']]);await SeasonLab.open(content());}
-   else if(loadedHash.startsWith('#atlas')){view='atlas';shell('Atlas pohraničí','Vlastní místa. Vlastní cesty. Stejný horizont.','atlas');menu([['#','Můj archiv','home'],['#atlas','Atlas','home'],['#telegrams','Telegramy','mail']]);await Atlas.open(content());}
+   else if(loadedHash.startsWith('#atlas')){view='atlas';shell('Atlas pohraničí','Vlastní místa. Vlastní cesty. Stejný horizont.','atlas');menu([['#','Můj archiv','home'],['#atlas','Atlas','home'],['#edit/requests','Moje žádosti','check']]);await Atlas.open(content());}
    else if(loadedHash.startsWith('#manage')){view='manage';const atlas=loadedHash==='#manage/atlas';shell(atlas?'Atlas pohraničí':'Správa kroniky',atlas?'Vlastní místa. Vlastní cesty. Stejný horizont.':'Pracovna pro lidi, kteří drží příběhy pohromadě.',atlas?'atlas':'manage');await manage(version,user);}
-   else{view='mail';shell('Telegrafní kancelář','Slova, která mají svého adresáta. Soukromá pošta mezi hráči.','mail');await telegrams(version,user);}
+   else{view='missing';shell('Stránka není dostupná','Vrať se do svého archivu.');content().innerHTML='<a class="web-button" href="#">Můj archiv</a>';}
    if(version!==generation||user!==identity?.user.id||document.hidden)return;
    window.scrollTo({top:0,behavior:'instant'});document.title=page.querySelector('h1').textContent+' · New Horizon';
   }catch(error){if(version===generation)setStatus(error.message);}
@@ -1200,6 +1197,19 @@ const Community=(()=>{
  function field(key,value,area=false){return '<label>'+text(labels[key])+(area?'<textarea name="'+key+'" rows="4" maxlength="'+({description:1500,quote:1500,closing:1500,familyDescription:2000}[key]||500)+'">'+text(value)+'</textarea>':'<input name="'+key+'" value="'+text(value)+'" maxlength="'+({given:100,surname:100,nickname:100,age:80,birth:100,occupation:250,relatives:500,kicker:500,origin:200,familyTitle:150}[key]||200)+'"'+(['given','surname','age'].includes(key)?' required':'')+'>')+'</label>';}
  function chapterRow(chapter){const row=document.createElement('div');row.className='edit-chapter';row.innerHTML='<label>Název kapitoly<input data-title maxlength="160" required value="'+text(chapter.title)+'"></label><label>Text kapitoly<textarea rows="7" maxlength="16000" required>'+text(chapter.text)+'</textarea></label>';row.append(button('Odstranit kapitolu',async()=>{if(await PortalPolish.confirm('Odstranit kapitolu?','Odstraní se z tohoto návrhu. Schválený příběh se zatím nezmění.','Odstranit')){row.remove();paintPreview();}},'subtle'));return row;}
  function relationRow(relation){const row=document.createElement('div');row.className='edit-relation';row.innerHTML=['label','name','text','status'].map(key=>'<label>'+({label:'Role / označení',name:'Jméno',text:'Popis vztahu',status:'Poznámka'}[key])+(key==='text'?'<textarea data-relation="text" maxlength="2000">'+text(relation[key])+'</textarea>':'<input data-relation="'+key+'" maxlength="160" value="'+text(relation[key])+'">')+'</label>').join('');row.append(button('Odstranit vztah',()=>{row.remove();paintPreview();},'subtle'));return row;}
+ function paintOwnRequests(history,host){
+  host.innerHTML=history.length?history.map(r=>'<article class="web-list-row"><span class="status-pill '+r.status+'">'+stamp(r.status)+'</span><div><p>Odesláno '+date(r.created_at)+(r.decided_at?' · Vyřízeno '+date(r.decided_at):'')+'</p><p>'+text(r.reason|| (r.status==='pending'?'Čekáme na vyjádření správy.':r.status==='approved'?'Nová verze postavy je zveřejněná.':'Návrh nebyl schválen.'))+'</p><a class="web-button" href="#edit/requests/'+r.id+'">Otevřít žádost ↗</a></div></article>').join(''):'<p class="web-muted">Zatím jsi neposlal žádnou žádost.</p>';
+ }
+ async function ownRequests(version,user){
+  const key=identity.owned[0];if(!key)throw Error('K účtu není přiřazená vlastní postava.');
+  const id=loadedHash.split('/')[2];
+  if(id){
+   const {request:r}=await api('/editor/requests/'+encodeURIComponent(id));if(!valid(version,user))return;
+   content().innerHTML='<a class="web-back" href="#edit/requests">← Moje žádosti</a><section class="own-request-detail"><span class="eyebrow">'+text(catalog[r.character_key]?.name||'Tvoje postava')+'</span><h2>Vyjádření k úpravám postavy</h2><span class="status-pill '+r.status+'">'+stamp(r.status)+'</span><p>Odesláno '+date(r.created_at)+(r.decided_at?' · Vyřízeno '+date(r.decided_at):'')+'</p><h3>Vyjádření správy</h3><p class="request-reason">'+text(r.reason||(r.status==='pending'?'Žádost čeká na schválení.':r.status==='approved'?'Úpravy byly schváleny a nová verze je zveřejněná.':'Návrh nebyl schválen.'))+'</p><a class="web-button" href="#edit">Upravit postavu</a></section>';
+  }else{
+   const data=await api('/editor/'+key);if(!valid(version,user))return;content().innerHTML='<h2>Moje žádosti</h2><p>Stav návrhů a vyjádření správy k úpravám tvé postavy.</p><div class="my-requests"></div><a class="web-button" href="#edit">Upravit postavu</a>';paintOwnRequests(data.history,content().querySelector('.my-requests'));
+  }
+ }
  async function editor(version,user){
   const key=identity.owned[0];if(!key)throw Error('K tvému účtu není přiřazená vlastní postava.');
   const result=await api('/editor/'+key);if(!valid(version,user))return;
@@ -1207,13 +1217,13 @@ const Community=(()=>{
   const initial=result.pending?.data||recovered?.data||result.draft?.data||result.data;
   editorState={key,baseRevision:result.revision,draftRevision:result.draft?.revision||0,baseline:JSON.stringify(initial),pending:!!result.pending};
   if(recovered)editorState.baseline=recovered.state.baseline;
-  content().innerHTML=(result.pending?'<div class="web-callout">'+icon('clock')+'<div><strong>Změny čekají na schválení.</strong><p>Žádost odeslána '+date(result.pending.created_at)+'. Rozhodnutí najdeš v telegramech.</p></div></div>':'')+'<div class="editor-layout"><form class="character-form"><fieldset'+(result.pending?' disabled':'')+'><h2>Osobní údaje</h2><div class="web-form-grid">'+['given','surname','nickname','age','birth','occupation','origin','relatives'].map(key=>field(key,initial[key])).join('')+'</div><h2>Hlas tvé postavy</h2>'+['kicker','description','quote','closing'].map(key=>field(key,initial[key],true)).join('')+'<div class="section-heading"><h2>Kapitoly lore</h2><button class="add-chapter web-button subtle" type="button">+ Přidat kapitolu</button></div><p class="field-help">Odděluj odstavce prázdným řádkem. Můžeš použít **tučné písmo** a *kurzívu*.</p><div class="edit-chapters"></div><h2>Vztahy a blízcí</h2>'+field('familyTitle',initial.familyTitle)+field('familyDescription',initial.familyDescription,true)+'<div class="edit-relations"></div><button class="add-relation web-button subtle" type="button">+ Přidat vztah</button><div class="editor-save-bar"><button type="button" class="save-character-draft web-button">Uložit koncept</button><button type="submit" class="submit-character web-button primary">Odeslat ke schválení ↗</button></div></fieldset></form><aside class="character-preview"><span class="eyebrow">NÁHLED NÁVRHU · ZATÍM NEZVEŘEJNĚNO</span><div></div></aside></div><h2>Moje žádosti</h2><div class="my-requests"></div>';
+  content().innerHTML=(result.pending?'<div class="web-callout">'+icon('clock')+'<div><strong>Změny čekají na schválení.</strong><p>Žádost odeslána '+date(result.pending.created_at)+'. Rozhodnutí najdeš v Moje žádosti.</p></div></div>':'')+'<div class="editor-layout"><form class="character-form"><fieldset'+(result.pending?' disabled':'')+'><h2>Osobní údaje</h2><div class="web-form-grid">'+['given','surname','nickname','age','birth','occupation','origin','relatives'].map(key=>field(key,initial[key])).join('')+'</div><h2>Hlas tvé postavy</h2>'+['kicker','description','quote','closing'].map(key=>field(key,initial[key],true)).join('')+'<div class="section-heading"><h2>Kapitoly lore</h2><button class="add-chapter web-button subtle" type="button">+ Přidat kapitolu</button></div><p class="field-help">Odděluj odstavce prázdným řádkem. Můžeš použít **tučné písmo** a *kurzívu*.</p><div class="edit-chapters"></div><h2>Vztahy a blízcí</h2>'+field('familyTitle',initial.familyTitle)+field('familyDescription',initial.familyDescription,true)+'<div class="edit-relations"></div><button class="add-relation web-button subtle" type="button">+ Přidat vztah</button><div class="editor-save-bar"><button type="button" class="save-character-draft web-button">Uložit koncept</button><button type="submit" class="submit-character web-button primary">Odeslat ke schválení ↗</button></div></fieldset></form><aside class="character-preview"><span class="eyebrow">NÁHLED NÁVRHU · ZATÍM NEZVEŘEJNĚNO</span><div></div></aside></div><h2>Moje žádosti</h2><div class="my-requests"></div>';
   const form=page.querySelector('.character-form');
   initial.chapters.forEach(c=>form.querySelector('.edit-chapters').append(chapterRow(c)));initial.family.forEach(c=>form.querySelector('.edit-relations').append(relationRow(c)));
   page.querySelector('.add-chapter').onclick=()=>{if(form.querySelectorAll('.edit-chapter').length<40){form.querySelector('.edit-chapters').append(chapterRow({title:'Nová kapitola',text:''}));paintPreview();}};
   page.querySelector('.add-relation').onclick=()=>{if(form.querySelectorAll('.edit-relation').length<20){form.querySelector('.edit-relations').append(relationRow({label:'',name:'',text:'',status:''}));paintPreview();}};
   form.oninput=paintPreview;page.querySelector('.save-character-draft').onclick=()=>saveCharacter(false);form.onsubmit=e=>{e.preventDefault();saveCharacter(true);};
-  page.querySelector('.my-requests').innerHTML=result.history.length?result.history.map(r=>'<div class="web-list-row"><span class="status-pill '+r.status+'">'+stamp(r.status)+'</span><span>'+date(r.created_at)+'</span><p>'+text(r.reason||'')+'</p></div>').join(''):'<p class="web-muted">Zatím jsi neposlal žádnou žádost.</p>';
+  paintOwnRequests(result.history,page.querySelector('.my-requests'));
   if(result.draft&&result.draft.baseRevision!==result.revision){editorState.baseRevision=result.revision;setStatus('Koncept vychází ze starší verze. Porovnej ho se schválenou postavou, než jej odešleš.');}
   paintPreview();
  }
@@ -1226,14 +1236,14 @@ const Community=(()=>{
   if(submit&&!await PortalPolish.confirm('Odeslat postavu ke schválení?','Schválený příběh zůstane beze změny, dokud správa tento návrh nepřijme.','Odeslat návrh'))return;
   const version=generation,payload={data:values(),baseRevision:editorState.baseRevision,draftRevision:editorState.draftRevision};form.querySelector('fieldset').disabled=true;setStatus(submit?'Odesílám návrh…':'Ukládám koncept…');
   try{const result=await api('/editor/'+editorState.key,{method:submit?'POST':'PUT',body:JSON.stringify(payload)});if(version!==generation)return;editorState.baseline=JSON.stringify(payload.data);
-   if(submit){editorState.pending=true;content().prepend(Object.assign(document.createElement('p'),{className:'web-callout submission-success',textContent:result.message}));setStatus('Žádost byla odeslána. Rozhodnutí dorazí do Telegramů.');await refreshSession();}
+   if(submit){editorState.pending=true;content().prepend(Object.assign(document.createElement('p'),{className:'web-callout submission-success',textContent:result.message}));setStatus('Žádost byla odeslána. Rozhodnutí najdeš v Moje žádosti. UBD tě může upozornit na Discordu.');await refreshSession();}
    else{editorState.draftRevision=result.revision;setStatus('Soukromý koncept je uložený. Ještě nebyl odeslán ke schválení.');form.querySelector('fieldset').disabled=false;}
   }catch(error){if(version===generation){setStatus(error.message);form.querySelector('fieldset').disabled=false;}}
  }
  async function manage(version,user){
   const overview=await api('/manage/overview');if(!valid(version,user))return;
   const own=overview.admin.owner,permissions=overview.admin.permissions;
-  const items=[['#manage','Přehled','admin']];if(permissions.includes('review'))items.push(['#manage/requests','Změny','edit']);if(permissions.includes('activity'))items.push(['#manage/users','Uživatelé a přihlášení','users']);if(own)items.push(['#manage/admins','Správci a oprávnění','admin']);if(permissions.includes('blacklist'))items.push(['#manage/blacklist','Blacklist','admin']);if(permissions.includes('official'))items.push(['#manage/mail','Telegramy správy','mail']);if(permissions.includes('review'))items.push(['#manage/audit','Historie rozhodnutí','clock']);menu(items);
+  const items=[['#manage','Přehled','admin']];if(permissions.includes('review'))items.push(['#manage/requests','Změny','edit']);if(permissions.includes('activity'))items.push(['#manage/users','Uživatelé a přihlášení','users']);if(own)items.push(['#manage/admins','Správci a oprávnění','admin']);if(permissions.includes('blacklist'))items.push(['#manage/blacklist','Blacklist','admin']);if(permissions.includes('review'))items.push(['#manage/audit','Historie rozhodnutí','clock']);menu(items);
   if(own){items.push(['#manage/economy','Ústavní pokladna','admin'],['#calendar/preview/24','Náhled kalendáře','mail'],['#manage/atlas','Atlas · náhled','home'],['#seasons','Roční období','clock'],['#gramophone','Gramofon','home']);menu(items);}
   const changes=page.querySelector('.community-menu a[href="#manage/requests"]');if(changes&&overview.pending){changes.classList.add('has-pending');changes.dataset.count=overview.pending;}
   const path=loadedHash.split('/');
@@ -1252,11 +1262,8 @@ const Community=(()=>{
    const result=await api('/manage/audit');if(!valid(version,user))return;
    const actionLabels={'character.approved':'Schválení postavy','character.rejected':'Zamítnutí návrhu','admin.updated':'Úprava oprávnění správce','admin.removed':'Odebrání správce','blacklist.added':'Omezení přístupu k webu','blacklist.removed':'Obnovení přístupu k webu'};
    content().innerHTML='<h2>Historie rozhodnutí</h2>'+result.events.map(r=>'<article class="web-list-row"><div><strong>'+text(actionLabels[r.action]||'Rozhodnutí správy')+'</strong><p>'+text(r.character_key?catalog[r.character_key].name:r.target)+'</p><p>'+text(r.action.startsWith('admin.')?'Změna přístupu ke správě webu.':r.detail)+'</p><small>Provedl: '+text(r.actor_name||(r.actor_id===identity.user.id?identity.user.name:r.actor_id))+'</small>'+(r.character_key?'<p><a class="web-back" href="#manage/requests/'+r.target+'">Otevřít rozhodnutí ↗</a></p>':'')+'</div><time>'+date(r.created_at)+'</time></article>').join('');
-  }else if(path[1]==='mail'){
-   if(!permissions.includes('official'))throw Error('Nemáš oprávnění odesílat za správu.');
-   content().innerHTML='<h2>Telegramy správy</h2><p>Odešli konkrétnímu hráči zprávu s ověřenou pečetí Správy kroniky.</p><a class="web-button primary" href="#telegrams/compose-official">Napsat úřední telegram ↗</a>';
   }else{
-   content().innerHTML='<div class="manage-stats">'+(permissions.includes('review')?'<a href="#manage/requests" class="manage-stat"><span class="signal '+(overview.pending?'signal-pending':'')+'"></span><strong>'+overview.pending+'</strong><h2>Změny ke schválení</h2><p>'+ (overview.pending?'Spisy čekají na tvoje rozhodnutí.':'V tuto chvíli nic nečeká.')+'</p></a>':'')+'<a href="#telegrams" class="manage-stat">'+icon('mail')+'<strong>'+overview.unread+'</strong><h2>Nepřečtené telegramy</h2><p>Tvoje soukromá poštovní schránka.</p></a></div><div class="web-callout"><div><h2>Pracovna správce</h2><p>Každé rozhodnutí má svou stopu. Spravuj pouze údaje, ke kterým máš oprávnění. Soukromé deníky a cizí telegramy zůstávají pod vlastními přístupy.</p></div></div>';
+   content().innerHTML='<div class="manage-stats">'+(permissions.includes('review')?'<a href="#manage/requests" class="manage-stat"><span class="signal '+(overview.pending?'signal-pending':'')+'"></span><strong>'+overview.pending+'</strong><h2>Změny ke schválení</h2><p>'+ (overview.pending?'Spisy čekají na tvoje rozhodnutí.':'V tuto chvíli nic nečeká.')+'</p></a>':'')+'</div><div class="web-callout"><div><h2>Pracovna správce</h2><p>Každé rozhodnutí má svou stopu. Spravuj pouze údaje, ke kterým máš oprávnění. Soukromé archivy a deníky zůstávají pod vlastními přístupy.</p></div></div>';
   }
  }
  async function blacklist(version,user){
@@ -1280,7 +1287,7 @@ const Community=(()=>{
   if(r.status!=='pending')return;
   const decide=async action=>{
    const reason=page.querySelector('[name=reason]').value;if(action==='reject'&&!reason.trim()){setStatus('Při zamítnutí napiš důvod pro hráče.');return;}
-   if(!await PortalPolish.confirm(action==='approve'?'Schválit a zveřejnit změny?':'Zamítnout tento návrh?','Hráč dostane rozhodnutí do Telegramů. Akce se zapíše do historie.',action==='approve'?'Schválit':'Zamítnout'))return;
+   if(!await PortalPolish.confirm(action==='approve'?'Schválit a zveřejnit změny?':'Zamítnout tento návrh?','Hráč najde rozhodnutí v Moje žádosti a může dostat upozornění na Discordu. Akce se zapíše do historie.',action==='approve'?'Schválit':'Zamítnout'))return;
    page.querySelectorAll('.review-form button').forEach(b=>b.disabled=true);
    try{await api('/manage/requests/'+id,{method:'POST',body:JSON.stringify({action,reason})});if(!valid(version,user))return;await refreshSession();location.hash='#manage/requests';}catch(error){if(version===generation){setStatus(error.message);page.querySelectorAll('.review-form button').forEach(b=>b.disabled=false);}}
   };page.querySelector('.approve-change').onclick=()=>decide('approve');page.querySelector('.reject-change').onclick=()=>decide('reject');
@@ -1291,37 +1298,7 @@ const Community=(()=>{
   for(const row of result.admins){const card=document.createElement('article');card.className='web-list-row';card.innerHTML='<div><strong>'+text(row.display_name||row.user_id)+'</strong><p>'+text(row.permissions.map(p=>permissionLabels[p]).join(' · '))+'</p><small>'+text(row.user_id)+'</small></div>';card.append(button('Upravit',()=>{const f=page.querySelector('.admin-form');f.elements.userId.value=row.user_id;for(const key of Object.keys(permissionLabels))f.elements[key].checked=row.permissions.includes(key);f.scrollIntoView({behavior:'smooth',block:'center'});}));card.append(button('Odebrat',async()=>{if(!await PortalPolish.confirm('Odebrat přístup správci?','Jeho správcovská oprávnění přestanou platit. Vlastnictví postavy tím nezměníš.','Odebrat'))return;try{await api('/manage/admins/'+row.user_id,{method:'DELETE'});if(valid(version,user))open();}catch(e){setStatus(e.message);}},'subtle'));page.querySelector('.admin-list').append(card);}
   page.querySelector('.admin-form').onsubmit=async event=>{event.preventDefault();const f=event.target,permissions=Object.keys(permissionLabels).filter(key=>f.elements[key].checked);if(!permissions.length){setStatus('Vyber alespoň jedno oprávnění.');return;}f.querySelector('button').disabled=true;try{await api('/manage/admins/'+f.elements.userId.value,{method:'PUT',body:JSON.stringify({permissions})});if(valid(version,user))open();}catch(e){if(valid(version,user)){setStatus(e.message);f.querySelector('button').disabled=false;}}};
  }
- async function telegrams(version,user){
-  menu([['#telegrams','Doručené','mail'],['#telegrams/sent','Odeslané','clock'],['#telegrams/compose','Napsat telegram','edit'],['#','Můj archiv','home']]);
-  const path=loadedHash.split('/');
-  if(path[1]?.startsWith('compose')){
-   const result=await api('/telegrams/contacts');if(!valid(version,user))return;const official=path[1]==='compose-official';
-   if(official&&!has('official'))throw Error('Nemáš oprávnění odesílat za správu.');mailRequest=crypto.randomUUID();
-   content().innerHTML='<h2>'+(official?'Telegram s pečetí správy':'Napsat soukromý telegram')+'</h2><form class="telegram-compose"><label>Adresát<select name="recipient" required><option value="">Vyber hráče</option>'+result.users.map(r=>'<option value="'+r.id+'">'+text(r.name)+'</option>').join('')+'</select></label><label>Předmět<input name="subject" maxlength="120" required></label><label>Zpráva<textarea name="body" maxlength="5000" rows="12" required></textarea></label><p class="field-help">Telegram uvidíš pouze ty a příjemce. Po odeslání jej nelze upravit.</p><button class="web-button primary">Odeslat telegram ↗</button></form>';
-   if(path[2])page.querySelector('[name=recipient]').value=path[2];
-   if(mailDraft?.user===user&&mailDraft.hash===loadedHash){const f=page.querySelector('form');for(const [name,value]of Object.entries(mailDraft.data))f.elements[name].value=value;mailRequest=mailDraft.requestId;}else mailDraft=null;
-   page.querySelector('form').onsubmit=async event=>{event.preventDefault();const f=event.target;f.querySelector('button').disabled=true;try{const r=await api('/telegrams',{method:'POST',body:JSON.stringify({recipient:f.elements.recipient.value,subject:f.elements.subject.value,text:f.elements.body.value,official,requestId:mailRequest})});if(valid(version,user)){mailDraft=null;f.reset();await refreshSession();location.hash='#telegrams/message/'+r.id;}}catch(e){if(valid(version,user)){setStatus(e.message);f.querySelector('button').disabled=false;}}};
-  }else if(path[1]==='message'){
-   const {message:r}=await api('/telegrams/'+path[2]);if(!valid(version,user))return;
-   content().innerHTML='<a class="web-back" href="#telegrams">← Do schránky</a><article class="telegram-paper">'+(r.official?'<span class="official-seal">'+icon('admin')+' OVĚŘENÁ SPRÁVA KRONIKY</span>':'<span class="eyebrow">SOUKROMÝ TELEGRAM</span>')+'<h2>'+text(r.subject)+'</h2><div class="telegram-address"><p>Od: <strong>'+text(r.sender_name)+'</strong></p><p>Komu: '+text(r.recipient_name)+'</p><time>'+date(r.created_at)+'</time></div><div class="telegram-text">'+text(r.body).replace(/\n/g,'<br>')+'</div></article>';
-   if(r.sender_id!==user)content().append(button('Odpovědět',()=>location.hash='#telegrams/compose/'+r.sender_id));
-   if(r.recipient_id===user)content().append(button('Smazat z mé schránky',()=>removeTelegrams([r.id]),'subtle telegram-delete'));
-   if(r.recipient_id===user&&!r.read_at){await api('/telegrams/'+r.id,{method:'POST',body:'{}'});if(valid(version,user))await refreshSession();}
-  }else{
-   const sent=path[1]==='sent',n=Number(path[sent?2:1]||0),result=await api('/telegrams?box='+(sent?'sent':'inbox')+'&page='+n);if(!valid(version,user))return;
-   content().innerHTML='<div class="section-heading"><h2>'+(sent?'Odeslané telegramy':'Doručené telegramy')+'</h2><a class="web-button" href="#telegrams/compose">Napsat telegram ↗</a></div><div class="telegram-list">'+(result.messages.length?result.messages.map(r=>'<a href="#telegrams/message/'+r.id+'" class="telegram-row '+(!r.read_at&&!sent?'is-unread':'')+'">'+icon(r.official?'admin':'mail')+'<div><span>'+text(sent?r.recipient_name:r.sender_name)+(r.official?' · SPRÁVA':'')+'</span><h3>'+text(r.subject)+'</h3></div><time>'+date(r.created_at)+'</time></a>').join(''):'<div class="web-empty">'+icon('mail')+'<h3>Ve schránce je zatím klid.</h3><p>Až ti někdo napíše, telegram najdeš tady.</p></div>')+'</div><div class="web-actions">'+(n>0?'<a class="web-button" href="#telegrams/'+(sent?'sent/':'')+(n-1)+'">← Novější</a>':'')+(result.hasMore?'<a class="web-button" href="#telegrams/'+(sent?'sent/':'')+(n+1)+'">Starší →</a>':'')+'</div>';
-   if(!sent&&result.messages.length){
-    const controls=document.createElement('div');controls.className='telegram-cleanup';const select=document.createElement('label');select.innerHTML='<input type="checkbox"> Vybrat celou stránku';const remove=button('Smazat vybrané',()=>removeTelegrams([...page.querySelectorAll('.telegram-select:checked')].map(c=>c.value)),'subtle');remove.disabled=true;const update=()=>{const boxes=[...page.querySelectorAll('.telegram-select')],checked=boxes.filter(c=>c.checked).length;remove.disabled=!checked;remove.textContent=checked?'Smazat vybrané ('+checked+')':'Smazat vybrané';select.querySelector('input').checked=checked===boxes.length;select.querySelector('input').indeterminate=checked>0&&checked<boxes.length;};
-    for(const row of page.querySelectorAll('.telegram-row')){const wrap=document.createElement('div');wrap.className='telegram-select-row';const check=document.createElement('input');check.type='checkbox';check.className='telegram-select';check.value=row.hash.split('/').at(-1);check.setAttribute('aria-label','Vybrat telegram: '+row.querySelector('h3').textContent);check.onchange=update;row.replaceWith(wrap);wrap.append(check,row);}
-    select.querySelector('input').onchange=event=>{page.querySelectorAll('.telegram-select').forEach(c=>c.checked=event.target.checked);update();};controls.append(select,remove);page.querySelector('.telegram-list').before(controls);
-   }
-  }
- }
- async function removeTelegrams(ids){
-  if(!ids.length||!await PortalPolish.confirm(ids.length===1?'Smazat tento telegram?':'Smazat vybrané telegramy?','Zmizí pouze z tvé příchozí schránky. Odesílateli zůstane jeho kopie. Smazání nelze vrátit.','Smazat'))return;
-  const user=identity?.user.id,version=generation;try{await api('/telegrams',{method:'DELETE',body:JSON.stringify({ids})});if(!valid(version,user))return;await refreshSession();if(location.hash==='#telegrams')await open();else location.hash='#telegrams';}catch(error){if(valid(version,user))setStatus(error.message);}
- }
- function allowed(){if(/^#(?:gramophone|seasons|atlas|games)(?:\/|$)/.test(location.hash))return !!identity&&!identity.restricted;const path=location.hash.split('/')[1];if(path==='admins'||path==='seasons')return !!identity?.admin?.owner;const permission={requests:'review',audit:'review',users:'activity',mail:'official',blacklist:'blacklist'}[path];return permission?has(permission):!!identity?.admin?.owner||!!identity?.admin?.permissions.length;}
+ function allowed(){if(/^#(?:gramophone|seasons|atlas|games)(?:\/|$)/.test(location.hash))return !!identity&&!identity.restricted;const path=location.hash.split('/')[1];if(path==='admins'||path==='seasons')return !!identity?.admin?.owner;const permission={requests:'review',audit:'review',users:'activity',blacklist:'blacklist'}[path];return permission?has(permission):!!identity?.admin?.owner||!!identity?.admin?.permissions.length;}
  return {init,sync,open,purge,beforeRoute,beforeLogout,get matches(){return routeMatch();},get active(){return view;},allowed};
 })();
 
@@ -1401,7 +1378,7 @@ const UserChrome=(()=>{
  function arrangeMenu(){
   const own=identity?.owned[0];nav.querySelector('.nav-journal').href=own?'#journal-'+own:'#';nav.querySelector('.nav-journal').hidden=!own||!!identity?.restricted;nav.querySelector('.nav-trust').hidden=!own||!!identity?.restricted;
   for(const selector of ['.nav-profile','.nav-shop','.nav-calendar'])nav.querySelector(selector).hidden=!!identity?.restricted;
-  const groups=[['Moje postava',['.nav-profile','.portal-home','.nav-journal','.nav-edit','.nav-trust']],['Náš svět',['.cast-toggle','.nav-mail','.nav-atlas']],['Volný čas',['.nav-gramophone','.nav-games','.nav-calendar','.nav-shop']],['Nastavení',['.nav-seasons','.pointer-settings-open','.notification-settings','.menu-logout']],['Správa',['.nav-manage']]];
+  const groups=[['Moje postava',['.nav-profile','.portal-home','.nav-journal','.nav-edit','.nav-trust']],['Náš svět',['.cast-toggle','.nav-atlas']],['Volný čas',['.nav-gramophone','.nav-games','.nav-calendar','.nav-shop']],['Nastavení',['.nav-seasons','.pointer-settings-open','.notification-settings','.menu-logout']],['Správa',['.nav-manage']]];
   const fresh=[];for(const[label,selectors]of groups){const section=document.createElement('section');section.className='account-menu-group';const title=document.createElement('h3');title.textContent=label;section.append(title);for(const selector of selectors){const e=nav.querySelector(selector);if(e)section.append(e);}fresh.push(section);}
   nav.querySelectorAll('.account-menu-group').forEach(e=>e.remove());nav.append(...fresh);
  }
@@ -1424,7 +1401,7 @@ const UserChrome=(()=>{
   window.addEventListener('hashchange',()=>{closeMenu();closeBirthday();refresh();});
   birthday=document.createElement('dialog');birthday.className='birthday-dialog';birthday.setAttribute('aria-labelledby','birthday-title');birthday.innerHTML='<button type="button" class="dialog-close" aria-label="Zavřít narozeniny">×</button><div class="birthday-content"></div>';document.body.append(birthday);birthday.querySelector('button').onclick=closeBirthday;
   birthday.addEventListener('cancel',event=>{event.preventDefault();closeBirthday();});birthday.addEventListener('keydown',event=>{if(event.key==='Escape'){event.preventDefault();event.stopPropagation();closeBirthday();}});
-  settings=document.createElement('dialog');settings.className='notification-dialog';settings.setAttribute('aria-labelledby','notification-title');settings.innerHTML='<button class="dialog-close" type="button" aria-label="Zavřít nastavení">×</button><span class="notification-emblem">'+bell+'</span><span class="eyebrow">SOUKROMÉ ZPRÁVY OD UBD</span><h2 id="notification-title">Když kronika zavolá.</h2><p>Vyber, na co tě má bot upozornit soukromou zprávou na Discordu. Obsah zpráv a lore zůstává na webu.</p><form><fieldset><label><input type="checkbox" name="telegrams">Nové telegramy</label><label><input type="checkbox" name="decisions">Rozhodnutí o úpravách mé postavy</label><label class="review-preference"><input type="checkbox" name="reviews">Nové návrhy ke schválení</label><button class="web-button primary">Uložit nastavení</button></fieldset></form><p class="notification-status" role="status" aria-live="polite"></p>';document.body.append(settings);settings.querySelector('.dialog-close').onclick=()=>{settingsVersion++;settings.close();};
+  settings=document.createElement('dialog');settings.className='notification-dialog';settings.setAttribute('aria-labelledby','notification-title');settings.innerHTML='<button class="dialog-close" type="button" aria-label="Zavřít nastavení">×</button><span class="notification-emblem">'+bell+'</span><span class="eyebrow">SOUKROMÉ ZPRÁVY OD UBD</span><h2 id="notification-title">Když kronika zavolá.</h2><p>Vyber, na co tě má bot upozornit soukromou zprávou na Discordu. Podrobnosti žádostí a lore zůstávají na webu.</p><form><fieldset><label><input type="checkbox" name="decisions">Rozhodnutí o úpravách mé postavy</label><label class="review-preference"><input type="checkbox" name="reviews">Nové návrhy ke schválení</label><button class="web-button primary">Uložit nastavení</button></fieldset></form><p class="notification-status" role="status" aria-live="polite"></p>';document.body.append(settings);settings.querySelector('.dialog-close').onclick=()=>{settingsVersion++;settings.close();};
   settings.addEventListener('cancel',()=>settingsVersion++);settings.querySelector('form').onsubmit=saveSettings;
   for(const dialog of [settings,birthday])dialog.addEventListener('click',event=>{if(event.target!==dialog)return;const r=dialog.getBoundingClientRect();if(event.clientX<r.left||event.clientX>r.right||event.clientY<r.top||event.clientY>r.bottom){if(dialog===birthday)closeBirthday();else{settingsVersion++;settings.close();}}});
  }
@@ -1435,7 +1412,7 @@ const UserChrome=(()=>{
   const avatar=accountControls.querySelector('img'),name=accountControls.querySelector('span'),logout=accountControls.querySelector('button');
   trigger=document.createElement('button');trigger.type='button';trigger.className='user-trigger';trigger.setAttribute('aria-controls',nav.id);trigger.setAttribute('aria-expanded','false');trigger.setAttribute('aria-label','Otevřít nabídku účtu '+identity.user.name);
   const portrait=document.createElement('span');portrait.className='user-trigger-portrait';portrait.append(avatar);trigger.append(portrait,name);const arrow=document.createElement('span');arrow.className='user-chevron';arrow.setAttribute('aria-hidden','true');arrow.textContent='⌄';trigger.append(arrow);
-  const counters=document.createElement('span');counters.className='user-counters';counters.innerHTML='<span class="user-unread" hidden></span><span class="user-pending" hidden></span>';trigger.append(counters);accountControls.replaceChildren(trigger);
+  const counters=document.createElement('span');counters.className='user-counters';counters.innerHTML='<span class="user-pending" hidden></span>';trigger.append(counters);accountControls.replaceChildren(trigger);
   logout.classList.add('menu-logout');nav.append(logout);arrangeMenu();trigger.onclick=()=>host.classList.contains('user-menu-open')?closeMenu():openMenu();refresh();
  }
  function refresh(){
@@ -1443,7 +1420,7 @@ const UserChrome=(()=>{
   if(!identity){closeMenu();return;}
   if(!trigger)return;
   PlayerHub.sync();Holiday.update();
-  for(const [selector,count,label]of [['.user-unread',identity.unread||0,'nepřečtených telegramů'],['.user-pending',identity.pending||0,'změn ke schválení']]){const counter=trigger.querySelector(selector);counter.hidden=!count;counter.textContent=String(count);counter.setAttribute('aria-label',count+' '+label);}
+  for(const [selector,count,label]of [['.user-pending',identity.pending||0,'změn ke schválení']]){const counter=trigger.querySelector(selector);counter.hidden=!count;counter.textContent=String(count);counter.setAttribute('aria-label',count+' '+label);}
   for(const link of nav.querySelectorAll('a')){const hash=link.hash,active=hash===''||hash==='#'?!location.hash||location.hash==='#':location.hash.startsWith(hash);if(active)link.setAttribute('aria-current','page');else link.removeAttribute('aria-current');}
  }
  function birthdayButton(key,large=false){const b=document.createElement('button');b.type='button';b.className='birthday-open'+(large?' birthday-large':'');b.dataset.birthday=key;b.setAttribute('aria-label','Narozeniny: '+catalog[key].name);b.setAttribute('aria-haspopup','dialog');b.innerHTML=cake+(large?'<span>Narozeniny</span>':'');b.onclick=()=>openBirthday(key,b);return b;}
@@ -1464,11 +1441,11 @@ const UserChrome=(()=>{
  }
  async function openSettings(){
   if(!identity)return;const version=++settingsVersion,user=identity.user.id,form=settings.querySelector('form');settings.querySelector('.notification-status').textContent='Načítám nastavení…';form.querySelector('fieldset').disabled=true;settings.querySelector('.review-preference').hidden=!identity.admin?.permissions.includes('review');settings.showModal();
-  try{const data=await api('/notifications/settings');if(version!==settingsVersion||user!==identity?.user.id)return;for(const key of ['telegrams','decisions','reviews'])form.elements[key].checked=data[key];form.querySelector('fieldset').disabled=false;settings.querySelector('.notification-status').textContent=data.lastDelivery?.reason==='dm_unavailable'?'Poslední zprávu Discord nepovolil doručit. Pokud upozornění chceš dostávat, povol soukromé zprávy od členů serveru. Na webu máš zprávy dostupné dál.':'';}
+  try{const data=await api('/notifications/settings');if(version!==settingsVersion||user!==identity?.user.id)return;for(const key of ['decisions','reviews'])form.elements[key].checked=data[key];form.querySelector('fieldset').disabled=false;settings.querySelector('.notification-status').textContent=data.lastDelivery?.reason==='dm_unavailable'?'Poslední zprávu Discord nepovolil doručit. Pokud upozornění chceš dostávat, povol soukromé zprávy od členů serveru. Rozhodnutí na webu dál najdeš v Moje žádosti.':'';}
   catch(error){if(version===settingsVersion)settings.querySelector('.notification-status').textContent=error.message;}
  }
  async function saveSettings(event){event.preventDefault();const version=settingsVersion,user=identity?.user.id,form=event.target;form.querySelector('fieldset').disabled=true;
-  try{await api('/notifications/settings',{method:'PUT',body:JSON.stringify(Object.fromEntries(['telegrams','decisions','reviews'].map(key=>[key,form.elements[key].checked])))});if(version===settingsVersion&&user===identity?.user.id)settings.querySelector('.notification-status').textContent='Nastavení upozornění je uložené.';}
+  try{await api('/notifications/settings',{method:'PUT',body:JSON.stringify(Object.fromEntries(['decisions','reviews'].map(key=>[key,form.elements[key].checked])))});if(version===settingsVersion&&user===identity?.user.id)settings.querySelector('.notification-status').textContent='Nastavení upozornění je uložené.';}
   catch(error){if(version===settingsVersion)settings.querySelector('.notification-status').textContent=error.message;}
   finally{if(version===settingsVersion)form.querySelector('fieldset').disabled=false;}
  }
@@ -1533,7 +1510,7 @@ const api = async (path, options = {}) => {
  const response = await fetch(apiRoot + path, { credentials: 'same-origin', cache: 'no-store', signal: AbortSignal.timeout(7000),
   ...options, headers: { ...(options.body ? { 'Content-Type': 'application/json' } : {}), ...(options.method && options.method !== 'GET' ? { 'X-CSRF-Token': csrf } : {}), ...options.headers } });
  let data;try{data=await response.json();}catch{throw Object.assign(Error('Archiv je dočasně nedostupný.'),{status:503});}
- if(!response.ok){if(data.restricted&&identity){identity={authenticated:true,restricted:true,user:identity.user,csrf,owned:[],access:[],journalAccess:[],directory:{},admin:{owner:false,permissions:[]},unread:0,pending:0};routeVersion++;renderAccount();}throw Object.assign(Error(data.error || 'Archiv není dostupný.'),{status:response.status,restricted:!!data.restricted});}
+ if(!response.ok){if(data.restricted&&identity){identity={authenticated:true,restricted:true,user:identity.user,csrf,owned:[],access:[],journalAccess:[],directory:{},admin:{owner:false,permissions:[]},pending:0};routeVersion++;renderAccount();}throw Object.assign(Error(data.error || 'Archiv není dostupný.'),{status:response.status,restricted:!!data.restricted});}
  return data;
 };
 const escape = escapeHTML;

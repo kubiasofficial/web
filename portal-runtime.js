@@ -41,7 +41,7 @@ const api = async (path, options = {}) => {
  const response = await fetch(apiRoot + path, { credentials: 'same-origin', cache: 'no-store', signal: AbortSignal.timeout(7000),
   ...options, headers: { ...(options.body ? { 'Content-Type': 'application/json' } : {}), ...(options.method && options.method !== 'GET' ? { 'X-CSRF-Token': csrf } : {}), ...options.headers } });
  let data;try{data=await response.json();}catch{throw Object.assign(Error('Archiv je dočasně nedostupný.'),{status:503});}
- if(!response.ok){if(data.restricted&&identity){identity={authenticated:true,restricted:true,user:identity.user,csrf,owned:[],access:[],journalAccess:[],directory:{},admin:{owner:false,permissions:[]},unread:0,pending:0};routeVersion++;renderAccount();}throw Object.assign(Error(data.error || 'Archiv není dostupný.'),{status:response.status,restricted:!!data.restricted});}
+ if(!response.ok){if(data.restricted&&identity){identity={authenticated:true,restricted:true,user:identity.user,csrf,owned:[],access:[],journalAccess:[],directory:{},admin:{owner:false,permissions:[]},pending:0};routeVersion++;renderAccount();}throw Object.assign(Error(data.error || 'Archiv není dostupný.'),{status:response.status,restricted:!!data.restricted});}
  return data;
 };
 const escape = escapeHTML;
