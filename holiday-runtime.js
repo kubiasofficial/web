@@ -3,7 +3,7 @@ const Holiday=(()=>{
  function update(){
   const parts=Object.fromEntries(new Intl.DateTimeFormat('en',{month:'numeric',day:'numeric',timeZone:'Europe/Prague'}).formatToParts(new Date()).map(p=>[p.type,p.value]));
   if(!identity?.admin?.owner)previewing=false;
-  active=enabled&&SeasonAtmosphere.mode!=='off'&&!identity?.restricted&&(previewing||(Number(parts.month)===12&&Number(parts.day)>=20&&Number(parts.day)<=26));
+  active=!/^#manage(?:\/|$)/.test(location.hash)&&enabled&&SeasonAtmosphere.mode!=='off'&&!identity?.restricted&&(previewing||(Number(parts.month)===12&&Number(parts.day)>=20&&Number(parts.day)<=26));
   document.body.classList.toggle('christmas-week',active);if(root){root.hidden=!active;root.classList.toggle('holiday-paused',document.hidden);}
   SeasonAtmosphere.festive(active);
  }

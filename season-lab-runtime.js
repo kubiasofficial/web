@@ -77,15 +77,15 @@ const SeasonAtmosphere=(()=>{
   if(!reduced.matches&&(season!=='winter'||holes.length))schedule();
  }
  function schedule(){if(frame||document.hidden||season==='off')return;frame=requestAnimationFrame(t=>{frame=0;if(t-lastFrame<40){schedule();return;}lastFrame=t;paint(t);});}
- function apply(){if(!host)return;season=(suspended||festive||identity?.restricted)?'off':mode==='auto'?current():mode;host.dataset.season=season;document.documentElement.dataset.season=season;holes=[];frost();paint(performance.now());}
+ function apply(){if(!host)return;season=(suspended||festive||identity?.restricted||/^#manage(?:\/|$)/.test(location.hash))?'off':mode==='auto'?current():mode;host.dataset.season=season;document.documentElement.dataset.season=season;holes=[];frost();paint(performance.now());}
  function configure(next,level){mode=modes.includes(next)?next:'auto';strength=Math.min(100,Math.max(10,Number(level)||45));try{localStorage.setItem('nh-season',JSON.stringify({mode,strength}));}catch{}apply();Holiday.update();}
  function init(){
   if(host)return;try{const saved=JSON.parse(localStorage.getItem('nh-season'));if(saved&&modes.includes(saved.mode)){mode=saved.mode;strength=Math.min(100,Math.max(10,Number(saved.strength)||45));}}catch{}
   reduced=matchMedia('(prefers-reduced-motion: reduce)');host=document.createElement('div');host.className='season-global';host.setAttribute('aria-hidden','true');host.innerHTML='<span class="season-global-light"></span><canvas></canvas>';document.body.append(host);canvas=host.querySelector('canvas');ctx=canvas.getContext('2d');
   const melt=event=>{if(season!=='winter'||document.hidden)return;const p={x:event.clientX/innerWidth,y:event.clientY/innerHeight,t:performance.now()},last=holes.at(-1);if(last&&Math.hypot((last.x-p.x)*innerWidth,(last.y-p.y)*innerHeight)<10)return;holes.push(p);if(holes.length>70)holes.shift();if(reduced.matches)paint(p.t);else schedule();};
   window.addEventListener('pointermove',melt,{passive:true});window.addEventListener('pointerdown',melt,{passive:true});window.addEventListener('resize',fit,{passive:true});
-  document.addEventListener('visibilitychange',()=>document.hidden?stop():apply());reduced.addEventListener('change',()=>paint(performance.now()));fit();apply();
+  window.addEventListener('hashchange',apply);document.addEventListener('visibilitychange',()=>document.hidden?stop():apply());reduced.addEventListener('change',()=>paint(performance.now()));fit();apply();
  }
- function syncSession(){const next=(suspended||festive||identity?.restricted)?'off':mode==='auto'?current():mode;if(host&&season!==next)apply();}
+ function syncSession(){const next=(suspended||festive||identity?.restricted||/^#manage(?:\/|$)/.test(location.hash))?'off':mode==='auto'?current():mode;if(host&&season!==next)apply();}
  return{init,configure,syncSession,festive(value){if(festive===!!value)return;festive=!!value;apply();},suspend(value){suspended=!!value;apply();},get mode(){return mode;},get strength(){return strength;}};
 })();
