@@ -473,44 +473,44 @@
       "bytes": 212696
     }
   ],
-  "frontier-visitors-left-v1.png": [
+  "frontier-cast-left-v2.png": [
     {
-      "url": "assets/optimized/frontier-visitors-left-v1-360.8179cc60f37f.webp",
+      "url": "assets/optimized/frontier-cast-left-v2-360.100b2ad6ab4b.webp",
       "width": 360,
-      "height": 480,
-      "bytes": 51316
+      "height": 329,
+      "bytes": 47006
     },
     {
-      "url": "assets/optimized/frontier-visitors-left-v1-720.e1f076e3ea80.webp",
+      "url": "assets/optimized/frontier-cast-left-v2-720.c26396ab02a1.webp",
       "width": 720,
-      "height": 960,
-      "bytes": 193010
+      "height": 658,
+      "bytes": 153136
     },
     {
-      "url": "assets/optimized/frontier-visitors-left-v1-1086.b0c05c5f04dd.webp",
+      "url": "assets/optimized/frontier-cast-left-v2-1086.2f5b22853c16.webp",
       "width": 1086,
-      "height": 1448,
-      "bytes": 384888
+      "height": 992,
+      "bytes": 320480
     }
   ],
-  "frontier-visitors-right-v1.png": [
+  "frontier-cast-right-v2.png": [
     {
-      "url": "assets/optimized/frontier-visitors-right-v1-360.289ef9a8b5d4.webp",
+      "url": "assets/optimized/frontier-cast-right-v2-360.184a27457f06.webp",
       "width": 360,
-      "height": 480,
-      "bytes": 52580
+      "height": 450,
+      "bytes": 78896
     },
     {
-      "url": "assets/optimized/frontier-visitors-right-v1-720.c78da55c4adc.webp",
+      "url": "assets/optimized/frontier-cast-right-v2-720.3229946fd3c1.webp",
       "width": 720,
-      "height": 960,
-      "bytes": 193044
+      "height": 900,
+      "bytes": 273984
     },
     {
-      "url": "assets/optimized/frontier-visitors-right-v1-1086.1aa475c68cb9.webp",
+      "url": "assets/optimized/frontier-cast-right-v2-1086.30f567cde3e1.webp",
       "width": 1086,
-      "height": 1448,
-      "bytes": 370488
+      "height": 1357,
+      "bytes": 538190
     }
   ]
 }

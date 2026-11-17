@@ -2,9 +2,9 @@
 
 ## Co se změnilo
 
-- Veřejná úvodní stránka používá dvě nové ilustrace anonymních westernových postav s průhledným pozadím. Nezobrazují členy party.
+- Veřejná úvodní stránka používá dvě ilustrace našich šesti postav podle jejich předloh, převedené do kresleného westernového stylu. Jména ani medailonky se u nich nezobrazují.
 - Medailony, jména postav, přezdívky a hráčské vizitky se na vstupu nezobrazují. Uprostřed zůstává logo, motto a přihlášení přes Discord.
-- Na telefonu je samostatná kompozice s jednou ilustrací pod textem. Na počítači jsou ilustrace po obou stranách.
+- Na telefonu jsou obě skupiny pod textem. Na počítači jsou po obou stranách. Vnější ruce a klobouky zůstávají uvnitř ilustrací a rozložení je nepřekrývá ořezem.
 - Jemný nástup, lehký pohyb pozadí podle kurzoru a mlžný opar. Omezení pohybu v systému se respektuje; na dotykových zařízeních se parallax nepoužívá.
 - Prezentační seznam šesti postav přichází až v ověřené relaci. Starý veřejný soubor `public-people.js` a obsluha veřejných hráčských vizitek byly z distribuce odstraněny.
 - Po odhlášení se seznam postav vyprázdní. Přístupy k lore a deníkům se dál kontrolují samostatně na serveru.
@@ -28,4 +28,12 @@ Testy běžely lokálně s aktuálním Workerem, SQLite a skutečným prohlíže
 
 ## Obrázky
 
-Vygenerováno vestavěným generátorem obrázků. Originály jsou ve složce `obrazky` jako `frontier-visitors-left-v1.png` a `frontier-visitors-right-v1.png`; web dodává průhledné WebP varianty 360, 720 a 1086 px. Přesná zadání jsou v `ENTRANCE-ART-PROMPTS.json`. Mobilní varianta ilustrace má přibližně 50 kB, desktopová 720px přibližně 189 kB.
+Vygenerováno vestavěným generátorem obrázků. Originály jsou ve složce `obrazky` jako `frontier-cast-left-v2.png` a `frontier-cast-right-v2.png`; web dodává průhledné WebP varianty 360, 720 a 1086 px. Přesná zadání jsou v `ENTRANCE-ART-PROMPTS.json`. Používají se zmenšené varianty podle šířky obrazovky.
+
+## Korekce podle připomínek
+
+- Obě skupiny vycházejí z aktuálních předloh: Nathaniel, Daniel, Annie / Katie, Vincent a Elijah. Nejde o náhodné anonymní postavy.
+- Pravá skupina byla znovu vygenerovaná pro shodný kreslený styl, průhlednost a celé ruce.
+- Přihlašovací tlačítko má opět původní HTML a pravidla ze `station.css`, bez dodatečné ikony Discordu a bez nového rozměru.
+- Kolem loga pomalu obíhá jemný zlatý odlesk, při omezeném pohybu je statický.
+- Tato korekce už vyžaduje pouze push složky `web`. Worker ani databáze se při ní nemění.
