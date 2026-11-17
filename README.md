@@ -35,3 +35,5 @@ Hudbu z ../pisnicky-gramofon připraví node tools/sync-music.mjs spuštěný z 
 Starší RELEASE a UPDATE dokumenty zachycují historii projektu; jejich seznamy funkcí nemusí odpovídat současnému stavu.
 
 Nový anonymní vstup: [změny, kontrola a pořadí zveřejnění](UPDATE-ANONYMOUS-ENTRANCE.md). Prezentační seznam postav se nově načítá až po přihlášení; před webem je potřeba nasadit aktuální Worker.
+
+Fotografický ateliér: [přehled a oznámení](UPDATE-ATELIER.md). Zveřejnění vyžaduje novou D1 migraci a aktuální Worker podle `bot/ATELIER-SETUP.md`.
