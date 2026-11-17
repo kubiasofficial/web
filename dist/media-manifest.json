@@ -472,5 +472,45 @@
       "url": "assets/optimized/vincent-960.7ee54c9d999b.webp",
       "bytes": 212696
     }
+  ],
+  "frontier-visitors-left-v1.png": [
+    {
+      "url": "assets/optimized/frontier-visitors-left-v1-360.8179cc60f37f.webp",
+      "width": 360,
+      "height": 480,
+      "bytes": 51316
+    },
+    {
+      "url": "assets/optimized/frontier-visitors-left-v1-720.e1f076e3ea80.webp",
+      "width": 720,
+      "height": 960,
+      "bytes": 193010
+    },
+    {
+      "url": "assets/optimized/frontier-visitors-left-v1-1086.b0c05c5f04dd.webp",
+      "width": 1086,
+      "height": 1448,
+      "bytes": 384888
+    }
+  ],
+  "frontier-visitors-right-v1.png": [
+    {
+      "url": "assets/optimized/frontier-visitors-right-v1-360.289ef9a8b5d4.webp",
+      "width": 360,
+      "height": 480,
+      "bytes": 52580
+    },
+    {
+      "url": "assets/optimized/frontier-visitors-right-v1-720.c78da55c4adc.webp",
+      "width": 720,
+      "height": 960,
+      "bytes": 193044
+    },
+    {
+      "url": "assets/optimized/frontier-visitors-right-v1-1086.1aa475c68cb9.webp",
+      "width": 1086,
+      "height": 1448,
+      "bytes": 370488
+    }
   ]
 }

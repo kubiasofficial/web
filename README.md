@@ -33,3 +33,5 @@ Hudbu z ../pisnicky-gramofon připraví node tools/sync-music.mjs spuštěný z 
 [Ověření odstranění funkcí](LEISURE-RETIREMENT-VERIFICATION.md).
 
 Starší RELEASE a UPDATE dokumenty zachycují historii projektu; jejich seznamy funkcí nemusí odpovídat současnému stavu.
+
+Nový anonymní vstup: [změny, kontrola a pořadí zveřejnění](UPDATE-ANONYMOUS-ENTRANCE.md). Prezentační seznam postav se nově načítá až po přihlášení; před webem je potřeba nasadit aktuální Worker.

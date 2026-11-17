@@ -1,5 +1,6 @@
 // Browser receives private profile data only after server authorization.
-const catalog = window.PUBLIC_PEOPLE;
+const catalog = {};
+function clearCatalog(){for(const key of Object.keys(catalog))delete catalog[key];}
 let identity = null, csrf = '', ready = false, routeVersion = 0, refreshVersion = 0, loggingOut = false, accountFingerprint='',directoryFingerprint='';
 const apiRoot = '/api/ubd';
 const deniedText = 'Děláš si prdel? Takto se informace nezískávají. Nejsi hoden znát toto info, takže si naser :D';
@@ -91,14 +92,14 @@ function renderAccount(){
  document.body.classList.toggle('signed-in',!!identity);welcome.hidden=!identity;rail.hidden=!identity;
  document.body.classList.toggle('restricted-user',!!identity?.restricted);if(!identity?.restricted)RestrictedAccess.hide();
  accountControls.replaceChildren();
- if(!identity){Community.purge();PortalPolish.closeCast();rail.replaceChildren();portal.replaceChildren();const login=document.createElement('a');login.href=loginHref;login.className='discord-login';login.textContent='Přihlásit přes Discord';accountControls.append(login);UserChrome.account();Holiday.update();return;}
+ if(!identity){clearCatalog();Community.purge();PortalPolish.closeCast();rail.replaceChildren();portal.replaceChildren();const login=document.createElement('a');login.href=loginHref;login.className='discord-login';login.textContent='Přihlásit přes Discord';accountControls.append(login);UserChrome.account();Holiday.update();return;}
  const photo=new Image(34,34);photo.src=identity.user.avatar;photo.alt='';accountControls.append(photo);
  const name=document.createElement('span');name.textContent=identity.user.name;accountControls.append(name);
  const logout=document.createElement('button');logout.type='button';logout.textContent='Odhlásit';logout.onclick=async()=>{
   if(!await Community.beforeLogout())return;
   logout.disabled=true;loggingOut=true;refreshVersion++;try{await api('/auth/logout',{method:'POST'});identity=null;csrf='';purgeProfile();Journal.purge();resetTrust();renderAccount();location.hash='';await route();}catch(error){setNotice(error.message);logout.disabled=false;}finally{loggingOut=false;}
  };accountControls.append(logout);
- if(identity.restricted){UserChrome.account();RestrictedAccess.show();return;}
+ if(identity.restricted){clearCatalog();UserChrome.account();RestrictedAccess.show();return;}
  const day=new Intl.DateTimeFormat('cs-CZ',{weekday:'long',timeZone:'Europe/Prague'}).format(new Date());
  const greeting={pondělí:'Krásné pondělí',úterý:'Krásné úterý',středa:'Krásnou středu',čtvrtek:'Krásný čtvrtek',pátek:'Krásný pátek',sobota:'Krásnou sobotu',neděle:'Krásnou neděli'};
  welcome.querySelector('h2').textContent=(greeting[day]||'Krásný den')+', '+identity.user.name+'.';
@@ -117,7 +118,7 @@ async function refreshSession(initial=false){
   const data=await api('/auth/session');if(version!==refreshVersion)return;const next=data.authenticated?data:null,changed=identity?.user.id!==next?.user.id||!!identity?.restricted!==!!next?.restricted;
   if(changed){purgeProfile();Journal.purge();Community.purge();resetTrust();}
   const freshDirectory=JSON.stringify(data.directory||{}),directoryChanged=directoryFingerprint!==freshDirectory;directoryFingerprint=freshDirectory;
-  for(const [key,patch]of Object.entries(data.directory||{}))if(catalog[key])Object.assign(catalog[key],patch);
+  clearCatalog();if(next&&!next.restricted)Object.assign(catalog,data.directory||{});
   if(directoryChanged&&activePerson)purgeProfile();
   identity=next;csrf=data.csrf||'';ready=true;renderAccount();
   if(identity?.restricted){RestrictedAccess.show();return;}
@@ -207,4 +208,3 @@ PortalPolish.init();Journal.init();Community.init();UserChrome.init();SeasonAtmo
 const loginResult=new URLSearchParams(location.search).get('login');
 if(loginResult){setNotice(loginResult==='failed'?'Přihlášení se nepodařilo. Ověř, že jsi členem vašeho Discord serveru, a zkus to znovu.':'Přihlášení bylo zrušeno.');history.replaceState(null,'',location.pathname+location.hash);}
 refreshSession(true);
-api('/directory').then(data=>{for(const [key,patch]of Object.entries(data.people||{})){if(!catalog[key])continue;Object.assign(catalog[key],patch);const card=selection.querySelector('.cast-link[href="#'+key+'"]');if(card){card.querySelector('.medallion-name').innerHTML=escapeHTML(catalog[key].given)+'<strong>'+escapeHTML(catalog[key].surname)+'</strong>';card.querySelector('.medallion-nickname').textContent=catalog[key].nickname;card.setAttribute('aria-label','Otevřít příběh: '+catalog[key].name);}}}).catch(()=>{});

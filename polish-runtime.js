@@ -1,6 +1,5 @@
 const PortalPolish = (() => {
  let loader, confirmation, resolveConfirmation=null, browser, castToggle, castNavigation, returnFocus=null;
- const playerNames={daniel:'Eidík',nathaniel:'kubiasofficial',vincent:'BuFu',elijah:'mata20_official',katie:'Safík Alex',scarlett:'Graciie04'};
  const names=new Map(), pendingNames=new Map(), avatars=new Map();
  let playerObserver;
  function closeCast(){
@@ -18,7 +17,7 @@ const PortalPolish = (() => {
  }
  function syncPlayer(key){
   const target=rail.querySelector('[data-character="'+key+'"]');if(!target)return;
-  target.querySelector('.rail-player').textContent=names.get(key)||playerNames[key];
+  target.querySelector('.rail-player').textContent=names.get(key)||catalog[key]?.player||'Hráč';
   const avatar=target.querySelector('.rail-avatar');avatar.hidden=!avatars.has(key);if(avatars.has(key))avatar.src=avatars.get(key);
   target.querySelector('.player-placeholder').hidden=avatars.has(key);
  }
