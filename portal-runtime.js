@@ -91,7 +91,7 @@ function renderAccount(){
  document.body.classList.toggle('signed-in',!!identity);welcome.hidden=!identity;rail.hidden=!identity;
  document.body.classList.toggle('restricted-user',!!identity?.restricted);if(!identity?.restricted)RestrictedAccess.hide();
  accountControls.replaceChildren();
- if(!identity){Community.purge();PortalPolish.closeCast();rail.replaceChildren();portal.replaceChildren();const login=document.createElement('a');login.href=loginHref;login.className='discord-login';login.textContent='Přihlásit přes Discord';accountControls.append(login);UserChrome.account();PlayerHub.sync();Holiday.update();return;}
+ if(!identity){Community.purge();PortalPolish.closeCast();rail.replaceChildren();portal.replaceChildren();const login=document.createElement('a');login.href=loginHref;login.className='discord-login';login.textContent='Přihlásit přes Discord';accountControls.append(login);UserChrome.account();Holiday.update();return;}
  const photo=new Image(34,34);photo.src=identity.user.avatar;photo.alt='';accountControls.append(photo);
  const name=document.createElement('span');name.textContent=identity.user.name;accountControls.append(name);
  const logout=document.createElement('button');logout.type='button';logout.textContent='Odhlásit';logout.onclick=async()=>{

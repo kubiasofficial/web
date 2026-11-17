@@ -8,8 +8,8 @@ const UserChrome=(()=>{
  function clearPrivate(){closeBirthday();settingsVersion++;if(settings?.open)settings.close();settings?.querySelector('form').reset();}
  function arrangeMenu(){
   const own=identity?.owned[0];nav.querySelector('.nav-journal').href=own?'#journal-'+own:'#';nav.querySelector('.nav-journal').hidden=!own||!!identity?.restricted;nav.querySelector('.nav-trust').hidden=!own||!!identity?.restricted;
-  for(const selector of ['.nav-profile','.nav-shop','.nav-calendar'])nav.querySelector(selector).hidden=!!identity?.restricted;
-  const groups=[['Moje postava',['.nav-profile','.portal-home','.nav-journal','.nav-edit','.nav-trust']],['Náš svět',['.cast-toggle','.nav-atlas']],['Volný čas',['.nav-gramophone','.nav-games','.nav-calendar','.nav-shop']],['Nastavení',['.nav-seasons','.pointer-settings-open','.notification-settings','.menu-logout']],['Správa',['.nav-manage']]];
+  for(const selector of ['.nav-profile'])nav.querySelector(selector).hidden=!!identity?.restricted;
+  const groups=[['Moje postava',['.nav-profile','.portal-home','.nav-journal','.nav-edit','.nav-trust']],['Náš svět',['.cast-toggle','.nav-atlas']],['Volný čas',['.nav-gramophone']],['Nastavení',['.nav-seasons','.pointer-settings-open','.notification-settings','.menu-logout']],['Správa',['.nav-manage']]];
   const fresh=[];for(const[label,selectors]of groups){const section=document.createElement('section');section.className='account-menu-group';const title=document.createElement('h3');title.textContent=label;section.append(title);for(const selector of selectors){const e=nav.querySelector(selector);if(e)section.append(e);}fresh.push(section);}
   nav.querySelectorAll('.account-menu-group').forEach(e=>e.remove());nav.append(...fresh);
  }
@@ -18,7 +18,7 @@ const UserChrome=(()=>{
   host=document.createElement('div');host.className='user-chrome';document.querySelector('.masthead').append(host);host.append(accountControls,nav);
   const preferenceButton=document.createElement('button');preferenceButton.type='button';preferenceButton.className='notification-settings';preferenceButton.innerHTML=bell+'Upozornění';preferenceButton.onclick=openSettings;nav.append(preferenceButton);
   const pointerButton=document.createElement('button');pointerButton.type='button';pointerButton.className='pointer-settings-open';pointerButton.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 3v16l5-5 4 7 3-2-4-7h7Z"/></svg>Vzhled a efekty';pointerButton.onclick=()=>PersonalPointer.open();pointerButton.hidden=true;nav.append(pointerButton);
-  for(const[cls,href,label,symbol]of [['profile','#player','Moje vizitka','♙'],['journal','#','Můj deník','▤'],['calendar','#calendar','Prosincová pošta','✉'],['shop','#shop','Ústavní krámek','◈']]){const a=document.createElement('a');a.className='nav-'+cls;a.href=href;a.innerHTML='<span class="menu-symbol" aria-hidden="true">'+symbol+'</span>'+label;nav.append(a);}
+  for(const[cls,href,label,symbol]of [['profile','#player','Moje vizitka','♙'],['journal','#','Můj deník','▤']]){const a=document.createElement('a');a.className='nav-'+cls;a.href=href;a.innerHTML='<span class="menu-symbol" aria-hidden="true">'+symbol+'</span>'+label;nav.append(a);}
   const trust=document.createElement('button');trust.type='button';trust.className='nav-trust';trust.innerHTML='<span class="menu-symbol" aria-hidden="true">♧</span>Komu důvěřuji';trust.onclick=()=>document.querySelector('.trust-open')?.click();nav.append(trust);
   nav.addEventListener('click',event=>{if(event.target.closest('a,button'))closeMenu(true);});
   host.addEventListener('keydown',event=>{if(event.key==='Escape'&&host.classList.contains('user-menu-open')){event.preventDefault();event.stopPropagation();closeMenu(true);}else if(event.target===trigger&&event.key==='ArrowDown'){event.preventDefault();openMenu(true);}});
@@ -50,7 +50,7 @@ const UserChrome=(()=>{
   if(birthdayKey&&(!identity||!identity.access.includes(birthdayKey)))closeBirthday();
   if(!identity){closeMenu();return;}
   if(!trigger)return;
-  PlayerHub.sync();Holiday.update();
+  Holiday.update();
   for(const [selector,count,label]of [['.user-pending',identity.pending||0,'změn ke schválení']]){const counter=trigger.querySelector(selector);counter.hidden=!count;counter.textContent=String(count);counter.setAttribute('aria-label',count+' '+label);}
   for(const link of nav.querySelectorAll('a')){const hash=link.hash,active=hash===''||hash==='#'?!location.hash||location.hash==='#':location.hash.startsWith(hash);if(active)link.setAttribute('aria-current','page');else link.removeAttribute('aria-current');}
  }

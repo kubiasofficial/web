@@ -417,48 +417,6 @@
       "bytes": 101280
     }
   ],
-  "shop-forest.png": [
-    {
-      "width": 800,
-      "height": 450,
-      "url": "assets/optimized/shop-forest-800.089c0900b3c4.webp",
-      "bytes": 49296
-    },
-    {
-      "width": 1600,
-      "height": 900,
-      "url": "assets/optimized/shop-forest-1600.288fb2cea012.webp",
-      "bytes": 158528
-    }
-  ],
-  "shop-mountain.png": [
-    {
-      "width": 800,
-      "height": 450,
-      "url": "assets/optimized/shop-mountain-800.7f62628d3d92.webp",
-      "bytes": 50078
-    },
-    {
-      "width": 1600,
-      "height": 900,
-      "url": "assets/optimized/shop-mountain-1600.ab8622c8a0d4.webp",
-      "bytes": 164352
-    }
-  ],
-  "shop-saloon.png": [
-    {
-      "width": 800,
-      "height": 450,
-      "url": "assets/optimized/shop-saloon-800.7c0eb1dac442.webp",
-      "bytes": 76378
-    },
-    {
-      "width": 1600,
-      "height": 900,
-      "url": "assets/optimized/shop-saloon-1600.6fff006f4b36.webp",
-      "bytes": 222620
-    }
-  ],
   "station-empty-v4.png": [
     {
       "width": 800,
