@@ -83,6 +83,7 @@ function closeDenial(){denial.close();location.hash='';}
 denial.querySelector('.dialog-close').onclick=closeDenial;denial.querySelector('.denial-back').onclick=closeDenial;
 denial.addEventListener('cancel',event=>{event.preventDefault();closeDenial();});
 function renderAccount(){
+ RPCalendar.sync();
  PersonalPointer.sync();
  SeasonAtmosphere.syncSession();
  Community.sync();

@@ -708,6 +708,123 @@ const Atelier=(()=>{
  return{open,dispose,get dirty(){return dirty;},get busy(){return busy;}};
 })();
 
+const RPCalendar=(()=>{
+ let root=null,version=0,formState=null,savedDraft=null,baseline='',busy=false,sessionUser='',lastSync=0,syncBusy=false,noticeIds=new Set(),noticeCount=0,toast,toastTimer=0;
+ const todayParts=()=>Object.fromEntries(new Intl.DateTimeFormat('en-CA',{timeZone:'Europe/Prague',year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(new Date()).map(p=>[p.type,p.value]));
+ let year=Number(todayParts().year),month=Number(todayParts().month)-1,display=matchMedia('(max-width:700px)').matches?'agenda':'month';
+ const categories={meeting:'Setkání',work:'Práce',journey:'Výprava',group:'Společná akce',other:'Jiné'},states={owner:'Organizátor',invited:'Čeká na odpověď',accepted:'Zúčastním se',maybe:'Možná',declined:'Nezúčastním se',left:'Opuštěno',revoked:'Přístup odebrán'},statuses={scheduled:'Naplánováno',cancelled:'Zrušeno',completed:'Dokončeno'},kinds={invite:'Nová pozvánka',update:'Změna akce',cancel:'Zrušená akce',complete:'Dokončená akce',rsvp:'Odpověď na pozvánku',reminder:'Připomínka akce'};
+ const esc=value=>escapeHTML(value),pad=n=>String(n).padStart(2,'0'),dayKey=t=>{const p=Object.fromEntries(new Intl.DateTimeFormat('en-CA',{timeZone:'Europe/Prague',year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(new Date(t*1000)).map(v=>[v.type,v.value]));return`${p.year}-${p.month}-${p.day}`;};
+ const stamp=t=>new Intl.DateTimeFormat('cs-CZ',{timeZone:'Europe/Prague',weekday:'long',day:'numeric',month:'long',hour:'2-digit',minute:'2-digit'}).format(new Date(t*1000));
+ const hour=t=>new Intl.DateTimeFormat('cs-CZ',{timeZone:'Europe/Prague',hour:'2-digit',minute:'2-digit'}).format(new Date(t*1000));
+ const local=t=>{if(!t)return'';const p=Object.fromEntries(new Intl.DateTimeFormat('en-CA',{timeZone:'Europe/Prague',year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',hourCycle:'h23'}).formatToParts(new Date(t*1000)).map(v=>[v.type,v.value]));return`${p.year}-${p.month}-${p.day}T${p.hour}:${p.minute}`;};
+ const snapshot=()=>root?.querySelector('.rp-event-form')?JSON.stringify([...new FormData(root.querySelector('.rp-event-form')).entries()]):'';
+ const dirty=()=>!!formState&&!!snapshot()&&snapshot()!==baseline;
+ function dispose({preserveDraft=false}={}){
+  if(preserveDraft&&dirty())savedDraft={user:identity?.user.id,hash:location.hash,data:formData(),state:formState,baseline};else if(!preserveDraft)savedDraft=null;
+  root=null;formState=null;baseline='';busy=false;version++;
+ }
+ function badges(){
+  const badge=document.querySelector('.rp-calendar-badge');if(badge){badge.hidden=!noticeCount;badge.textContent=String(noticeCount);badge.setAttribute('aria-label',noticeCount+' upozornění kalendáře');}
+  const counters=document.querySelector('.user-counters');if(counters){let b=counters.querySelector('.user-calendar');if(!b){b=document.createElement('span');b.className='user-calendar';counters.append(b);}b.hidden=!noticeCount;b.textContent=String(noticeCount);b.setAttribute('aria-label',noticeCount+' upozornění kalendáře');}
+ }
+ function clear(){sessionUser='';lastSync=0;syncBusy=false;noticeCount=0;noticeIds.clear();savedDraft=null;clearTimeout(toastTimer);toast?.remove();toast=null;badges();}
+ async function sync(force=false){
+  if(!identity||identity.restricted){if(sessionUser)clear();return;}
+  if(sessionUser!==identity.user.id){clear();sessionUser=identity.user.id;}
+  badges();if(document.hidden||syncBusy||(!force&&Date.now()-lastSync<12000))return;
+  const user=sessionUser;syncBusy=true;
+  try{const result=await api('/rp-calendar/notices');if(sessionUser!==user||identity?.user.id!==user||identity.restricted)return;
+   const fresh=lastSync?result.notices.find(n=>!n.readAt&&!noticeIds.has(n.id)):null;noticeCount=result.unread;noticeIds=new Set(result.notices.map(n=>n.id));lastSync=Date.now();badges();
+   if(fresh&&location.hash!=='#rp-calendar/notifications')showToast(fresh);
+   const hash=location.hash,container=root,v=version;
+   if(container&&/^#rp-calendar\/event\//.test(hash)){
+    try{await api('/rp-calendar/events/'+hash.split('/')[2]);}
+    catch(error){if([401,403,404].includes(error.status)&&root===container&&version===v&&identity?.user.id===user){container.querySelector('.rp-calendar-body').innerHTML='<div class="rp-calendar-empty"><h3>Akce už není dostupná.</h3><p>Organizátor ji smazal nebo odebral pozvánku.</p><a class="web-button" href="#rp-calendar">Zpět do diáře</a></div>';}}
+   }
+  }catch{/* Other portal features continue during migration or a transient calendar outage. */}finally{if(sessionUser===user)syncBusy=false;}
+ }
+ function showToast(n){
+  clearTimeout(toastTimer);toast?.remove();toast=document.createElement('aside');toast.className='rp-calendar-toast';toast.setAttribute('role','status');
+  toast.innerHTML='<span aria-hidden="true">◷</span><div><strong>'+esc(kinds[n.kind]||'RP kalendář')+'</strong><p>'+esc(n.title)+'</p><a href="#rp-calendar/notifications">Otevřít upozornění ↗</a></div><button type="button" aria-label="Zavřít upozornění">×</button>';
+  toast.querySelector('button').onclick=()=>toast?.remove();document.body.append(toast);toastTimer=setTimeout(()=>toast?.remove(),12000);
+ }
+ function valid(v,user){return root?.isConnected&&version===v&&identity?.user.id===user&&!identity.restricted&&!document.hidden;}
+ function message(text,error=false){const e=root?.querySelector('.rp-calendar-status');if(e){e.textContent=text;e.classList.toggle('is-error',error);}}
+ function button(label,fn,cls=''){const b=document.createElement('button');b.type='button';b.className='web-button '+cls;b.textContent=label;b.onclick=fn;return b;}
+ function card(e){return '<a class="rp-event-card '+(e.status!=='scheduled'?'is-inactive':'')+'" style="--event-color:'+esc(e.color)+'" href="#rp-calendar/event/'+e.id+'"><span class="rp-event-time">'+esc(hour(e.startsAt))+'</span><div><h3>'+esc(e.title)+'</h3><p>'+esc(e.location||categories[e.category])+'</p><small>'+esc(e.status==='scheduled'?(e.own?'Moje akce':states[e.myState]):statuses[e.status])+'</small></div><span aria-hidden="true">↗</span></a>';}
+ function tabs(hash){return '<nav class="rp-calendar-tabs" aria-label="Výběr akcí">'+[['#rp-calendar','Vše'],['#rp-calendar/mine','Moje akce'],['#rp-calendar/invitations','Pozvánky'],['#rp-calendar/shared','Sdílené'],['#rp-calendar/notifications','Upozornění']].map(([h,l])=>'<a href="'+h+'"'+(h===hash?' aria-current="page"':'')+'>'+l+'</a>').join('')+'</nav>';}
+ async function open(container,hash){
+  dispose({preserveDraft:!!savedDraft});root=container;const v=++version,user=identity.user.id;
+  root.innerHTML='<div class="rp-calendar-top"><div><span class="eyebrow">ČAS NA DALŠÍ PŘÍBĚH</span><h2>Tvůj RP kalendář</h2><p>Domluv si večer. Připomínku nech na Ústavu.</p></div><a class="web-button primary" href="#rp-calendar/new">＋ Přidat akci</a></div>'+tabs(hash)+'<p class="rp-calendar-status" role="status" aria-live="polite"></p><div class="rp-calendar-body"><p class="web-muted">Otevírám diář…</p></div>';
+  try{
+   if(hash==='#rp-calendar/new'||/^#rp-calendar\/edit\//.test(hash))await editor(hash,v,user);
+   else if(/^#rp-calendar\/event\//.test(hash))await detail(hash.split('/')[2],v,user);
+   else if(hash==='#rp-calendar/notifications')await notices(v,user);
+   else await overview(hash,v,user);
+  }catch(e){if(valid(v,user)){root.querySelector('.rp-calendar-body').innerHTML='<div class="rp-calendar-empty"><span aria-hidden="true">◷</span><h3>Diář teď nelze otevřít.</h3><p></p><a href="#rp-calendar" class="web-button">Zpět do kalendáře</a></div>';root.querySelector('.rp-calendar-empty p').textContent=e.message;}}
+  if(valid(v,user))sync(true);
+ }
+ async function overview(hash,v,user){
+  const from=Math.floor(Date.UTC(year,month,1)/1000)-86400,to=Math.floor(Date.UTC(year,month+1,1)/1000)+86400;
+  const result=await api(hash==='#rp-calendar/invitations'?'/rp-calendar/invitations':'/rp-calendar/events?from='+from+'&to='+to);if(!valid(v,user))return;
+  let events=result.events;if(hash.endsWith('/mine'))events=events.filter(e=>e.own);if(hash.endsWith('/shared'))events=events.filter(e=>!e.own&&e.myState!=='invited');
+  const body=root.querySelector('.rp-calendar-body'),monthName=new Intl.DateTimeFormat('cs-CZ',{month:'long',year:'numeric',timeZone:'UTC'}).format(new Date(Date.UTC(year,month,1))),today=todayParts(),keyToday=`${today.year}-${today.month}-${today.day}`;
+  if(hash==='#rp-calendar/invitations'){body.innerHTML='<div class="rp-section-heading"><h3>Pozvánky čekají na odpověď</h3><span>'+events.length+'</span></div><div class="rp-calendar-agenda">'+(events.length?events.map(e=>'<p class="rp-agenda-date">'+esc(stamp(e.startsAt))+'</p>'+card(e)).join(''):'<div class="rp-calendar-empty"><span>✉</span><h3>Žádná pozvánka nečeká.</h3><p>Jakmile tě někdo pozve na akci, najdeš ji tady.</p></div>')+'</div>';return;}
+  body.innerHTML='<div class="rp-month-controls"><div><button class="web-button rp-month-prev" type="button" aria-label="Předchozí měsíc">←</button><h3>'+esc(monthName)+'</h3><button class="web-button rp-month-next" type="button" aria-label="Další měsíc">→</button></div><div><button class="web-button rp-today" type="button">Dnes</button><button class="web-button rp-toggle-view" type="button">'+(display==='month'?'Seznam akcí':'Měsíční přehled')+'</button></div></div><div class="rp-calendar-layout"><section class="rp-calendar-sheet" aria-label="'+esc(monthName)+'"></section><aside class="rp-calendar-upcoming"><span class="eyebrow">V TOMTO MĚSÍCI</span><h3>Co tě čeká</h3><div></div><p class="rp-calendar-zone">Časy zobrazujeme v Europe/Prague.<br>Každý účastník má vlastní připomínky.</p></aside></div>';
+  const sheet=body.querySelector('.rp-calendar-sheet'),days=new Date(Date.UTC(year,month+1,0)).getUTCDate(),offset=(new Date(Date.UTC(year,month,1)).getUTCDay()+6)%7;
+  if(display==='month'){
+   sheet.innerHTML='<div class="rp-weekdays" aria-hidden="true">'+['Po','Út','St','Čt','Pá','So','Ne'].map(d=>'<span>'+d+'</span>').join('')+'</div><div class="rp-month-grid">'+Array.from({length:Math.ceil((offset+days)/7)*7},(_,i)=>{const day=i-offset+1;if(day<1||day>days)return'<div class="rp-day is-outside" aria-hidden="true"></div>';const key=`${year}-${pad(month+1)}-${pad(day)}`,items=events.filter(e=>dayKey(e.startsAt)===key);return'<div class="rp-day '+(key===keyToday?'is-today':'')+'"><button type="button" class="rp-day-select" data-day="'+key+'" aria-label="Akce dne '+day+'. '+esc(monthName)+'"'+(key===keyToday?' aria-current="date"':'')+'>'+day+'</button>'+items.slice(0,2).map(e=>'<a class="rp-day-event" href="#rp-calendar/event/'+e.id+'" style="--event-color:'+esc(e.color)+'" title="'+esc(e.title)+'">'+esc(e.title)+'</a>').join('')+(items.length>2?'<button type="button" class="rp-day-more" data-day="'+key+'">Další '+(items.length-2)+'</button>':'')+'</div>';}).join('')+'</div><div class="rp-selected-day" hidden></div>';
+   sheet.querySelectorAll('[data-day]').forEach(b=>b.onclick=()=>{const selection=sheet.querySelector('.rp-selected-day'),rows=events.filter(e=>dayKey(e.startsAt)===b.dataset.day);selection.hidden=false;selection.innerHTML='<h3>'+b.dataset.day.split('-').reverse().join('. ')+'</h3>'+(rows.length?rows.map(card).join(''):'<p class="web-muted">Pro tento den zatím nemáš žádnou akci.</p>');selection.append(button('Přidat akci na tento den',()=>{savedDraft={user,hash:'#rp-calendar/new',data:{startLocal:b.dataset.day+'T20:00'}};location.hash='#rp-calendar/new';}));});
+  }else sheet.innerHTML='<div class="rp-calendar-agenda">'+(events.length?events.map(e=>'<p class="rp-agenda-date">'+esc(stamp(e.startsAt))+'</p>'+card(e)).join(''):'<div class="rp-calendar-empty"><span>◷</span><h3>Volné stránky.</h3><p>Přidej svou první RP akci.</p></div>')+'</div>';
+  const upcoming=events.filter(e=>e.status==='scheduled'&&e.startsAt>=Date.now()/1000).slice(0,5);body.querySelector('.rp-calendar-upcoming>div').innerHTML=upcoming.length?upcoming.map(card).join(''):'<p class="web-muted">Žádné další akce v tomto měsíci.</p>';
+  const shift=delta=>{const d=new Date(Date.UTC(year,month+delta,1));year=d.getUTCFullYear();month=d.getUTCMonth();open(root,hash);};body.querySelector('.rp-month-prev').onclick=()=>shift(-1);body.querySelector('.rp-month-next').onclick=()=>shift(1);body.querySelector('.rp-today').onclick=()=>{year=Number(todayParts().year);month=Number(todayParts().month)-1;open(root,hash);};body.querySelector('.rp-toggle-view').onclick=()=>{display=display==='month'?'agenda':'month';open(root,hash);};
+ }
+ function reminderFields(s){return '<fieldset class="rp-reminder-fields"><legend>Připomenout mi akci</legend><p>Nejvýše tři předstihy. Vlastní čas zadej v minutách, nejvýše týden.</p><label>Předstihy v minutách<input name="reminders" value="'+esc(s.reminders.join(', '))+'" placeholder="15, 60" inputmode="numeric"></label><div class="rp-reminder-presets">'+[[0,'Při začátku'],[5,'5 min'],[10,'10 min'],[15,'15 min'],[30,'30 min'],[60,'Hodina'],[1440,'Den']].map(([n,l])=>'<button type="button" data-reminder="'+n+'">'+l+'</button>').join('')+'</div><div class="rp-channel-options"><label><input type="checkbox" name="notifyWeb" '+(s.web?'checked':'')+'> Upozornění na webu</label><label><input type="checkbox" name="notifyDiscord" '+(s.discord?'checked':'')+'> Soukromá zpráva od UBD</label></div><p>Na zavřeném webu upozornění uvidíš po návratu. Discord může přijít i při vypnutém počítači, pokud máš dostupné osobní zprávy.</p></fieldset>';}
+ function wireReminders(form){form.querySelectorAll('[data-reminder]').forEach(b=>b.onclick=()=>{const input=form.elements.reminders,list=input.value.split(',').map(x=>x.trim()).filter(Boolean).map(Number),n=Number(b.dataset.reminder);input.value=(list.includes(n)?list.filter(v=>v!==n):[...list,n]).join(', ');input.dispatchEvent(new Event('input',{bubbles:true}));});}
+ function settingsData(form){return {reminders:form.elements.reminders.value.trim()?form.elements.reminders.value.split(',').map(v=>Number(v.trim())):[],web:form.elements.notifyWeb.checked,discord:form.elements.notifyDiscord.checked};}
+ function formData(){
+  const f=root.querySelector('.rp-event-form');if(!f)return null;
+  const value=name=>f.elements[name].value;
+  return {title:value('title'),description:value('description'),location:value('location'),privateNote:value('privateNote'),category:value('category'),color:value('color'),startLocal:value('startLocal'),endLocal:value('endLocal'),startChoice:value('startChoice'),endChoice:value('endChoice'),invitees:[...f.querySelectorAll('[name=invitee]:checked')].map(e=>e.value),...(f.elements.reminders?{settings:settingsData(f)}:{})};
+ }
+ async function editor(hash,v,user){
+  const edit=hash.startsWith('#rp-calendar/edit/'),id=edit?hash.split('/')[2]:crypto.randomUUID(),[peopleResult,result]=await Promise.all([api('/rp-calendar/people'),edit?api('/rp-calendar/events/'+id):Promise.resolve(null)]);if(!valid(v,user))return;
+  if(edit&&!result.event.own)throw Error('Akci může upravit pouze organizátor.');
+  const e=result?.event,draft=savedDraft?.user===user&&savedDraft.hash===hash?savedDraft:null;
+  const defaults={title:e?.title||'',description:e?.description||'',location:e?.location||'',privateNote:e?.privateNote||'',category:e?.category||'meeting',color:e?.color||'#b88b49',startLocal:local(e?.startsAt||Math.floor(Date.now()/1000)+3600),endLocal:local(e?.endsAt),startChoice:e?.startChoice||'earlier',endChoice:e?.endChoice||'earlier',invitees:result?.members.filter(m=>m.id!==user).map(m=>m.id)||[],settings:e?.settings||{reminders:[15],web:true,discord:true}},data={...defaults,...draft?.data};
+  formState=draft?.state||{id,edit,revision:e?.revision||0,requestId:crypto.randomUUID()};
+  const field=(name,label,max,area=false)=>'<label>'+label+(area?'<textarea name="'+name+'" maxlength="'+max+'" rows="4">'+esc(data[name])+'</textarea>':'<input name="'+name+'" maxlength="'+max+'" value="'+esc(data[name])+'"'+(name==='title'?' required':'')+'>')+'</label>';
+  root.querySelector('.rp-calendar-body').innerHTML='<form class="rp-event-form"><div class="rp-form-heading"><span class="rp-calendar-seal" aria-hidden="true">◷</span><div><span class="eyebrow">'+(edit?'UPRAVIT SPOLEČNÝ PLÁN':'NOVÁ STRÁNKA V DIÁŘI')+'</span><h3>'+(edit?'Dolaď svou akci':'Na kdy si píšeme příběh?')+'</h3></div></div><div class="rp-form-columns"><section>'+field('title','Název akce',120)+'<div class="rp-form-pair"><label>Začátek · český čas<input type="datetime-local" name="startLocal" value="'+esc(data.startLocal)+'" required></label><label>Konec · volitelný<input type="datetime-local" name="endLocal" value="'+esc(data.endLocal)+'"></label></div>'+field('location','Místo setkání',200)+'<div class="rp-form-pair"><label>Kategorie<select name="category">'+Object.entries(categories).map(([k,l])=>'<option value="'+k+'"'+(data.category===k?' selected':'')+'>'+l+'</option>').join('')+'</select></label><label>Barva<input type="color" name="color" value="'+esc(data.color)+'"></label></div>'+field('description','Společný popis · uvidí pozvaní',2500,true)+'<details class="rp-time-options"><summary>Změna letního / zimního času</summary><p>Pokud se čas při přechodu na zimní opakuje, zvol jeho první nebo druhý výskyt.</p>'+['start','end'].map(k=>'<label>'+({start:'Začátek',end:'Konec'}[k])+'<select name="'+k+'Choice"><option value="earlier"'+(data[k+'Choice']==='earlier'?' selected':'')+'>První výskyt</option><option value="later"'+(data[k+'Choice']==='later'?' selected':'')+'>Druhý výskyt</option></select></label>').join('')+'</details></section><aside><fieldset class="rp-invite-picker"><legend>Pozvat hráče</legend><p>Sdílíš pouze tuto akci. Ostatní události zůstávají tvoje.</p>'+peopleResult.people.map(p=>'<label><input type="checkbox" name="invitee" value="'+p.id+'"'+(data.invitees.includes(p.id)?' checked':'')+'><img src="'+esc(p.avatar||mediaURL('icon-'+p.character+'.png',160))+'" alt="" width="34" height="34"><span>'+esc(p.name)+'</span></label>').join('')+'</fieldset><div class="rp-private-note">'+field('privateNote','Soukromá poznámka · jen pro tebe',2500,true)+'</div>'+(!edit?reminderFields(data.settings):'<p class="web-muted">Vlastní připomínky nastavíš v detailu akce. Pozvaní si nastavují svoje.</p>')+'</aside></div><div class="rp-form-actions"><button class="web-button primary" type="submit">'+(edit?'Uložit změny':'Vytvořit akci a odeslat pozvánky')+'</button><a class="web-button" href="#rp-calendar'+(edit?'/event/'+id:'')+'">Zpět</a></div><p class="rp-form-status" role="status"></p></form>';
+  const form=root.querySelector('form');if(!edit)wireReminders(form);baseline=draft?.baseline||snapshot();savedDraft=null;
+  form.onsubmit=async event=>{event.preventDefault();if(busy)return;busy=true;form.querySelector('[type=submit]').disabled=true;form.querySelector('.rp-form-status').textContent='Ukládám akci…';
+   try{const input={...formData(),id:formState.id,revision:formState.revision,requestId:formState.requestId};const out=await api('/rp-calendar/events'+(edit?'/'+id:''),{method:edit?'PUT':'POST',body:JSON.stringify(input)});if(!valid(v,user))return;baseline=snapshot();formState=null;savedDraft=null;location.hash='#rp-calendar/event/'+(out.id||id);sync(true);
+   }catch(e){if(valid(v,user))form.querySelector('.rp-form-status').textContent=e.message;}finally{if(valid(v,user)){busy=false;form.querySelector('[type=submit]').disabled=false;}}
+  };
+ }
+ async function detail(id,v,user){
+  const result=await api('/rp-calendar/events/'+id);if(!valid(v,user))return;const e=result.event,members=result.members;
+  root.querySelector('.rp-calendar-body').innerHTML='<article class="rp-event-detail" style="--event-color:'+esc(e.color)+'"><header><span class="eyebrow">'+esc(categories[e.category])+' · '+esc(statuses[e.status])+'</span><h3>'+esc(e.title)+'</h3><p class="rp-detail-date">'+esc(stamp(e.startsAt))+(e.endsAt?' — '+esc(stamp(e.endsAt)):'')+'</p><p>'+esc(e.location||'Místo zatím není uvedené')+'</p></header><div class="rp-detail-columns"><section><h4>O akci</h4><p class="rp-preserve-lines">'+esc(e.description||'Podrobnosti doplní organizátor.')+'</p><h4>Kdo má pozvánku</h4><ul class="rp-member-list">'+members.map(m=>'<li><span>'+esc(m.name)+'</span><b>'+esc(states[m.state])+'</b></li>').join('')+'</ul>'+(e.own&&e.privateNote?'<aside class="rp-private-note"><span class="eyebrow">JEN TVOJE OČI</span><p class="rp-preserve-lines">'+esc(e.privateNote)+'</p></aside>':'')+'<div class="rp-event-actions"></div></section><aside class="rp-personal-settings"></aside></div></article>';
+  const actions=root.querySelector('.rp-event-actions');
+  const mutate=async(action,body,method='POST')=>{if(busy)return;busy=true;actions.querySelectorAll('button').forEach(b=>b.disabled=true);try{await api('/rp-calendar/events/'+id+(action?'/'+action:''),{method,body:JSON.stringify(body)});if(valid(v,user)){sync(true);if(action==='leave'||method==='DELETE')location.hash='#rp-calendar';else open(root,location.hash);}}catch(error){if(valid(v,user)){message(error.message,true);busy=false;actions.querySelectorAll('button').forEach(b=>b.disabled=false);}}};
+  if(!e.own&&e.status==='scheduled')for(const[state,label]of [['accepted','Zúčastním se'],['maybe','Možná'],['declined','Nezúčastním se']]){const b=button(label,()=>mutate('respond',{state,revision:e.settings.revision}),state===e.myState?'primary':'');b.setAttribute('aria-pressed',String(state===e.myState));actions.append(b);}
+  if(e.own){if(e.status==='scheduled'){const edit=document.createElement('a');edit.className='web-button primary';edit.href='#rp-calendar/edit/'+id;edit.textContent='Upravit akci a pozvané';actions.append(edit);actions.append(button('Dokončeno',async()=>{if(await PortalPolish.confirm('Označit akci jako dokončenou?','Další připomínky se zastaví.','Dokončit'))mutate('complete',{revision:e.revision});}));actions.append(button('Zrušit akci',async()=>{if(await PortalPolish.confirm('Zrušit tuto RP akci?','Pozvaní uvidí zrušení. Všechny další připomínky se zastaví.','Zrušit akci'))mutate('cancel',{revision:e.revision});},'subtle'));}
+   actions.append(button('Smazat',async()=>{if(await PortalPolish.confirm('Smazat akci z kalendáře?','Zápis zmizí všem účastníkům a soukromé poznámky se odstraní. Pozvaní dostanou zprávu o zrušení.','Smazat'))mutate('',{revision:e.revision},'DELETE');},'subtle'));
+  }else actions.append(button('Opustit akci',async()=>{if(await PortalPolish.confirm('Opustit tuto akci?','Akce zmizí z tvého kalendáře a připomínky se zastaví.','Opustit'))mutate('leave',{});},'subtle'));
+  if(e.status==='scheduled'){
+   const settings=root.querySelector('.rp-personal-settings');settings.innerHTML='<form class="rp-settings-form">'+reminderFields(e.settings)+'<button type="submit" class="web-button">Uložit moje připomínky</button><p class="rp-settings-status" role="status"></p></form>';const form=settings.querySelector('form');wireReminders(form);
+   form.onsubmit=async event=>{event.preventDefault();const b=form.querySelector('[type=submit]');b.disabled=true;try{await api('/rp-calendar/events/'+id+'/settings',{method:'PUT',body:JSON.stringify({...settingsData(form),revision:e.settings.revision})});if(valid(v,user)){await open(root,location.hash);message('Tvoje připomínky jsou uložené. Ostatním se nastavení nezměnilo.');}}catch(error){if(valid(v,user))form.querySelector('.rp-settings-status').textContent=error.message;}finally{if(valid(v,user))b.disabled=false;}};
+  }
+ }
+ async function notices(v,user){
+  const result=await api('/rp-calendar/notices');if(!valid(v,user))return;
+  root.querySelector('.rp-calendar-body').innerHTML='<div class="rp-section-heading"><h3>Co ti diář připomíná</h3><button type="button" class="web-button rp-notices-read">Vše přečtené</button></div><div class="rp-notice-list">'+(result.notices.length?result.notices.map(n=>'<article class="rp-notice '+(!n.readAt?'is-unread':'')+'"><div><span class="eyebrow">'+esc(kinds[n.kind]||'RP kalendář')+'</span><h3>'+esc(n.title)+'</h3><p>'+esc(stamp(n.createdAt))+'</p><small>'+esc(({delivered:'Discord: doručeno',failed:'Discord: nedoručeno',uncertain:'Discord: doručení nepotvrzené',pending:'Discord: čeká na doručení',skipped:'Discord: upozornění už není potřeba',off:'Pouze web'})[n.delivery]||'')+'</small></div><div>'+(n.eventId?'<a class="web-button" href="#rp-calendar/event/'+n.eventId+'">Otevřít akci ↗</a>':'')+(!n.readAt?'<button type="button" class="web-button subtle" data-read="'+esc(n.id)+'">Přečteno</button>':'')+'</div></article>').join(''):'<div class="rp-calendar-empty"><span>✉</span><h3>Všechno v klidu.</h3><p>Pozvánky, změny a připomínky najdeš na tomto místě.</p></div>')+'</div>';
+  const read=async id=>{try{await api('/rp-calendar/notices/read',{method:'POST',body:JSON.stringify(id?{id}:{})});if(valid(v,user)){await sync(true);open(root,location.hash);}}catch(e){if(valid(v,user))message(e.message,true);}};
+  root.querySelector('.rp-notices-read').onclick=()=>read();root.querySelectorAll('[data-read]').forEach(b=>b.onclick=()=>read(b.dataset.read));
+ }
+ document.addEventListener('visibilitychange',()=>{if(document.hidden){clearTimeout(toastTimer);toast?.remove();}else sync();});
+ return {open,dispose,sync,badges,clear,get dirty(){return dirty();},get pendingDraft(){return !!savedDraft;}};
+})();
+
 const Community=(()=>{
  let page,nav,generation=0,loadedHash='',view='',editorState=null,suspended=null;
  const labels={given:'Jméno',surname:'Příjmení',nickname:'Přezdívka',age:'Věk v lore',birth:'Datum narození',occupation:'Povolání',relatives:'Rodina a blízcí',kicker:'Motto',description:'Úvodní charakteristika',quote:'Osobní citát',closing:'Závěrečná slova',origin:'Původ',familyTitle:'Nadpis vztahů',familyDescription:'Úvod ke vztahům',chapters:'Kapitoly lore',family:'Vztahy'};
@@ -716,7 +833,7 @@ const Community=(()=>{
  const icon=name=>'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="'+icons[name]+'"/></svg>';
  const stamp=state=>({pending:'Čeká na schválení',approved:'Schváleno',rejected:'Zamítnuto'}[state]||state);
  const date=t=>t?new Intl.DateTimeFormat('cs-CZ',{dateStyle:'medium',timeStyle:'short',timeZone:'Europe/Prague'}).format(new Date(t*1000)):'Zatím nezaznamenáno';
- const routeMatch=()=>/^#(?:manage|edit|telegrams|gramophone|seasons|atlas|games|shop|calendar|player|atelier)(?:\/|$)/.test(location.hash);
+ const routeMatch=()=>/^#(?:manage|edit|telegrams|gramophone|seasons|atlas|games|shop|calendar|player|atelier|rp-calendar)(?:\/|$)/.test(location.hash);
  const has=permission=>identity?.admin?.permissions.includes(permission);
  const text=data=>escapeHTML(data);
  function setStatus(message){page.querySelector('.community-status').textContent=message;}
@@ -729,6 +846,7 @@ const Community=(()=>{
   const seasons=document.createElement('a');seasons.href='#seasons';seasons.className='nav-seasons';seasons.innerHTML=icon('clock')+'Roční období';nav.append(seasons);
   const atlas=document.createElement('a');atlas.href='#atlas';atlas.className='nav-atlas';atlas.innerHTML=AtlasIcons.svg('pin')+'Atlas';nav.append(atlas);
   const atelier=document.createElement('a');atelier.href='#atelier';atelier.className='nav-atelier';atelier.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7h18v14H3zM7 7l2-4h6l2 4"/><circle cx="12" cy="14" r="4"/></svg>Ateliér';nav.append(atelier);
+  const calendar=document.createElement('a');calendar.href='#rp-calendar';calendar.className='nav-rp-calendar';calendar.innerHTML=icon('clock')+'RP kalendář <span class="web-badge rp-calendar-badge" hidden></span>';nav.append(calendar);
   const admin=document.createElement('a');admin.href='#manage';admin.className='nav-manage';admin.innerHTML=icon('admin')+'Pro správu webu <span class="web-badge review-badge" hidden></span>';nav.append(admin);
   window.addEventListener('beforeunload',event=>{if(dirty()){event.preventDefault();event.returnValue='';}});
  }
@@ -738,6 +856,7 @@ const Community=(()=>{
   nav.querySelector('.nav-manage').hidden=!identity?.admin?.owner&&!identity?.admin?.permissions.length;
   nav.querySelector('.nav-seasons').hidden=!identity||!!identity.restricted;
   nav.querySelector('.nav-atlas').hidden=!identity||!!identity.restricted;
+  nav.querySelector('.nav-rp-calendar').hidden=!identity||!!identity.restricted;
   nav.querySelector('.nav-atelier').hidden=!identity||!!identity.restricted;
   for(const [selector,count]of [['.nav-manage',identity?.pending||0]]){const badge=nav.querySelector(selector+' .web-badge');badge.hidden=!count;badge.textContent=String(count);}
  }
@@ -748,15 +867,16 @@ const Community=(()=>{
   data.family=[...form.querySelectorAll('.edit-relation')].map(row=>Object.fromEntries(['label','name','text','status'].map(key=>[key,row.querySelector('[data-relation='+key+']').value])));
   return data;
  }
- function dirty(){if(Atelier.dirty)return true;if(Atlas.dirty())return true;return view==='edit'&&editorState&&JSON.stringify(values())!==editorState.baseline;}
- async function beforeLogout(){if(Atelier.dirty)return PortalPolish.confirm('Odhlásit a zavřít ateliér?','Nevyvolaný náhled se zahodí. Uložené fotografie na šňůře zůstanou.','Odhlásit');return !dirty()||await PortalPolish.confirm('Odhlásit a zahodit rozepsané změny?','Neuložené změny postavy se zahodí. Uložený koncept zůstane zachovaný.','Odhlásit');}
+ function dirty(){if(RPCalendar.dirty)return true;if(Atelier.dirty)return true;if(Atlas.dirty())return true;return view==='edit'&&editorState&&JSON.stringify(values())!==editorState.baseline;}
+ async function beforeLogout(){if(RPCalendar.dirty)return PortalPolish.confirm('Odhlásit a opustit diář?','Neuložené akce se zahodí. Uložené akce zůstanou.','Odhlásit');if(Atelier.dirty)return PortalPolish.confirm('Odhlásit a zavřít ateliér?','Nevyvolaný náhled se zahodí. Uložené fotografie na šňůře zůstanou.','Odhlásit');return !dirty()||await PortalPolish.confirm('Odhlásit a zahodit rozepsané změny?','Neuložené změny postavy se zahodí. Uložený koncept zůstane zachovaný.','Odhlásit');}
  async function beforeRoute(){
+  if(loadedHash!==location.hash&&RPCalendar.dirty){if(!await PortalPolish.confirm('Opustit rozepsanou akci?','Neuložené změny akce se zahodí.','Opustit diář')){history.replaceState(null,'',loadedHash);return false;}RPCalendar.dispose();}
   if(loadedHash!==location.hash&&Atelier.dirty){if(!await PortalPolish.confirm('Opustit ateliér?','Nevyvolaný náhled se zahodí. Fotografie na šňůře zůstanou uložené.','Opustit ateliér')){history.replaceState(null,'',loadedHash);return false;}Atelier.dispose();}
   if(loadedHash!==location.hash&&Atlas.dirty()){if(!await PortalPolish.confirm('Opustit rozepsané místo?','Neuložené úpravy místa v atlasu se zahodí.','Opustit atlas')){history.replaceState(null,'',loadedHash);return false;}Atlas.dispose();}
   if(loadedHash!==location.hash&&dirty()&&!await PortalPolish.confirm('Opustit rozepsanou postavu?','Neuložené změny se zahodí. Koncept uložený na serveru zůstane zachovaný.','Opustit editor')){history.replaceState(null,'',loadedHash);return false;}return true;
  }
  function purge({preserveDraft=false}={}){
-  Atelier.dispose();MemberProfile.dispose();Atlas.dispose({preserveDraft});SeasonLab.dispose();
+  RPCalendar.dispose({preserveDraft});Atelier.dispose();MemberProfile.dispose();Atlas.dispose({preserveDraft});SeasonLab.dispose();
   if(preserveDraft&&view==='edit'&&editorState)suspended={user:identity?.user.id,data:values(),state:editorState};else if(!preserveDraft)suspended=null;
   generation++;page.hidden=true;page.replaceChildren();document.body.classList.remove('community-view');view='';editorState=null;loadedHash='';
  }
@@ -767,11 +887,12 @@ const Community=(()=>{
  function content(){return page.querySelector('.community-content');}
  function menu(items){page.querySelector('.community-menu').innerHTML=items.map(([hash,label,kind])=>'<a href="'+hash+'"'+(location.hash===hash?' aria-current="page"':'')+'>'+icon(kind)+'<span>'+text(label)+'</span></a>').join('');}
  async function open(){
-  purge({preserveDraft:!!suspended||Atlas.pendingDraft});const version=++generation,user=identity?.user.id;loadedHash=location.hash;
+  purge({preserveDraft:!!suspended||Atlas.pendingDraft||RPCalendar.pendingDraft});const version=++generation,user=identity?.user.id;loadedHash=location.hash;
   if(!identity){shell('Vstup do svého archivu','Pro správu postavy a osobního archivu se přihlas přes Discord.');content().innerHTML='<a class="web-button" href="'+loginHref+'">Přihlásit přes Discord</a>';return;}
   try{
    if(loadedHash.startsWith('#telegrams')||loadedHash==='#manage/mail'){view='removed';shell('Telegramy se zavřely','Soukromá schránka už není součástí webu.');content().innerHTML='<div class="web-empty"><h2>Rozhodnutí najdeš u své žádosti.</h2><p>Stav úprav postavy a vyjádření správy jsou dostupné v Moje žádosti. Upozornění na Discordu fungují dál.</p><a class="web-button" href="#edit/requests">Moje žádosti</a><a class="web-button" href="#">Můj archiv</a></div>'; }
    else if(/^#(?:games|shop|calendar)(?:\/|$)/.test(loadedHash)||/^#manage\/(?:economy|calendar)(?:\/|$)/.test(loadedHash)){view='retired';shell('Tato část kroniky skončila','Hry, obchod a adventní kalendář už nejsou součástí webu.','retired');content().innerHTML='<div class="web-empty"><h2>Vrať se ke svému příběhu.</h2><p>Archiv, deník, atlas a ateliér jsou dál dostupné.</p><a href="#" class="web-button">Můj archiv ↗</a></div>';}
+   else if(loadedHash.startsWith('#rp-calendar')){view='rp-calendar';shell('RP kalendář','Tvoje plány, společné akce a včasné připomínky.','rp-calendar');menu([['#','Můj archiv','home'],['#rp-calendar','Diář','clock'],['#rp-calendar/invitations','Pozvánky','users'],['#rp-calendar/notifications','Upozornění','mail']]);await RPCalendar.open(content(),loadedHash);}
    else if(/^#player(?:\/|$)/.test(loadedHash)){view='member-profile';shell('Moje vizitka','Hráč a jeho postava.','member-profile');menu([['#','Můj archiv','home'],['#player','Moje vizitka','users']]);await MemberProfile.open(content(),loadedHash);}
    else if(loadedHash.startsWith('#edit')){view='edit';shell('Tvůj příběh. Tvými slovy.','Uprav svou postavu. Zveřejní se až po schválení správou.','editor');menu([['#','Můj archiv','home'],['#edit','Upravit postavu','edit'],['#edit/requests','Moje žádosti','check']]);if(loadedHash.startsWith('#edit/requests'))await ownRequests(version,user);else await editor(version,user);}
    else if(loadedHash==='#atelier'){view='atelier';shell('Fotografický ateliér','Vzpomínky z našich cest. Vyvolané po tvém.','atelier');menu([['#','Můj archiv','home'],['#atelier','Ateliér','edit']]);await Atelier.open(content());}
@@ -979,7 +1100,7 @@ const UserChrome=(()=>{
  function arrangeMenu(){
   const own=identity?.owned[0];nav.querySelector('.nav-journal').href=own?'#journal-'+own:'#';nav.querySelector('.nav-journal').hidden=!own||!!identity?.restricted;nav.querySelector('.nav-trust').hidden=!own||!!identity?.restricted;
   for(const selector of ['.nav-profile'])nav.querySelector(selector).hidden=!!identity?.restricted;
-  const groups=[['Moje postava',['.nav-profile','.portal-home','.nav-journal','.nav-edit','.nav-trust']],['Náš svět',['.cast-toggle','.nav-atlas']],['Volný čas',['.nav-atelier']],['Nastavení',['.nav-seasons','.pointer-settings-open','.notification-settings','.menu-logout']],['Správa',['.nav-manage']]];
+  const groups=[['Moje postava',['.nav-profile','.portal-home','.nav-journal','.nav-edit','.nav-trust','.nav-rp-calendar']],['Náš svět',['.cast-toggle','.nav-atlas']],['Volný čas',['.nav-atelier']],['Nastavení',['.nav-seasons','.pointer-settings-open','.notification-settings','.menu-logout']],['Správa',['.nav-manage']]];
   const fresh=[];for(const[label,selectors]of groups){const section=document.createElement('section');section.className='account-menu-group';const title=document.createElement('h3');title.textContent=label;section.append(title);for(const selector of selectors){const e=nav.querySelector(selector);if(e)section.append(e);}fresh.push(section);}
   nav.querySelectorAll('.account-menu-group').forEach(e=>e.remove());nav.append(...fresh);
  }
@@ -1017,6 +1138,7 @@ const UserChrome=(()=>{
   logout.classList.add('menu-logout');nav.append(logout);arrangeMenu();trigger.onclick=()=>host.classList.contains('user-menu-open')?closeMenu():openMenu();refresh();
  }
  function refresh(){
+  RPCalendar.badges();
   if(birthdayKey&&(!identity||!identity.access.includes(birthdayKey)))closeBirthday();
   if(!identity){closeMenu();return;}
   if(!trigger)return;
@@ -1183,6 +1305,7 @@ function closeDenial(){denial.close();location.hash='';}
 denial.querySelector('.dialog-close').onclick=closeDenial;denial.querySelector('.denial-back').onclick=closeDenial;
 denial.addEventListener('cancel',event=>{event.preventDefault();closeDenial();});
 function renderAccount(){
+ RPCalendar.sync();
  PersonalPointer.sync();
  SeasonAtmosphere.syncSession();
  Community.sync();
