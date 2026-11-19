@@ -28,7 +28,7 @@ Sestavený bot/worker.js se nahrává do Cloudflare Workeru. Push tohoto repozit
 
 Gramofon byl odstraněn 19. listopadu 2026. Původní hudba je v soukromé záloze mimo publikovaný web.
 
-Nejnovější úklid: [gramofon, příkazy UBD a náhled RedM](UPDATE-GRAMOPHONE-RETIREMENT.md). Měření zatím čeká na propojení se serverem; náhled je pouze pro vlastníka.
+Nejnovější úklid: [gramofon a příkazy UBD](UPDATE-GRAMOPHONE-RETIREMENT.md). Měření zatím čeká na propojení se serverem; původní náhled byl zatím odstraněn.
 
 ## Předchozí úklid
 

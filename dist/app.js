@@ -708,22 +708,6 @@ const Atelier=(()=>{
  return{open,dispose,get dirty(){return dirty;},get busy(){return busy;}};
 })();
 
-// Design preview only. No presence is inferred from Discord activity or login.
-const FrontierPresence=(()=>{
- const labels={awake:'Vzhůru',asleep:'Spí',unknown:'Stav není dostupný'};
- function card(state,total){
-  const element=document.createElement('aside');element.className='frontier-presence';element.dataset.state=state;
-  element.setAttribute('aria-label','Život v pohraničí');
-  element.innerHTML='<header><img src="'+mediaURL('NH.png',160)+'" alt="" width="46" height="46"><div><span class="eyebrow">ŽIVOT V POHRANIČÍ</span><strong>New Horizon RP</strong></div></header><p class="frontier-state"><span aria-hidden="true"></span>'+labels[state]+'</p><div class="frontier-total"><span>Celkový odehraný čas</span><b></b></div>';
-  element.querySelector('b').textContent=total;return element;
- }
- function preview(root){
-  root.innerHTML='<section class="frontier-preview"><span class="eyebrow">NÁHLED · BEZ ŽIVÉHO PROPOJENÍ</span><h2>Život v pohraničí</h2><p>Malé logo, stav postavy a celkový čas na New Horizon RP. Ukázkové stavy níže nejsou údaje o hráčích.</p><div class="frontier-previews"></div><div class="web-callout"><p>Čekáme na domluvu s majitelkou serveru. Na profilech se zatím nic neměří ani nezobrazuje. Bez čerstvého ověření zobrazíme nedostupný stav, nikoli „Spí“.</p></div></section>';
-  root.querySelector('.frontier-previews').append(card('awake','38 h 45 min'),card('asleep','38 h 45 min'),card('unknown','Zatím se neměří'));
- }
- return {preview};
-})();
-
 const Community=(()=>{
  let page,nav,generation=0,loadedHash='',view='',editorState=null,suspended=null;
  const labels={given:'Jméno',surname:'Příjmení',nickname:'Přezdívka',age:'Věk v lore',birth:'Datum narození',occupation:'Povolání',relatives:'Rodina a blízcí',kicker:'Motto',description:'Úvodní charakteristika',quote:'Osobní citát',closing:'Závěrečná slova',origin:'Původ',familyTitle:'Nadpis vztahů',familyDescription:'Úvod ke vztahům',chapters:'Kapitoly lore',family:'Vztahy'};
@@ -851,9 +835,8 @@ const Community=(()=>{
   const overview=await api('/manage/overview');if(!valid(version,user))return;
   const own=overview.admin.owner,p=overview.admin.permissions,path=loadedHash.split('/');
   const groups=[['PRACOVNA',[['#manage','Přehled','home'],...(p.includes('review')?[['#manage/requests','Změny postav','edit']]:[])]],['LIDÉ',[...(p.includes('activity')?[['#manage/users','Uživatelé','users']]:[]),...(own?[['#manage/admins','Správci a oprávnění','admin']]:[]),...(p.includes('blacklist')?[['#manage/blacklist','Blacklist','admin']]:[])]],['PROVOZ',p.includes('review')?[['#manage/delivery','Discord upozornění','mail'],['#manage/audit','Historie správy','clock']]:[]]];
-  if(own)groups.push(['PŘIPRAVUJEME',[['#manage/redm','New Horizon RP · náhled','clock']]]);
   const sidebar=page.querySelector('.community-menu');sidebar.innerHTML=groups.filter(([,items])=>items.length).map(([label,items])=>'<div class="manage-nav-group"><span>'+label+'</span>'+items.map(([hash,label,kind])=>'<a href="'+hash+'"'+(loadedHash===hash||hash==='#manage/requests'&&path[1]==='requests'?' aria-current="page"':'')+'>'+icon(kind)+'<span>'+label+'</span>'+(hash==='#manage/requests'&&overview.pending?'<b class="web-badge">'+overview.pending+'</b>':'')+'</a>').join('')+'</div>').join('');
-  if(path[1]==='redm'){if(!own){setStatus('Náhled je pouze pro vlastníka webu.');return;}FrontierPresence.preview(content());return;}
+  if(path[1]==='redm'){location.hash='#manage';return;}
   if(path[1]==='requests'){
    if(path[2]&&!['pending','approved','rejected'].includes(path[2])){await review(path[2],version,user);return;}
    const state=path[2]||'pending',result=await api('/manage/requests?status='+state);if(!valid(version,user))return;
@@ -916,9 +899,10 @@ const Community=(()=>{
   const selectedAdmin=loadedHash.split('/')[2];if(/^\d{17,20}$/.test(selectedAdmin||'')){const f=page.querySelector('.admin-form'),prior=result.admins.find(r=>r.user_id===selectedAdmin);f.elements.userId.value=selectedAdmin;for(const key of Object.keys(permissionLabels))f.elements[key].checked=!!prior?.permissions.includes(key);}
   page.querySelector('.admin-form').onsubmit=async event=>{event.preventDefault();const f=event.target,permissions=Object.keys(permissionLabels).filter(key=>f.elements[key].checked);if(!permissions.length){setStatus('Vyber alespoň jedno oprávnění.');return;}const previous=result.admins.find(r=>r.user_id===f.elements.userId.value)?.permissions||[];if(!await PortalPolish.confirm('Změnit oprávnění správce?',f.elements.userId.value+'\nDosud: '+(previous.map(k=>permissionLabels[k]).join(', ')||'Bez oprávnění')+'\nNově: '+permissions.map(k=>permissionLabels[k]).join(', '),'Uložit oprávnění'))return;if(!valid(version,user))return;f.querySelector('button').disabled=true;try{await api('/manage/admins/'+f.elements.userId.value,{method:'PUT',body:JSON.stringify({permissions})});if(valid(version,user))open();}catch(e){if(valid(version,user)){setStatus(e.message);f.querySelector('button').disabled=false;}}};
  }
- function allowed(){if(/^#(?:gramophone|seasons|atlas|games)(?:\/|$)/.test(location.hash))return !!identity&&!identity.restricted;const path=location.hash.split('/')[1];if(path==='admins'||path==='seasons'||path==='redm')return !!identity?.admin?.owner;const permission={requests:'review',audit:'review',delivery:'review',users:'activity',blacklist:'blacklist'}[path];return permission?has(permission):!!identity?.admin?.owner||!!identity?.admin?.permissions.length;}
+ function allowed(){if(/^#(?:gramophone|seasons|atlas|games)(?:\/|$)/.test(location.hash))return !!identity&&!identity.restricted;const path=location.hash.split('/')[1];if(path==='admins'||path==='seasons')return !!identity?.admin?.owner;const permission={requests:'review',audit:'review',delivery:'review',users:'activity',blacklist:'blacklist'}[path];return permission?has(permission):!!identity?.admin?.owner||!!identity?.admin?.permissions.length;}
  return {init,sync,open,purge,beforeRoute,beforeLogout,get matches(){return routeMatch();},get active(){return view;},allowed};
 })();
+
 const PERSONAL_POINTERS={"scarlett":{"name":"Kočičí stopa","animal":"Kočka","color":"#6fa9ff","normal":"assets/pointers/scarlett-normal.2b4eead4b6d5.svg","link":"assets/pointers/scarlett-link.4df9eff1d7a0.svg","stamp":"assets/pointers/scarlett-stamp.c4003513c25d.svg"},"nathaniel":{"name":"Havraní podpis","animal":"Havran","color":"#d36b7c","normal":"assets/pointers/nathaniel-normal.0c7f1797eb69.svg","link":"assets/pointers/nathaniel-link.d987b5320d62.svg","stamp":"assets/pointers/nathaniel-stamp.bbf04dc3dec0.svg"},"daniel":{"name":"Jantarový panter","animal":"Panter","color":"#e7a052","normal":"assets/pointers/daniel-normal.03ce4c2006d3.svg","link":"assets/pointers/daniel-link.77734a92d6ec.svg","stamp":"assets/pointers/daniel-stamp.724579149632.svg"},"katie":{"name":"Vlčí přísaha","animal":"Vlk","color":"#a2d6f5","normal":"assets/pointers/katie-normal.406b470345bc.svg","link":"assets/pointers/katie-link.ee72601d8bdc.svg","stamp":"assets/pointers/katie-stamp.8b9e8905f649.svg"},"vincent":{"name":"Dračí dotek","animal":"Drak","color":"#6eafff","normal":"assets/pointers/vincent-normal.bd5425e5ed45.svg","link":"assets/pointers/vincent-link.35d109ace4d0.svg","stamp":"assets/pointers/vincent-stamp.ae64f42e9213.svg"},"elijah":{"name":"Věrný strážce","animal":"Ovčák","color":"#d5a05c","normal":"assets/pointers/elijah-normal.3adffcb4f881.svg","link":"assets/pointers/elijah-link.e8aa99987b89.svg","stamp":"assets/pointers/elijah-stamp.8bd8626894dc.svg"}};
 const PersonalPointer=(()=>{
  const defaults={cursor:true,clicks:true,touch:false},inputSelector='input,textarea,select,[contenteditable]:not([contenteditable="false"]),[role="textbox"],[role="slider"],[draggable="true"],iframe';
