@@ -335,7 +335,7 @@ const SeasonAtmosphere=(()=>{
   if(!reduced.matches&&(season!=='winter'||holes.length))schedule();
  }
  function schedule(){if(frame||document.hidden||season==='off')return;frame=requestAnimationFrame(t=>{frame=0;if(t-lastFrame<40){schedule();return;}lastFrame=t;paint(t);});}
- function apply(){if(!host)return;season=(suspended||festive||identity?.restricted||/^#manage(?:\/|$)/.test(location.hash))?'off':mode==='auto'?current():mode;host.dataset.season=season;document.documentElement.dataset.season=season;holes=[];frost();paint(performance.now());}
+ function apply(){if(!host)return;season=(suspended||festive||!identity||identity.restricted||/^#manage(?:\/|$)/.test(location.hash))?'off':mode==='auto'?current():mode;host.dataset.season=season;document.documentElement.dataset.season=season;holes=[];frost();paint(performance.now());}
  function configure(next,level){mode=modes.includes(next)?next:'auto';strength=Math.min(100,Math.max(10,Number(level)||45));try{localStorage.setItem('nh-season',JSON.stringify({mode,strength}));}catch{}apply();Holiday.update();}
  function init(){
   if(host)return;try{const saved=JSON.parse(localStorage.getItem('nh-season'));if(saved&&modes.includes(saved.mode)){mode=saved.mode;strength=Math.min(100,Math.max(10,Number(saved.strength)||45));}}catch{}
@@ -344,7 +344,7 @@ const SeasonAtmosphere=(()=>{
   window.addEventListener('pointermove',melt,{passive:true});window.addEventListener('pointerdown',melt,{passive:true});window.addEventListener('resize',fit,{passive:true});
   window.addEventListener('hashchange',apply);document.addEventListener('visibilitychange',()=>document.hidden?stop():apply());reduced.addEventListener('change',()=>paint(performance.now()));fit();apply();
  }
- function syncSession(){const next=(suspended||festive||identity?.restricted||/^#manage(?:\/|$)/.test(location.hash))?'off':mode==='auto'?current():mode;if(host&&season!==next)apply();}
+ function syncSession(){const next=(suspended||festive||!identity||identity.restricted||/^#manage(?:\/|$)/.test(location.hash))?'off':mode==='auto'?current():mode;if(host&&season!==next)apply();}
  return{init,configure,syncSession,festive(value){if(festive===!!value)return;festive=!!value;apply();},suspend(value){suspended=!!value;apply();},get mode(){return mode;},get strength(){return strength;}};
 })();
 
@@ -555,7 +555,7 @@ const Holiday=(()=>{
  function update(){
   const parts=Object.fromEntries(new Intl.DateTimeFormat('en',{month:'numeric',day:'numeric',timeZone:'Europe/Prague'}).formatToParts(new Date()).map(p=>[p.type,p.value]));
   if(!identity?.admin?.owner)previewing=false;
-  active=!/^#manage(?:\/|$)/.test(location.hash)&&enabled&&SeasonAtmosphere.mode!=='off'&&!identity?.restricted&&(previewing||(Number(parts.month)===12&&Number(parts.day)>=20&&Number(parts.day)<=26));
+  active=!!identity&&!/^#manage(?:\/|$)/.test(location.hash)&&enabled&&SeasonAtmosphere.mode!=='off'&&!identity?.restricted&&(previewing||(Number(parts.month)===12&&Number(parts.day)>=20&&Number(parts.day)<=26));
   document.body.classList.toggle('christmas-week',active);if(root){root.hidden=!active;root.classList.toggle('holiday-paused',document.hidden);}
   SeasonAtmosphere.festive(active);
  }
@@ -1084,6 +1084,36 @@ const RestrictedAccess=(()=>{
  return {show,hide};
 })();
 
+// Public copy only. One cancellable timer; no work while hidden, logged in or motion-reduced.
+const EntranceTypewriter=(()=>{
+ const scene=document.querySelector('.frontier-entrance'),line=scene?.querySelector('.entrance-typed'),wrapper=scene?.querySelector('.entrance-typewriter');
+ if(!line)return;
+ const phrases=['Jak začneš dnešní příběh ty?','Některé cesty začínají jediným rozhodnutím.','Komu dnes svěříš své tajemství?','Minulost už nezměníš. Další kapitolu ano.','Za obzorem čeká příběh, který ještě nikdo nenapsal.'];
+ const reduced=matchMedia('(prefers-reduced-motion: reduce)');
+ let timer=0,index=0,position=0,phase='typing';
+ const stop=()=>{clearTimeout(timer);timer=0;};
+ const active=()=>!document.hidden&&!scene.hidden&&!document.body.classList.contains('signed-in');
+ function later(delay){stop();if(active()&&!reduced.matches)timer=setTimeout(tick,delay);}
+ function tick(){
+  timer=0;if(!active()||reduced.matches)return;
+  if(phase==='typing'){
+   line.textContent=phrases[index].slice(0,++position);
+   if(position>=phrases[index].length){phase='hold';later(4200);}
+   else later(/[.,?]/.test(phrases[index][position-1])?200:48+(position%4)*11);
+  }else if(phase==='hold'){wrapper.classList.add('is-fading');phase='next';later(600);}
+  else{index=(index+1)%phrases.length;position=0;phase='typing';line.textContent='';wrapper.classList.remove('is-fading');later(250);}
+ }
+ function sync(){
+  stop();scene.classList.toggle('is-paused',!active());
+  if(reduced.matches){wrapper.classList.remove('is-fading');line.textContent=phrases[index];position=phrases[index].length;phase='hold';return;}
+  if(active())later(phase==='hold'?4200:phase==='next'?600:150);
+ }
+ line.textContent=reduced.matches?phrases[0]:'';
+ new MutationObserver(sync).observe(scene,{attributes:true,attributeFilter:['hidden']});
+ document.addEventListener('visibilitychange',sync);window.addEventListener('pageshow',sync);reduced.addEventListener('change',sync);
+ sync();return {sync};
+})();
+
 // Browser receives private profile data only after server authorization.
 const catalog = {};
 function clearCatalog(){for(const key of Object.keys(catalog))delete catalog[key];}
@@ -1178,7 +1208,7 @@ function renderAccount(){
  document.body.classList.toggle('signed-in',!!identity);welcome.hidden=!identity;rail.hidden=!identity;
  document.body.classList.toggle('restricted-user',!!identity?.restricted);if(!identity?.restricted)RestrictedAccess.hide();
  accountControls.replaceChildren();
- if(!identity){clearCatalog();Community.purge();PortalPolish.closeCast();rail.replaceChildren();portal.replaceChildren();const login=document.createElement('a');login.href=loginHref;login.className='discord-login';login.textContent='Přihlásit přes Discord';accountControls.append(login);UserChrome.account();Holiday.update();return;}
+ if(!identity){clearCatalog();Community.purge();PortalPolish.closeCast();rail.replaceChildren();portal.replaceChildren();UserChrome.account();Holiday.update();return;}
  const photo=new Image(34,34);photo.src=identity.user.avatar;photo.alt='';accountControls.append(photo);
  const name=document.createElement('span');name.textContent=identity.user.name;accountControls.append(name);
  const logout=document.createElement('button');logout.type='button';logout.textContent='Odhlásit';logout.onclick=async()=>{

@@ -2,6 +2,8 @@
 
 Soukromá kronika na https://web-mocha-seven-71.vercel.app/ s přihlášením přes Discord.
 
+Aktuální veřejný vstup: [nádraží přes celou šířku a psací stroj](UPDATE-ENTRANCE-TYPEWRITER.md). Přihlášení je pouze uprostřed, postavy a sezónní překryvy se zobrazují až po přihlášení.
+
 ## Aktuální funkce
 
 - Vlastní archiv postavy, lore a samostatně sdílené deníky.
