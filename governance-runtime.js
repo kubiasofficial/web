@@ -16,7 +16,6 @@ const Community=(()=>{
   nav=document.querySelector('.portal-navigation');
   nav.querySelector('.portal-home').innerHTML=icon('home')+'Můj archiv';
   const edit=document.createElement('a');edit.href='#edit';edit.className='nav-edit';edit.innerHTML=icon('edit')+'Upravit postavu';nav.append(edit);
-  const music=document.createElement('a');music.href='#gramophone';music.className='nav-gramophone';music.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 19h16v3H4zM7 19v-4h10v4M12 15V7l8-4v9l-8-5M7 15a3 3 0 1 1 0-6"/></svg>Gramofon';nav.append(music);
   const seasons=document.createElement('a');seasons.href='#seasons';seasons.className='nav-seasons';seasons.innerHTML=icon('clock')+'Roční období';nav.append(seasons);
   const atlas=document.createElement('a');atlas.href='#atlas';atlas.className='nav-atlas';atlas.innerHTML=AtlasIcons.svg('pin')+'Atlas';nav.append(atlas);
   const atelier=document.createElement('a');atelier.href='#atelier';atelier.className='nav-atelier';atelier.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7h18v14H3zM7 7l2-4h6l2 4"/><circle cx="12" cy="14" r="4"/></svg>Ateliér';nav.append(atelier);
@@ -27,7 +26,6 @@ const Community=(()=>{
   if(!nav)return;
   nav.querySelector('.nav-edit').hidden=!identity?.owned.length;
   nav.querySelector('.nav-manage').hidden=!identity?.admin?.owner&&!identity?.admin?.permissions.length;
-  nav.querySelector('.nav-gramophone').hidden=!identity||!!identity.restricted;
   nav.querySelector('.nav-seasons').hidden=!identity||!!identity.restricted;
   nav.querySelector('.nav-atlas').hidden=!identity||!!identity.restricted;
   nav.querySelector('.nav-atelier').hidden=!identity||!!identity.restricted;
@@ -48,7 +46,7 @@ const Community=(()=>{
   if(loadedHash!==location.hash&&dirty()&&!await PortalPolish.confirm('Opustit rozepsanou postavu?','Neuložené změny se zahodí. Koncept uložený na serveru zůstane zachovaný.','Opustit editor')){history.replaceState(null,'',loadedHash);return false;}return true;
  }
  function purge({preserveDraft=false}={}){
-  Atelier.dispose();MemberProfile.dispose();Atlas.dispose({preserveDraft});SeasonLab.dispose();Gramophone.detach();
+  Atelier.dispose();MemberProfile.dispose();Atlas.dispose({preserveDraft});SeasonLab.dispose();
   if(preserveDraft&&view==='edit'&&editorState)suspended={user:identity?.user.id,data:values(),state:editorState};else if(!preserveDraft)suspended=null;
   generation++;page.hidden=true;page.replaceChildren();document.body.classList.remove('community-view');view='';editorState=null;loadedHash='';
  }
@@ -63,12 +61,12 @@ const Community=(()=>{
   if(!identity){shell('Vstup do svého archivu','Pro správu postavy a osobního archivu se přihlas přes Discord.');content().innerHTML='<a class="web-button" href="'+loginHref+'">Přihlásit přes Discord</a>';return;}
   try{
    if(loadedHash.startsWith('#telegrams')||loadedHash==='#manage/mail'){view='removed';shell('Telegramy se zavřely','Soukromá schránka už není součástí webu.');content().innerHTML='<div class="web-empty"><h2>Rozhodnutí najdeš u své žádosti.</h2><p>Stav úprav postavy a vyjádření správy jsou dostupné v Moje žádosti. Upozornění na Discordu fungují dál.</p><a class="web-button" href="#edit/requests">Moje žádosti</a><a class="web-button" href="#">Můj archiv</a></div>'; }
-   else if(/^#(?:games|shop|calendar)(?:\/|$)/.test(loadedHash)||/^#manage\/(?:economy|calendar)(?:\/|$)/.test(loadedHash)){view='retired';shell('Tato část kroniky skončila','Hry, obchod a adventní kalendář už nejsou součástí webu.','retired');content().innerHTML='<div class="web-empty"><h2>Vrať se ke svému příběhu.</h2><p>Archiv, deník, atlas a gramofon jsou dál dostupné.</p><a href="#" class="web-button">Můj archiv ↗</a></div>';}
+   else if(/^#(?:games|shop|calendar)(?:\/|$)/.test(loadedHash)||/^#manage\/(?:economy|calendar)(?:\/|$)/.test(loadedHash)){view='retired';shell('Tato část kroniky skončila','Hry, obchod a adventní kalendář už nejsou součástí webu.','retired');content().innerHTML='<div class="web-empty"><h2>Vrať se ke svému příběhu.</h2><p>Archiv, deník, atlas a ateliér jsou dál dostupné.</p><a href="#" class="web-button">Můj archiv ↗</a></div>';}
    else if(/^#player(?:\/|$)/.test(loadedHash)){view='member-profile';shell('Moje vizitka','Hráč a jeho postava.','member-profile');menu([['#','Můj archiv','home'],['#player','Moje vizitka','users']]);await MemberProfile.open(content(),loadedHash);}
    else if(loadedHash.startsWith('#edit')){view='edit';shell('Tvůj příběh. Tvými slovy.','Uprav svou postavu. Zveřejní se až po schválení správou.','editor');menu([['#','Můj archiv','home'],['#edit','Upravit postavu','edit'],['#edit/requests','Moje žádosti','check']]);if(loadedHash.startsWith('#edit/requests'))await ownRequests(version,user);else await editor(version,user);}
-   else if(loadedHash==='#atelier'){view='atelier';shell('Fotografický ateliér','Vzpomínky z našich cest. Vyvolané po tvém.','atelier');menu([['#','Můj archiv','home'],['#atelier','Ateliér','edit'],['#gramophone','Gramofon','home']]);await Atelier.open(content());}
-   else if(loadedHash.startsWith('#gramophone')){view='gramophone';shell('Gramofon','Desky, které dávají příběhům vlastní hlas.','gramophone');menu([['#','Můj archiv','home'],['#gramophone','Gramofon','home'],['#seasons','Roční období','clock']]);await Gramophone.open(content());}
-   else if(loadedHash.startsWith('#seasons')){view='seasons';shell('Roční období','Atmosféra kroniky podle tebe.','seasons');menu([['#','Můj archiv','home'],['#gramophone','Gramofon','home'],['#seasons','Roční období','clock']]);await SeasonLab.open(content());}
+   else if(loadedHash==='#atelier'){view='atelier';shell('Fotografický ateliér','Vzpomínky z našich cest. Vyvolané po tvém.','atelier');menu([['#','Můj archiv','home'],['#atelier','Ateliér','edit']]);await Atelier.open(content());}
+   else if(loadedHash.startsWith('#gramophone')){view='removed';shell('Gramofon dohrál','Hudební místnost už není součástí kroniky.');content().innerHTML='<div class="web-empty"><h2>Vzpomínky pokračují dál.</h2><a class="web-button" href="#atelier">Fotografický ateliér ↗</a><a class="web-button" href="#">Můj archiv</a></div>';}
+   else if(loadedHash.startsWith('#seasons')){view='seasons';shell('Roční období','Atmosféra kroniky podle tebe.','seasons');menu([['#','Můj archiv','home'],['#seasons','Roční období','clock']]);await SeasonLab.open(content());}
    else if(loadedHash.startsWith('#atlas')){view='atlas';shell('Atlas pohraničí','Vlastní místa. Vlastní cesty. Stejný horizont.','atlas');menu([['#','Můj archiv','home'],['#atlas','Atlas','home'],['#edit/requests','Moje žádosti','check']]);await Atlas.open(content());}
    else if(loadedHash.startsWith('#manage')){view='manage';shell('Správa kroniky','Žádosti, lidé a provoz na jednom místě.','manage');await manage(version,user);}
    else{view='missing';shell('Stránka není dostupná','Vrať se do svého archivu.');content().innerHTML='<a class="web-button" href="#">Můj archiv</a>';}
@@ -127,7 +125,9 @@ const Community=(()=>{
   const overview=await api('/manage/overview');if(!valid(version,user))return;
   const own=overview.admin.owner,p=overview.admin.permissions,path=loadedHash.split('/');
   const groups=[['PRACOVNA',[['#manage','Přehled','home'],...(p.includes('review')?[['#manage/requests','Změny postav','edit']]:[])]],['LIDÉ',[...(p.includes('activity')?[['#manage/users','Uživatelé','users']]:[]),...(own?[['#manage/admins','Správci a oprávnění','admin']]:[]),...(p.includes('blacklist')?[['#manage/blacklist','Blacklist','admin']]:[])]],['PROVOZ',p.includes('review')?[['#manage/delivery','Discord upozornění','mail'],['#manage/audit','Historie správy','clock']]:[]]];
+  if(own)groups.push(['PŘIPRAVUJEME',[['#manage/redm','New Horizon RP · náhled','clock']]]);
   const sidebar=page.querySelector('.community-menu');sidebar.innerHTML=groups.filter(([,items])=>items.length).map(([label,items])=>'<div class="manage-nav-group"><span>'+label+'</span>'+items.map(([hash,label,kind])=>'<a href="'+hash+'"'+(loadedHash===hash||hash==='#manage/requests'&&path[1]==='requests'?' aria-current="page"':'')+'>'+icon(kind)+'<span>'+label+'</span>'+(hash==='#manage/requests'&&overview.pending?'<b class="web-badge">'+overview.pending+'</b>':'')+'</a>').join('')+'</div>').join('');
+  if(path[1]==='redm'){if(!own){setStatus('Náhled je pouze pro vlastníka webu.');return;}FrontierPresence.preview(content());return;}
   if(path[1]==='requests'){
    if(path[2]&&!['pending','approved','rejected'].includes(path[2])){await review(path[2],version,user);return;}
    const state=path[2]||'pending',result=await api('/manage/requests?status='+state);if(!valid(version,user))return;
@@ -190,6 +190,6 @@ const Community=(()=>{
   const selectedAdmin=loadedHash.split('/')[2];if(/^\d{17,20}$/.test(selectedAdmin||'')){const f=page.querySelector('.admin-form'),prior=result.admins.find(r=>r.user_id===selectedAdmin);f.elements.userId.value=selectedAdmin;for(const key of Object.keys(permissionLabels))f.elements[key].checked=!!prior?.permissions.includes(key);}
   page.querySelector('.admin-form').onsubmit=async event=>{event.preventDefault();const f=event.target,permissions=Object.keys(permissionLabels).filter(key=>f.elements[key].checked);if(!permissions.length){setStatus('Vyber alespoň jedno oprávnění.');return;}const previous=result.admins.find(r=>r.user_id===f.elements.userId.value)?.permissions||[];if(!await PortalPolish.confirm('Změnit oprávnění správce?',f.elements.userId.value+'\nDosud: '+(previous.map(k=>permissionLabels[k]).join(', ')||'Bez oprávnění')+'\nNově: '+permissions.map(k=>permissionLabels[k]).join(', '),'Uložit oprávnění'))return;if(!valid(version,user))return;f.querySelector('button').disabled=true;try{await api('/manage/admins/'+f.elements.userId.value,{method:'PUT',body:JSON.stringify({permissions})});if(valid(version,user))open();}catch(e){if(valid(version,user)){setStatus(e.message);f.querySelector('button').disabled=false;}}};
  }
- function allowed(){if(/^#(?:gramophone|seasons|atlas|games)(?:\/|$)/.test(location.hash))return !!identity&&!identity.restricted;const path=location.hash.split('/')[1];if(path==='admins'||path==='seasons')return !!identity?.admin?.owner;const permission={requests:'review',audit:'review',delivery:'review',users:'activity',blacklist:'blacklist'}[path];return permission?has(permission):!!identity?.admin?.owner||!!identity?.admin?.permissions.length;}
+ function allowed(){if(/^#(?:gramophone|seasons|atlas|games)(?:\/|$)/.test(location.hash))return !!identity&&!identity.restricted;const path=location.hash.split('/')[1];if(path==='admins'||path==='seasons'||path==='redm')return !!identity?.admin?.owner;const permission={requests:'review',audit:'review',delivery:'review',users:'activity',blacklist:'blacklist'}[path];return permission?has(permission):!!identity?.admin?.owner||!!identity?.admin?.permissions.length;}
  return {init,sync,open,purge,beforeRoute,beforeLogout,get matches(){return routeMatch();},get active(){return view;},allowed};
 })();
