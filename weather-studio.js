@@ -92,7 +92,7 @@ const WeatherStudio=(()=>{
   stage.dataset.garland=String(host.querySelector('[name=garland]').checked);stage.dataset.wreath=String(host.querySelector('[name=wreath]').checked);stage.dataset.ribbons=String(host.querySelector('[name=ribbons]').checked);
   stage.dataset.caps=String(host.querySelector('[name=caps]').checked);
   const festive=stage.dataset.christmas==='true',selected=source==='season'?season():mode;
-  surface.configure({...state(),caps:host.querySelector('[name=caps]').checked,falling:!festive||host.querySelector('[name=snow]').checked,mode:festive&&source!=='city'&&host.querySelector('[name=snow]').checked?'winter':selected});
+  surface.configure({...state(),caps:host.querySelector('[name=caps]').checked,falling:!festive||selected!=='winter'||host.querySelector('[name=snow]').checked,mode:selected});
   stage.querySelector('.weather-greeting').textContent=festive?'Klidný vánoční večer, '+identity.user.name+'.':selected==='autumn'?'Za okny padá listí. Příběh pokračuje.':selected==='rain'?'Venku prší. Uvnitř čeká tvůj příběh.':'Šest osudů. Jeden horizont.';
   host.querySelector('.weather-mode-label').textContent=festive?'Vánoční náhled':modes[selected];stage.classList.toggle('weather-no-caps',!host.querySelector('[name=caps]').checked);stage.classList.toggle('weather-no-snow',!host.querySelector('[name=snow]').checked);
   // Decoration and animation remain scoped to the demo, never to the live portal.
@@ -100,6 +100,7 @@ const WeatherStudio=(()=>{
   save();
  }
  function weatherType(code){return [71,73,75,77,85,86].includes(code)?'winter':[51,53,55,56,57,61,63,65,66,67,80,81,82,95,96,99].includes(code)?'rain':'off';}
+ function useCity(next){city=next;source='city';mode='off';currentWeather=null;weatherAt=0;host.querySelector('[name=source]').value=source;host.querySelector('[name=christmas]').checked=false;render();weather();}
  async function weather(){
   clearTimeout(timer);if(source!=='city'||!city||document.hidden||!host)return;const v=version,wv=++weatherVersion,chosen=city,key=chosen.latitude+','+chosen.longitude,cached=weatherCache.get(key);fetchController?.abort();fetchController=new AbortController();
   const controller=fetchController,timeout=setTimeout(()=>controller.abort(),8000);
@@ -113,12 +114,12 @@ const WeatherStudio=(()=>{
  async function search(query){
   if(!host)return;const v=version,sv=++searchVersion;searchController?.abort();const results=host.querySelector('.weather-city-results');results.replaceChildren();if(query.trim().length<2)return;
   searchController=new AbortController();const controller=searchController,timeout=setTimeout(()=>controller.abort(),8000);status('Hledám město…');
-  try{const r=await fetch('https://geocoding-api.open-meteo.com/v1/search?'+new URLSearchParams({name:query.trim().slice(0,80),count:6,language:'cs',format:'json'}),{signal:controller.signal,credentials:'omit',referrerPolicy:'no-referrer'});if(!r.ok)throw Error();const data=await r.json();if(!valid(v)||sv!==searchVersion)return;for(const result of data.results||[]){if(!Number.isFinite(result.latitude)||!Number.isFinite(result.longitude))continue;const b=document.createElement('button');b.type='button';b.className='web-button';b.textContent=[result.name,result.admin1,result.country].filter(Boolean).join(' · ');b.onclick=()=>{city={name:b.textContent,latitude:Number(result.latitude.toFixed(2)),longitude:Number(result.longitude.toFixed(2))};results.replaceChildren();host.querySelector('[name=source]').value=source='city';weather();};results.append(b);}status(results.children.length?'Vyber město z výsledků.':'Město se nepodařilo najít. Zkus jiný název.');}
+  try{const r=await fetch('https://geocoding-api.open-meteo.com/v1/search?'+new URLSearchParams({name:query.trim().slice(0,80),count:6,language:'cs',format:'json'}),{signal:controller.signal,credentials:'omit',referrerPolicy:'no-referrer'});if(!r.ok)throw Error();const data=await r.json();if(!valid(v)||sv!==searchVersion)return;for(const result of data.results||[]){if(!Number.isFinite(result.latitude)||!Number.isFinite(result.longitude))continue;const b=document.createElement('button');b.type='button';b.className='web-button';b.textContent=[result.name,result.admin1,result.country].filter(Boolean).join(' · ');b.onclick=()=>{results.replaceChildren();useCity({name:b.textContent,latitude:Number(result.latitude.toFixed(2)),longitude:Number(result.longitude.toFixed(2))});};results.append(b);}status(results.children.length?'Vyber město z výsledků.':'Město se nepodařilo najít. Zkus jiný název.');}
   catch{if(valid(v)&&sv===searchVersion)status('Města teď nelze načíst. Ruční náhled funguje dál.');}finally{clearTimeout(timeout);}
  }
  function locate(){
   if(!navigator.geolocation){status('Prohlížeč polohu nepodporuje. Použij vyhledání města.');return;}const v=version;status('Polohu použijeme pouze po tvém souhlasu.');
-  navigator.geolocation.getCurrentPosition(p=>{if(!valid(v))return;city={name:'Moje přibližná poloha',latitude:Number(p.coords.latitude.toFixed(2)),longitude:Number(p.coords.longitude.toFixed(2))};source='city';host.querySelector('[name=source]').value=source;weather();},()=>{if(valid(v))status('Poloha není dostupná nebo nebyla povolena. Můžeš zadat město ručně.');},{enableHighAccuracy:false,timeout:10000,maximumAge:15*60000});
+  navigator.geolocation.getCurrentPosition(p=>{if(!valid(v))return;useCity({name:'Moje přibližná poloha',latitude:Number(p.coords.latitude.toFixed(2)),longitude:Number(p.coords.longitude.toFixed(2))});},()=>{if(valid(v))status('Poloha není dostupná nebo nebyla povolena. Můžeš zadat město ručně.');},{enableHighAccuracy:false,timeout:10000,maximumAge:15*60000});
  }
  function chime(){
   if(!host?.querySelector('[name=sounds]').checked||host.querySelector('[name=simple]').checked||matchMedia('(prefers-reduced-motion: reduce)').matches||document.hidden)return;
@@ -131,12 +132,14 @@ const WeatherStudio=(()=>{
   let saved=null;try{saved=JSON.parse(localStorage.getItem(storageKey()));}catch{}
   if(saved){for(const name of ['interactive','simple','garland','wreath','caps','ribbons','christmas','snow'])if(typeof saved[name]==='boolean')host.querySelector('[name='+name+']').checked=saved[name];if(Object.hasOwn(modes,saved.mode))host.querySelector('[name=mode]').value=mode=saved.mode;if(['manual','season','city'].includes(saved.source))host.querySelector('[name=source]').value=source=saved.source;strength=Math.min(100,Math.max(10,Number(saved.strength)||45));host.querySelector('[name=strength]').value=strength;host.querySelector('output').textContent=strength+' %';if(saved.city&&typeof saved.city.name==='string'&&saved.city.name.length<=250&&Number.isFinite(saved.city.latitude)&&Math.abs(saved.city.latitude)<=90&&Number.isFinite(saved.city.longitude)&&Math.abs(saved.city.longitude)<=180)city=saved.city;}
   for(const name of ['interactive','simple','garland','wreath','caps','ribbons','christmas','snow','sounds'])host.querySelector('[name='+name+']').onchange=render;
-  host.querySelector('[name=mode]').onchange=e=>{source='manual';host.querySelector('[name=source]').value=source;mode=e.target.value;weatherVersion++;clearTimeout(timer);fetchController?.abort();render();};
-  host.querySelector('[name=source]').onchange=e=>{source=e.target.value;weatherVersion++;clearTimeout(timer);fetchController?.abort();mode=source==='city'?'off':host.querySelector('[name=mode]').value;if(source==='city'&&city)weather();render();};
+  host.querySelector('[name=mode]').onchange=e=>{source='manual';host.querySelector('[name=source]').value=source;mode=e.target.value;if(mode!=='winter')host.querySelector('[name=christmas]').checked=false;weatherVersion++;clearTimeout(timer);fetchController?.abort();render();};
+  host.querySelector('[name=christmas]').onchange=e=>{if(e.target.checked){source='manual';mode='winter';host.querySelector('[name=source]').value=source;host.querySelector('[name=mode]').value=mode;weatherVersion++;clearTimeout(timer);fetchController?.abort();}render();};
+  host.querySelector('[name=source]').onchange=e=>{source=e.target.value;weatherVersion++;clearTimeout(timer);fetchController?.abort();mode=source==='city'?'off':host.querySelector('[name=mode]').value;if(source!=='manual'||mode!=='winter')host.querySelector('[name=christmas]').checked=false;if(source==='city'&&city)weather();render();};
   host.querySelector('[name=strength]').oninput=e=>{strength=Number(e.target.value);host.querySelector('output').textContent=strength+' %';render();};
   host.querySelector('[name=city]').oninput=e=>{clearTimeout(searchTimer);searchVersion++;searchController?.abort();const q=e.target.value;searchTimer=setTimeout(()=>{if(valid(v))search(q);},450);};
   host.querySelector('.weather-locate').onclick=locate;host.querySelector('.weather-reset').onclick=()=>surface.reset();host.querySelector('.weather-stop').onclick=()=>{weatherVersion++;clearTimeout(timer);fetchController?.abort();source='manual';mode='off';host.querySelector('[name=source]').value=source;host.querySelector('[name=mode]').value=mode;host.querySelector('[name=christmas]').checked=false;host.querySelector('[name=sounds]').checked=false;sound?.suspend();render();};
   host.querySelectorAll('.weather-demo button').forEach(b=>b.onclick=()=>{stage.querySelector('.weather-click-feedback').textContent='Tlačítko funguje — výzdoba nebrání ovládání.';chime();});
+  if(source==='manual'&&mode!=='winter'||source==='city')host.querySelector('[name=christmas]').checked=false;
   render();if(source==='city'&&city)weather();
  }
  document.addEventListener('visibilitychange',()=>{if(document.hidden){clearTimeout(timer);fetchController?.abort();sound?.suspend();}else if(host&&source==='city')weather();});
